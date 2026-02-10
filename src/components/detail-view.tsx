@@ -37,9 +37,9 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
 
   if (!plant) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center bg-yellow-50 min-h-screen">
         <div className="text-center">
-          <p className="text-gray-500 text-lg">Plant not found.</p>
+          <p className="text-gray-500 text-xl">Plant not found.</p>
           <button
             type="button"
             onClick={onBack}

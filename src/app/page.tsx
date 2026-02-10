@@ -1,30 +1,25 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HomeView } from '@/src/components/home-view';
-import { DetailView } from '@/src/components/detail-view';
 import { AdminLogin } from '@/src/components/admin-login';
 import { AdminDashboard } from '@/src/components/admin-dashboard';
-import { plants } from '@/src/lib/plants';
 
-type View = 'home' | 'detail' | 'admin_login' | 'admin_dashboard';
+type View = 'home' | 'admin_login' | 'admin_dashboard';
 
 export default function Home() {
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<View>('home');
   const [adminUser, setAdminUser] = useState<string | null>(null);
-  const [selectedPlantId, setSelectedPlantId] = useState<string>('');
-
-  const selectedPlant = useMemo(() => plants.find((p) => p.id === selectedPlantId), [selectedPlantId]);
 
   function navigateToPlant(id: string) {
-    setSelectedPlantId(id);
-    setCurrentView('detail');
+    router.push(`/plants/${id}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function goBack() {
     setCurrentView('home');
-    setSelectedPlantId('');
   }
 
   function handleAdminLogin(email: string) {
@@ -40,13 +35,6 @@ export default function Home() {
   switch (currentView) {
     case 'home':
       return <HomeView onSelectPlant={navigateToPlant} onAdminClick={() => setCurrentView('admin_login')} />;
-
-    case 'detail':
-      return selectedPlant ? (
-        <DetailView plantId={selectedPlant.id} onBack={goBack} onSelectPlant={navigateToPlant} />
-      ) : (
-        <HomeView onSelectPlant={navigateToPlant} onAdminClick={() => setCurrentView('admin_login')} />
-      );
 
     case 'admin_login':
       return <AdminLogin onBack={goBack} onLogin={handleAdminLogin} />;
