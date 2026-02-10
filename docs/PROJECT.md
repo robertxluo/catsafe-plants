@@ -4,6 +4,8 @@
 - **Product:** CatSafe Plants
 - **One-liner:** CatSafe Plants helps cat owners quickly check whether indoor plants and flowers are safe for cats, and discover safer alternatives before they buy.
 - **Launch intent:** Public launch (real product, not prototype).
+- **Visual direction:** Pastel and cute, but still professional and trustworthy.
+- **Landing page style requirement:** Soft pastel yellow base (bg-yellow-50) with cat-pattern background image.
 - **Primary users:**
   - Cat owners who need fast safety checks.
   - Cat owners browsing for safe plants by look/aesthetic.
@@ -14,6 +16,7 @@
 - Search plants by common name or scientific name.
 - Plant directory with pagination (20 per page).
 - Filter directory by safety status (`safe only`, `toxic only`) and flower color.
+- Landing page uses soft pastel yellow background with cat-pattern artwork.
 - Plant detail page with:
   - Safety badge/status.
   - Symptoms and toxic parts (when applicable).
@@ -110,6 +113,8 @@ MVP is done when all conditions below are met:
 - Users can open detail pages with gallery, safety details, toxic parts/symptoms, and safe alternatives.
 - Every published plant record has citation data.
 - At least 50 plants are available in production data.
+- Landing page clearly presents the pastel yellow + cat-pattern brand style.
+- Overall UI style is consistently pastel/cute while preserving readability and trust cues.
 - UI is responsive and includes loading, empty, and error states for all MVP flows.
 - Performance is acceptable for image-heavy pages (lazy loading and list/detail payload split).
 - Lint/build checks pass using repo commands.

@@ -12,6 +12,8 @@
 
 **Acceptance Criteria**
 - Home screen has a clear search input and submit/instant-search behavior.
+- Home screen uses a soft pastel yellow background with cat-pattern artwork.
+- Visual style is pastel/cute while preserving clear, professional readability.
 - Typing a common or scientific name returns matching plants from local data.
 - Each result card shows plant name, safety badge, and primary image/placeholder.
 - Empty state is shown when no results match.
@@ -222,6 +224,8 @@
 
 **Acceptance Criteria**
 - Touched screens have explicit loading, empty, and error states.
+- Landing page brand style matches approved visual direction (pastel yellow (bg-yellow-50) + cat-pattern background).
+- Overall UI retains pastel/cute aesthetic without weakening trust/readability of safety information.
 - Core interactions pass basic keyboard/focus sanity checks.
 - Lint and production build pass.
 - `docs/PROJECT.md` reflects any new commands/env vars/constraints introduced during implementation.

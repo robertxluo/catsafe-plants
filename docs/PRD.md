@@ -55,6 +55,13 @@ CatSafe Plants is a high-trust utility that helps cat owners quickly verify whet
 - Trust-first clarity: binary safety signals should be easy to understand at a glance.
 - Calm urgency: tone should be supportive, not alarmist.
 - Fast decision support: users should quickly move from “Is this safe?” to “What should I buy instead?”
+- Visual voice: pastel and cute, while remaining professional and medically credible.
+
+### Visual Direction
+- Landing page background: soft pastel yellow base with the cat-pattern background artwork.
+- UI tone: playful warmth with clean, readable data presentation.
+- Safety signaling must remain high-contrast and unambiguous over pastel surfaces.
+- Decorative elements must never reduce readability of safety badges, symptoms, or citations.
 
 ### Primary User Flow (Highest Priority)
 1. User lands on home/search.
