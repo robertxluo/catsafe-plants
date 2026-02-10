@@ -11,7 +11,7 @@
 - Deliver the fastest usable UI: users can type a plant name and immediately see safety matches from local mock data.
 
 **Acceptance criteria**
-- Home route shows branded hero, search input, and search action.
+- Home route shows branded hero, search input.
 - Home uses pastel yellow base with cat-pattern background.
 - Typing filters by common name and scientific name.
 - Results render as clickable cards with plant name and safety badge.
@@ -27,7 +27,6 @@
 - Manual:
   - Run app and search for known names (`Lily`, `Lilium`, etc.).
   - Confirm matching cards update while typing.
-  - Confirm search button and Enter submit both trigger search behavior.
   - Confirm pastel yellow + cat-pattern background is visible and readable.
   - Confirm no layout break on mobile viewport.
 - Tests:

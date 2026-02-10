@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Search, Leaf, ShieldCheck, Cat } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Search, Leaf, ShieldCheck, Cat, LoaderCircle, AlertCircle } from 'lucide-react';
 import type { Plant } from '@/src/lib/plants';
-import { plants, getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { loadPlants } from '@/src/lib/load-plants';
 
 interface HomeViewProps {
   onSelectPlant: (id: string) => void;
@@ -11,21 +12,45 @@ interface HomeViewProps {
 }
 
 export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
+  const [plants, setPlants] = useState<Plant[]>([]);
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const filtered: Plant[] =
-    query.trim().length > 0
-      ? plants.filter((p) => {
-          const q = query.toLowerCase();
-          return (
-            p.common_name.toLowerCase().includes(q) ||
-            p.scientific_name.toLowerCase().includes(q) ||
-            p.aka_names.some((a) => a.toLowerCase().includes(q))
-          );
-        })
-      : [];
+  const filtered: Plant[] = useMemo(() => {
+    if (query.trim().length === 0) {
+      return [];
+    }
+    const q = query.toLowerCase();
+    return plants.filter((p) => {
+      return (
+        p.common_name.toLowerCase().includes(q) ||
+        p.scientific_name.toLowerCase().includes(q) ||
+        p.aka_names.some((a) => a.toLowerCase().includes(q))
+      );
+    });
+  }, [plants, query]);
+
+  const fetchPlants = useCallback(async () => {
+    try {
+      setIsDataLoading(true);
+      setError(null);
+      const loadedPlants = await loadPlants();
+      setPlants(loadedPlants);
+    } catch (err) {
+      setPlants([]);
+      setError(err instanceof Error ? err.message : 'Unable to load plant data. Please try again.');
+    } finally {
+      setIsDataLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchPlants();
+  }, [fetchPlants]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -36,6 +61,22 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen || query.trim().length === 0 || isDataLoading || error) {
+      setIsSearchLoading(false);
+      return;
+    }
+
+    setIsSearchLoading(true);
+    const timer = window.setTimeout(() => {
+      setIsSearchLoading(false);
+    }, 180);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [error, isDataLoading, isOpen, query]);
 
   return (
     <div
@@ -93,10 +134,42 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
             />
           </div>
 
+          {isDataLoading && (
+            <div className="top-full z-50 absolute bg-white/95 shadow-lg mt-2 border border-gray-200 rounded-xl w-full">
+              <div className="flex justify-center items-center gap-2 px-4 py-6 text-gray-500 text-sm">
+                <LoaderCircle className="w-4 h-4 animate-spin" />
+                Loading plants...
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="top-full z-50 absolute bg-white/95 shadow-lg mt-2 border border-rose-200 rounded-xl w-full">
+              <div className="px-4 py-5 text-center">
+                <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void fetchPlants()}
+                  className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-1 px-3 py-2 border border-rose-200 rounded-lg text-rose-700 text-xs transition-colors cursor-pointer"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Dropdown results */}
-          {isOpen && query.trim().length > 0 && (
+          {!isDataLoading && !error && isOpen && query.trim().length > 0 && (
             <div className="top-full z-50 absolute bg-white shadow-lg mt-2 border border-gray-200 rounded-xl w-full max-h-80 overflow-y-auto">
-              {filtered.length === 0 ? (
+              {isSearchLoading ? (
+                <div className="flex justify-center items-center gap-2 px-4 py-6 text-gray-500 text-sm">
+                  <LoaderCircle className="w-4 h-4 animate-spin" />
+                  Searching...
+                </div>
+              ) : filtered.length === 0 ? (
                 <div className="px-4 py-6 text-gray-400 text-sm text-center">
                   No plants found matching &quot;{query}&quot;
                 </div>
