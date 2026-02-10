@@ -54,6 +54,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
 
   const color = getStatusColor(plant.safety_status);
   const isToxic = plant.safety_status === 'mildly_toxic' || plant.safety_status === 'highly_toxic';
+  const hasToxicDetailContent = Boolean(plant.symptoms || plant.toxic_parts);
 
   const alternatives = plant.alternatives.map((id) => getPlantById(id)).filter(Boolean) as Plant[];
 
@@ -124,7 +125,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
             </div>
 
             {/* Toxic Details */}
-            {isToxic && (
+            {isToxic && hasToxicDetailContent && (
               <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
                 {plant.symptoms && (
                   <div className="p-5 border-gray-100 border-b">
@@ -146,6 +147,14 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                 )}
               </div>
             )}
+
+            <div className="bg-amber-50 p-4 border border-amber-200 rounded-xl">
+              <p className="text-amber-900 text-sm leading-relaxed">
+                This information is for educational purposes only and is not a substitute for professional
+                veterinary care. If your cat may have ingested a toxic plant, contact your veterinarian or an
+                emergency animal poison service immediately.
+              </p>
+            </div>
 
             {/* Safe Alternatives */}
             {isToxic && alternatives.length > 0 && (

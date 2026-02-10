@@ -24,6 +24,7 @@ describe('PlantDetailPage route', () => {
 
     expect(screen.getByRole('heading', { name: /lily/i })).toBeTruthy();
     expect(screen.getByText(/highly toxic/i)).toBeTruthy();
+    expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
   });
 
   it('renders graceful not-found state for an invalid plant id', () => {
