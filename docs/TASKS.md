@@ -6,242 +6,291 @@
 - Prefer one visible user outcome per task.
 - If a task exceeds limits, split before implementation.
 
-## T-01 - Ship a usable search-first home screen (mock data)
+## T-01 - Launch a visible search-first home UI (local mock list)
 **Goal**
-- Deliver a visible, mobile-friendly home page where users can search plant names and see immediate safety results from local mock data.
+- Deliver the fastest usable UI: users can type a plant name and immediately see safety matches from local mock data.
 
-**Acceptance Criteria**
-- Home screen has a clear search input and submit/instant-search behavior.
-- Home screen uses a soft pastel yellow background with cat-pattern artwork.
-- Visual style is pastel/cute while preserving clear, professional readability.
-- Typing a common or scientific name returns matching plants from local data.
-- Each result card shows plant name, safety badge, and primary image/placeholder.
-- Empty state is shown when no results match.
-- Loading state is shown while filtering/searching (even if simulated briefly for UX consistency).
-- Error state is shown if local data read fails.
+**Acceptance criteria**
+- Home route shows branded hero, search input, and search action.
+- Typing filters by common name and scientific name.
+- Results render as clickable cards with plant name and safety badge.
+- Search is case-insensitive and updates as user types.
+- Mobile layout remains usable at narrow widths.
 
-**Out of Scope**
-- Supabase-backed search.
-- Pagination and advanced filters.
-- Detail-page evidence content.
+**Out of scope**
+- Supabase-backed data reads.
+- Detail page content.
+- Directory browsing and filters.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Start app, search for known plant names, confirm result cards and safety badges.
-  - Search nonsense text, confirm empty state.
-  - Trigger error path (temporary data import break), confirm error state.
-  - Check mobile width for layout and basic keyboard focus flow.
+  - Run app and search for known names (`Lily`, `Lilium`, etc.).
+  - Confirm matching cards update while typing.
+  - Confirm no layout break on mobile viewport.
 - Tests:
-  - Add component test(s) for search filtering behavior and empty-state rendering.
+  - Add/update component test for common-name matching.
+  - Add/update component test for scientific-name matching.
 
-## T-02 - Add URL-based plant detail route with trust disclaimer
+## T-02 - Add complete home-state UX (loading, empty, error)
 **Goal**
-- Enable opening a dedicated plant detail page by URL and show essential safety summary plus informational disclaimer.
+- Make the home search flow production-ready with explicit loading, empty, and error states.
 
-**Acceptance Criteria**
-- Clicking a search result navigates to `/plants/[id]` (or slug) route.
-- Detail page shows plant name, safety status, symptoms/toxic parts section (when present), and at least one image.
-- Detail page includes visible informational disclaimer (not a substitute for veterinary care).
-- Missing/invalid plant ID returns a graceful not-found UI.
-- Loading state appears while detail data resolves.
+**Acceptance criteria**
+- Initial data load shows a loading state.
+- Search action shows a brief loading state for consistency.
+- No-match query shows a clear empty state.
+- Data-load failure shows a clear error state with retry action.
+- Retry successfully restores normal search behavior.
 
-**Out of Scope**
-- Citation list.
-- Alternatives carousel/list.
+**Out of scope**
+- Global error boundary work.
+- API/network retry policies.
+- Detail route error handling.
+
+**Verification steps**
+- Manual:
+  - Load the page and confirm initial loading state appears.
+  - Search nonsense text and confirm empty state.
+  - Force local loader failure and confirm error + retry behavior.
+- Tests:
+  - Add/update test for loading state visibility.
+  - Add/update test for empty-state rendering.
+  - Add/update test for error-state rendering and retry path.
+
+## T-03 - Add image/placeholder support in home result cards
+**Goal**
+- Improve scanability by showing a primary image (or placeholder) on each home search result.
+
+**Acceptance criteria**
+- Plant mock model includes a primary image field.
+- Result cards render primary image when available.
+- Cards render a consistent placeholder when image is missing.
+- Safety badge remains readable and visually distinct over pastel UI.
+
+**Out of scope**
+- Image gallery support.
+- External image hosting migration.
+- Performance tuning beyond basic rendering correctness.
+
+**Verification steps**
+- Manual:
+  - Confirm cards with image URL show image.
+  - Confirm cards without image show placeholder.
+  - Verify card readability on desktop and mobile.
+- Tests:
+  - Add/update component test for image rendering branch.
+  - Add/update component test for placeholder branch.
+
+## T-04 - Introduce test baseline for UI component work
+**Goal**
+- Add a lightweight test harness so search and view behavior can be validated quickly as slices ship.
+
+**Acceptance criteria**
+- Test command exists in `package.json`.
+- Vitest + RTL runs successfully in this repo.
+- Home component tests run in jsdom environment.
+- CI/local output clearly reports passing/failing tests.
+
+**Out of scope**
+- Full end-to-end browser testing.
+- Snapshot-heavy test strategy.
+- Coverage thresholds enforcement.
+
+**Verification steps**
+- Manual:
+  - Run `npm run test` and confirm tests execute.
+  - Confirm test runner can run in watch mode.
+- Tests:
+  - Add/update at least one passing smoke test for home component render.
+
+## T-05 - Add URL-based detail route and home-result navigation
+**Goal**
+- Enable opening a plant detail page by URL and by clicking a home search result.
+
+**Acceptance criteria**
+- Clicking a search result navigates to `/plants/[id]`.
+- Directly opening `/plants/[id]` renders the same detail route.
+- Invalid plant id renders a graceful not-found state.
+- Detail route shows a route-level loading state.
+
+**Out of scope**
+- Citation content.
+- Alternatives section.
 - Supabase data fetching.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Open detail from home search and via direct URL.
-  - Test invalid URL and confirm not-found UI.
+  - Navigate from home search to detail and back.
+  - Open valid and invalid detail URLs directly.
+  - Confirm loading and not-found states are visible.
+- Tests:
+  - Add/update route-level test for valid id render.
+  - Add/update route-level test for not-found path.
+
+## T-06 - Add detail safety summary + informational disclaimer
+**Goal**
+- Provide core safety information and trust framing on the detail page.
+
+**Acceptance criteria**
+- Detail page displays plant name and safety status badge.
+- Toxic plants display symptoms and toxic parts when present.
+- Unknown/missing fields degrade gracefully (no broken UI).
+- Informational disclaimer is always visible: not a substitute for veterinary care.
+
+**Out of scope**
+- Citation links.
+- Alternatives recommendations.
+- Admin editing controls.
+
+**Verification steps**
+- Manual:
+  - Open safe, toxic, and unknown plants and confirm content differences.
   - Verify disclaimer visibility on desktop and mobile.
 - Tests:
-  - Add route-level test(s) for valid ID and not-found state.
+  - Add/update detail component test for toxic field rendering.
+  - Add/update detail component test for unknown fallback and disclaimer.
 
-## T-03 - Add citation-backed evidence section to detail page
+## T-07 - Add citation-backed evidence section with unknown fallback
 **Goal**
-- Present source-backed evidence on every plant detail page and enforce fallback language for unknown evidence.
+- Show source-backed evidence on detail pages and enforce cautious language when evidence is missing.
 
-**Acceptance Criteria**
-- Detail page renders a citations section with source name and URL for current plant.
-- If citations are missing, page shows `Unknown` caution copy and no strong safety claim.
-- Citation links open correctly and are visibly labeled.
-- Safety copy avoids medical certainty wording.
+**Acceptance criteria**
+- Detail page renders citation list with source name + URL.
+- Citation links are clearly labeled and functional.
+- Missing citations show `Unknown` fallback copy.
+- Safety copy avoids absolute/medical-certainty language.
 
-**Out of Scope**
-- Data-entry/admin tooling.
-- Citation moderation workflow.
-- External source scraping.
+**Out of scope**
+- Citation ingestion tooling.
+- Source moderation workflows.
+- Third-party scraping.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Open plants with and without citations; verify section and unknown fallback behavior.
-  - Click citation links and verify destinations.
+  - Open plants with citations and verify section content and links.
+  - Open plants without citations and verify unknown fallback copy.
 - Tests:
-  - Add tests for citation rendering and unknown-evidence fallback logic.
+  - Add/update test for citation rendering.
+  - Add/update test for no-citation fallback behavior.
 
-## T-04 - Add safe alternatives on toxic detail pages
+## T-08 - Add safe alternatives for toxic plants
 **Goal**
-- Show 3-5 safe alternatives on toxic plant pages to provide immediate next actions.
+- Give users immediate next-step choices by showing safe alternatives on toxic detail pages.
 
-**Acceptance Criteria**
-- Toxic plant detail pages render an alternatives section.
-- Alternatives list shows 3-5 safe plants when available.
-- Each alternative includes name, safety badge, and thumbnail/placeholder.
-- Clicking an alternative navigates to that plant detail page.
-- Non-toxic and unknown plants do not show this section.
+**Acceptance criteria**
+- Toxic detail pages show an alternatives section.
+- Section displays 3-5 alternatives when available.
+- Each alternative card shows name, safety badge, and thumbnail/placeholder.
+- Clicking an alternative opens that plant detail page.
+- Non-toxic and unknown detail pages hide this section.
 
-**Out of Scope**
-- Similarity scoring algorithm.
+**Out of scope**
+- Similarity ranking algorithm work.
 - Personalized recommendations.
-- Ranking optimization.
+- Editorial/admin curation tools.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Open a toxic plant and confirm 3-5 alternatives display and navigation works.
-  - Open non-toxic/unknown plant and confirm alternatives section is hidden.
+  - Open toxic plants and verify alternatives appear and navigate correctly.
+  - Open non-toxic/unknown plants and verify section is hidden.
 - Tests:
-  - Add tests for conditional rendering and link behavior.
+  - Add/update conditional-rendering test (toxic vs non-toxic).
+  - Add/update link navigation test for alternatives.
 
-## T-05 - Launch directory page with pagination (20 per page)
+## T-09 - Launch `/plants` directory with pagination (20/page)
 **Goal**
-- Provide a browseable plant directory for users who do not search by exact name.
+- Provide a browseable directory for users who do not know exact names.
 
-**Acceptance Criteria**
-- New `/plants` directory route lists plants with 20 items per page.
-- Pagination controls support next/previous and page indicator.
-- List cards show primary image, name, and safety status.
-- Empty state appears if no plants are available.
-- Loading and error states are handled on this route.
+**Acceptance criteria**
+- New `/plants` route lists plants with 20 items per page.
+- Pagination supports next/previous and current page indicator.
+- Directory cards show primary image/placeholder, name, and safety status.
+- Directory includes loading, empty, and error states.
 
-**Out of Scope**
-- Search input on directory page.
-- Filter UI.
+**Out of scope**
+- Directory search input.
+- Safety/color filters.
 - Server-side caching optimization.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Navigate through multiple pages and verify 20 items per page.
-  - Confirm empty/error states via temporary data stubs.
-  - Verify mobile layout remains usable.
+  - Navigate through pages and confirm 20 items per page.
+  - Verify loading, empty, and error states via temporary stubs.
+  - Confirm basic mobile usability.
 - Tests:
-  - Add tests for pagination math and boundary conditions.
+  - Add/update tests for pagination math and boundary cases.
 
-## T-06 - Add directory filters: safety and flower color
+## T-10 - Add directory filters: safety status + flower color
 **Goal**
-- Let users narrow directory results by safety status and flower color.
+- Let users narrow directory results by safety and flower color.
 
-**Acceptance Criteria**
-- Directory has safety filter (`safe only`, `toxic only`) and flower-color filter from controlled values.
-- Applying filters updates visible results correctly.
-- Combined filters (safety + color) work together.
-- Filtered empty state includes clear reset action.
+**Acceptance criteria**
+- Directory includes safety filter (`safe only`, `toxic only`) and flower-color filter.
+- Applying each filter updates visible results correctly.
+- Combined filters apply with AND logic.
+- No-match state includes clear reset action.
 - Filter controls are keyboard accessible and labeled.
 
-**Out of Scope**
-- Free-text custom colors.
-- Multi-select for many colors in one pass (unless already supported by existing UI pattern).
-- Saved filter preferences.
+**Out of scope**
+- Free-text color values.
+- Multi-select color combinations (unless already present in UI pattern).
+- Persisted/saved filter state.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Apply each filter independently and combined; validate result accuracy.
-  - Trigger no-match condition and confirm reset flow.
-  - Keyboard tab through filters and verify focus styles.
+  - Apply each filter independently and then together.
+  - Trigger no-match condition and use reset action.
+  - Tab through controls and verify focus states.
 - Tests:
-  - Add tests for filter predicate logic and controlled color enforcement.
+  - Add/update tests for filter predicate logic.
+  - Add/update tests for reset behavior.
 
-## T-07 - Add Supabase read path for search/directory/detail
+## T-11 - Add Supabase read path for home, detail, and directory
 **Goal**
-- Replace mock data reads with Supabase-backed reads for public plant content.
+- Replace local mock read paths with Supabase-backed reads while preserving UI behavior.
 
-**Acceptance Criteria**
-- Search, directory, and detail routes read from Supabase in development.
-- If env vars are missing, app shows clear configuration error state.
-- Response shape preserves current UI behavior (name, safety, image, citations, alternatives).
-- Unknown/missing fields degrade gracefully in UI.
-- No secrets are exposed to client beyond approved public keys.
+**Acceptance criteria**
+- Home search, detail, and directory read from Supabase in development.
+- Missing env vars show clear configuration error state.
+- Data mapping preserves existing UI fields and fallbacks.
+- No server-only secrets are exposed client-side.
 
-**Out of Scope**
+**Out of scope**
 - Admin write flows.
-- Database migrations beyond minimum required read compatibility.
 - Realtime subscriptions.
+- Large schema redesign.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Run with valid env vars and confirm search/directory/detail work against DB.
-  - Run with missing env vars and confirm friendly config error.
+  - Run with valid env vars and verify all public routes.
+  - Run with missing env vars and verify friendly config error.
 - Tests:
-  - Add integration-style data mapping tests (query result -> UI model).
+  - Add/update data-mapping tests (Supabase row -> UI model).
+  - Add/update tests for missing-env error path.
 
-## T-08 - Enforce data quality guardrails in UI + query layer
+## T-12 - Enforce trust guardrails + performance + release checks
 **Goal**
-- Ensure public views respect trust constraints (citation required, unknown fallback, toxic alt completeness indicator).
+- Finish MVP hardening with trust guardrails, image/perf basics, and reproducible release checks.
 
-**Acceptance Criteria**
-- Plants lacking citation data are either hidden from public lists or clearly labeled incomplete (choose one implementation and document).
+**Acceptance criteria**
 - Unknown evidence always maps to `Unknown` safety display with caution language.
-- Toxic plants with fewer than 3 alternatives show explicit incomplete-state messaging.
-- Directory and detail views remain functional when records are partial.
+- Plants missing required evidence are hidden or clearly labeled incomplete (document chosen policy).
+- List views use primary image only; detail can load full gallery.
+- Core touched flows pass loading/empty/error and keyboard/focus sanity checks.
+- `npm run lint` and `npm run build` pass in a network-capable environment.
+- `docs/PROJECT.md` is updated for any new commands/env/constraints.
 
-**Out of Scope**
-- Admin enforcement dashboards.
-- Automated content backfill jobs.
-- Third-party data validation services.
+**Out of scope**
+- Admin dashboard rollout.
+- Analytics expansion beyond minimal logging.
+- New user-facing features outside MVP scope.
 
-**Verification**
+**Verification steps**
 - Manual:
-  - Seed/fixture partial records and verify each guardrail behavior.
-  - Confirm no broken UI when required fields are absent.
+  - Run end-to-end happy path: home search -> detail -> alternatives -> directory + filters.
+  - Validate loading/empty/error states across touched routes.
+  - Verify mobile layout and keyboard navigation basics.
 - Tests:
-  - Add tests for citation-required display policy and alternatives completeness rule.
-
-## T-09 - Performance pass for image-heavy flows
-**Goal**
-- Improve perceived speed for home/search, directory, and detail pages to support fast confidence checks.
-
-**Acceptance Criteria**
-- List views load only a primary image per plant; detail loads full gallery.
-- Images use optimized rendering strategy (Next Image, sizing, lazy loading where appropriate).
-- Avoid unnecessary refetching/re-renders on filter/search changes.
-- Basic performance check confirms first result appears quickly on standard local throttling profile.
-
-**Out of Scope**
-- CDN architecture redesign.
-- Full synthetic monitoring setup.
-- Advanced caching invalidation strategy.
-
-**Verification**
-- Manual:
-  - Use browser dev tools throttling to compare search/list/detail responsiveness.
-  - Confirm lazy loading and no layout shift spikes on scroll.
-- Tests:
-  - Add lightweight regression tests for data payload split assumptions where testable.
-
-## T-10 - MVP readiness hardening and launch checklist
-**Goal**
-- Finalize MVP quality bar with UX states, accessibility basics, and reproducible checks for release confidence.
-
-**Acceptance Criteria**
-- Touched screens have explicit loading, empty, and error states.
-- Landing page brand style matches approved visual direction (pastel yellow (bg-yellow-50) + cat-pattern background).
-- Overall UI retains pastel/cute aesthetic without weakening trust/readability of safety information.
-- Core interactions pass basic keyboard/focus sanity checks.
-- Lint and production build pass.
-- `docs/PROJECT.md` reflects any new commands/env vars/constraints introduced during implementation.
-- Manual QA checklist is captured for happy path + edge cases.
-
-**Out of Scope**
-- Post-MVP admin/auth rollout.
-- Analytics instrumentation beyond minimal logs.
-- New product features.
-
-**Verification**
-- Manual:
-  - Run full happy path from home search -> detail -> alternatives -> directory filters.
-  - Validate loading/empty/error states on each touched flow.
-  - Check mobile viewport and keyboard navigation basics.
-- Tests:
+  - Run `npm run test`.
   - Run `npm run lint`.
   - Run `npm run build`.
-  - Run full project test suite (if present) and capture results.
