@@ -13,6 +13,8 @@ interface HomeViewProps {
 }
 
 export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
+  const thumbnailClassName = 'rounded-lg w-10 h-10 shrink-0 border border-gray-200';
+
   const [plants, setPlants] = useState<Plant[]>([]);
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -195,11 +197,14 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
                               alt={`${plant.common_name} photo`}
                               width={40}
                               height={40}
-                              className="rounded-lg w-10 h-10 object-cover shrink-0"
+                              className={`${thumbnailClassName} object-cover`}
                               unoptimized
                             />
                           ) : (
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${color.bg}`}>
+                            <div
+                              className={`${thumbnailClassName} flex items-center justify-center ${color.bg}`}
+                              aria-hidden="true"
+                            >
                               <Leaf className={`w-5 h-5 ${color.text}`} />
                             </div>
                           )}
@@ -208,7 +213,7 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
                             <div className="text-gray-500 text-sm truncate italic">{plant.scientific_name}</div>
                           </div>
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color.bg} ${color.text} border ${color.border}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-sm ${color.bg} ${color.text} border ${color.border}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
                             {getStatusLabel(plant.safety_status)}
