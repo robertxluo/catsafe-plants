@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, Leaf, ShieldCheck, Cat, LoaderCircle, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 import type { Plant } from '@/src/lib/plants';
 import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -188,9 +189,20 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
                             setIsOpen(false);
                           }}
                         >
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${color.bg}`}>
-                            <Leaf className={`w-5 h-5 ${color.text}`} />
-                          </div>
+                          {plant.primary_image_url ? (
+                            <Image
+                              src={plant.primary_image_url}
+                              alt={`${plant.common_name} photo`}
+                              width={40}
+                              height={40}
+                              className="rounded-lg w-10 h-10 object-cover shrink-0"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${color.bg}`}>
+                              <Leaf className={`w-5 h-5 ${color.text}`} />
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{plant.common_name}</div>
                             <div className="text-gray-500 text-sm truncate italic">{plant.scientific_name}</div>

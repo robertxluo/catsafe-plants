@@ -5,6 +5,7 @@ export interface Plant {
   common_name: string;
   scientific_name: string;
   aka_names: string[];
+  primary_image_url: string | null;
   safety_status: SafetyStatus;
   symptoms: string | null;
   toxic_parts: string | null;
@@ -17,6 +18,7 @@ export const plants: Plant[] = [
     common_name: 'Lily',
     scientific_name: 'Lilium spp.',
     aka_names: ['Easter Lily', 'Tiger Lily', 'Asiatic Lily'],
+    primary_image_url: '/flower_placeholder.png',
     safety_status: 'highly_toxic',
     symptoms:
       'Vomiting, loss of appetite, lethargy, kidney failure. Even small ingestions (pollen, water from vase) can be fatal to cats.',
@@ -28,6 +30,7 @@ export const plants: Plant[] = [
     common_name: 'Spider Plant',
     scientific_name: 'Chlorophytum comosum',
     aka_names: ['Airplane Plant', 'Ribbon Plant', 'Spider Ivy'],
+    primary_image_url: '/flower_placeholder.png',
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -38,6 +41,7 @@ export const plants: Plant[] = [
     common_name: 'Monstera',
     scientific_name: 'Monstera deliciosa',
     aka_names: ['Swiss Cheese Plant', 'Split-Leaf Philodendron'],
+    primary_image_url: null,
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, excessive drooling, vomiting, difficulty swallowing due to calcium oxalate crystals.',
     toxic_parts: 'Leaves and stems contain insoluble calcium oxalate crystals.',
@@ -48,6 +52,7 @@ export const plants: Plant[] = [
     common_name: 'Unknown Plant',
     scientific_name: 'Species unidentified',
     aka_names: ['Mystery Plant'],
+    primary_image_url: null,
     safety_status: 'unknown',
     symptoms: null,
     toxic_parts: null,
@@ -58,6 +63,7 @@ export const plants: Plant[] = [
     common_name: 'Boston Fern',
     scientific_name: 'Nephrolepis exaltata',
     aka_names: ['Sword Fern', 'Ladder Fern'],
+    primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -68,6 +74,7 @@ export const plants: Plant[] = [
     common_name: 'Areca Palm',
     scientific_name: 'Dypsis lutescens',
     aka_names: ['Butterfly Palm', 'Golden Cane Palm'],
+    primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -78,6 +85,7 @@ export const plants: Plant[] = [
     common_name: 'Calathea',
     scientific_name: 'Calathea spp.',
     aka_names: ['Prayer Plant', 'Zebra Plant'],
+    primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -88,6 +96,7 @@ export const plants: Plant[] = [
     common_name: 'Pothos',
     scientific_name: 'Epipremnum aureum',
     aka_names: ["Devil's Ivy", 'Golden Pothos', 'Taro Vine'],
+    primary_image_url: null,
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, drooling, vomiting, difficulty swallowing.',
     toxic_parts: 'Leaves and stems.',
