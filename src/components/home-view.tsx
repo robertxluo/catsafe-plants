@@ -38,7 +38,13 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
   }, []);
 
   return (
-    <div className="flex flex-col bg-slate-50 min-h-screen">
+    <div
+      className="flex flex-col bg-yellow-50 min-h-screen"
+      style={{
+        backgroundImage: "url('/catsafe-plants-background.svg')",
+        backgroundPosition: 'center',
+      }}
+    >
       {/* Hero */}
       <main className="flex flex-col flex-1 justify-center items-center px-4 py-20">
         <div className="flex items-center gap-3 mb-6">

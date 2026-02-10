@@ -12,6 +12,7 @@
 
 **Acceptance criteria**
 - Home route shows branded hero, search input, and search action.
+- Home uses pastel yellow base with cat-pattern background.
 - Typing filters by common name and scientific name.
 - Results render as clickable cards with plant name and safety badge.
 - Search is case-insensitive and updates as user types.
@@ -26,10 +27,11 @@
 - Manual:
   - Run app and search for known names (`Lily`, `Lilium`, etc.).
   - Confirm matching cards update while typing.
+  - Confirm search button and Enter submit both trigger search behavior.
+  - Confirm pastel yellow + cat-pattern background is visible and readable.
   - Confirm no layout break on mobile viewport.
 - Tests:
-  - Add/update component test for common-name matching.
-  - Add/update component test for scientific-name matching.
+  - Deferred to T-04 (test baseline and home component coverage).
 
 ## T-02 - Add complete home-state UX (loading, empty, error)
 **Goal**
