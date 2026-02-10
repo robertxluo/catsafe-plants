@@ -10,6 +10,10 @@ export interface Plant {
   symptoms: string | null;
   toxic_parts: string | null;
   alternatives: string[];
+  citations: {
+    source_name: string;
+    source_url: string;
+  }[];
 }
 
 export const plants: Plant[] = [
@@ -24,6 +28,17 @@ export const plants: Plant[] = [
       'Vomiting, loss of appetite, lethargy, kidney failure. Even small ingestions (pollen, water from vase) can be fatal to cats.',
     toxic_parts: 'All parts — petals, leaves, pollen, stems, and water in the vase.',
     alternatives: ['spider-plant', 'boston-fern', 'areca-palm'],
+    citations: [
+      {
+        source_name: 'ASPCA Animal Poison Control - Lily',
+        source_url: 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/lily',
+      },
+      {
+        source_name: 'FDA - Lovely Lilies and Curious Cats: A Dangerous Combination',
+        source_url:
+          'https://www.fda.gov/animal-veterinary/animal-health-literacy/lovely-lilies-and-curious-cats-dangerous-combination',
+      },
+    ],
   },
   {
     id: 'spider-plant',
@@ -35,6 +50,7 @@ export const plants: Plant[] = [
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
+    citations: [],
   },
   {
     id: 'monstera',
@@ -46,6 +62,7 @@ export const plants: Plant[] = [
     symptoms: 'Oral irritation, excessive drooling, vomiting, difficulty swallowing due to calcium oxalate crystals.',
     toxic_parts: 'Leaves and stems contain insoluble calcium oxalate crystals.',
     alternatives: ['spider-plant', 'boston-fern', 'calathea'],
+    citations: [],
   },
   {
     id: 'unknown-plant',
@@ -57,6 +74,7 @@ export const plants: Plant[] = [
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
+    citations: [],
   },
   {
     id: 'boston-fern',
@@ -68,6 +86,7 @@ export const plants: Plant[] = [
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
+    citations: [],
   },
   {
     id: 'areca-palm',
@@ -79,6 +98,7 @@ export const plants: Plant[] = [
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
+    citations: [],
   },
   {
     id: 'calathea',
@@ -90,6 +110,7 @@ export const plants: Plant[] = [
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
+    citations: [],
   },
   {
     id: 'pothos',
@@ -101,6 +122,7 @@ export const plants: Plant[] = [
     symptoms: 'Oral irritation, drooling, vomiting, difficulty swallowing.',
     toxic_parts: 'Leaves and stems.',
     alternatives: ['spider-plant', 'boston-fern', 'calathea'],
+    citations: [],
   },
 ];
 

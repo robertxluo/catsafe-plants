@@ -95,6 +95,8 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
 ### Data Constraints
 - Seed minimum of **50 plants** for MVP launch.
 - Every plant record must include at least one citation before it is considered complete.
+- Every citation URL must resolve to the intended source page (HTTP `200` or valid redirect to the same source).
+- Broken citation links block publish; unresolved citations must be treated as `unknown` until corrected.
 - Flower color values must come from a fixed controlled list (no free text).
 - Directory responses should prioritize performance:
   - Return primary image in list responses.
@@ -104,6 +106,7 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
 ### Safety/Trust Constraints
 - This product is safety-adjacent; avoid unverified medical certainty language.
 - Always present source-backed toxicity information.
+- Validate citation link health during QA/release checks, not just at data entry time.
 - Include a visible disclaimer that this tool is informational and not a replacement for veterinary care.
 
 ## MVP Definition of Done

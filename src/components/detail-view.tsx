@@ -116,10 +116,10 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                 <div className={`text-lg font-bold ${color.text}`}>{getStatusLabel(plant.safety_status)}</div>
                 <div className={`text-sm ${color.text} opacity-80`}>
                   {plant.safety_status === 'non_toxic'
-                    ? 'This plant is safe to have around cats.'
+                    ? 'This plant is currently regarded as non-toxic to cats, but individual reactions can vary. Monitor your cat around any new plant.'
                     : plant.safety_status === 'unknown'
                       ? 'Toxicity data is not yet available for this plant. Exercise caution.'
-                      : 'This plant poses a risk to cats. Keep it out of reach or choose an alternative.'}
+                      : 'This plant is reported to pose a risk to cats. Keep it out of reach or choose an alternative.'}
                 </div>
               </div>
             </div>
@@ -147,6 +147,36 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                 )}
               </div>
             )}
+
+            {/* Evidence */}
+            <section className="bg-white shadow-sm p-5 border border-gray-200 rounded-xl">
+              <h2 className="font-bold text-gray-900 text-lg">Evidence</h2>
+              {plant.citations.length > 0 ? (
+                <ul className="space-y-3 mt-3">
+                  {plant.citations.map((citation) => (
+                    <li
+                      key={`${citation.source_name}-${citation.source_url}`}
+                      className="flex sm:flex-row flex-col sm:items-center sm:justify-between gap-2 bg-gray-50 p-3 border border-gray-100 rounded-lg"
+                    >
+                      <span className="font-medium text-gray-800 text-sm">{citation.source_name}</span>
+                      <a
+                        href={citation.source_url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="font-medium text-emerald-700 hover:text-emerald-800 text-sm underline underline-offset-2"
+                      >
+                        Open source
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+                  Evidence source: <span className="font-semibold">Unknown</span>. We do not currently have a
+                  source citation for this plant.
+                </p>
+              )}
+            </section>
 
             <div className="bg-amber-50 p-4 border border-amber-200 rounded-xl">
               <p className="text-amber-900 text-sm leading-relaxed">

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailView } from '@/src/components/detail-view';
 import * as plantsModule from '@/src/lib/plants';
@@ -19,6 +19,19 @@ describe('DetailView', () => {
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
   });
 
+  it('renders evidence citations with labeled functional links when available', () => {
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(screen.getByRole('heading', { name: /evidence/i })).toBeTruthy();
+    expect(screen.getByText(/aspca animal poison control - lily/i)).toBeTruthy();
+
+    const sourceLinks = screen.getAllByRole('link', { name: /open source/i });
+    expect(sourceLinks.length).toBeGreaterThan(0);
+    expect(sourceLinks[0].getAttribute('href')).toBe(
+      'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/lily'
+    );
+  });
+
   it('renders disclaimer and hides toxic detail sections for unknown plants', () => {
     render(<DetailView plantId="unknown-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
 
@@ -26,7 +39,20 @@ describe('DetailView', () => {
     expect(screen.getByText(/unknown safety/i)).toBeTruthy();
     expect(screen.queryByRole('heading', { name: /symptoms/i })).toBeNull();
     expect(screen.queryByRole('heading', { name: /toxic parts/i })).toBeNull();
+    const evidenceHeading = screen.getByRole('heading', { name: /evidence/i });
+    const evidenceSection = evidenceHeading.closest('section');
+    expect(evidenceSection).not.toBeNull();
+    expect(within(evidenceSection as HTMLElement).getByText(/we do not currently have a source citation/i)).toBeTruthy();
+    expect(within(evidenceSection as HTMLElement).getByText('Unknown')).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /open source/i })).toBeNull();
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
+  });
+
+  it('uses cautious non-toxic wording instead of absolute safety language', () => {
+    render(<DetailView plantId="spider-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(screen.getByText(/currently regarded as non-toxic/i)).toBeTruthy();
+    expect(screen.getByText(/individual reactions can vary/i)).toBeTruthy();
   });
 
   it('gracefully hides empty toxic details when toxic fields are missing', () => {
@@ -42,6 +68,7 @@ describe('DetailView', () => {
           symptoms: null,
           toxic_parts: null,
           alternatives: [],
+          citations: [],
         };
       }
       return undefined;

@@ -78,6 +78,7 @@ CatSafe Plants is a high-trust utility that helps cat owners quickly verify whet
 
 ### Content and Trust Requirements
 - Every public plant must show source-backed citations.
+- Every public citation URL must resolve to a live, intended source page (directly or via valid redirect).
 - Uncertain evidence is shown as `Unknown` with caution guidance.
 - Include clear informational disclaimer that the tool does not replace veterinary care.
 
@@ -89,6 +90,8 @@ CatSafe Plants is a high-trust utility that helps cat owners quickly verify whet
 - Risk: Conflicting sources reduce trust.
 - Mitigation:
   - Require citation(s) for every public plant.
+  - Validate citation URL health before publish and during release QA.
+  - Treat broken citation links as missing evidence until fixed.
   - Use `Unknown` status when evidence is not conclusive.
   - Avoid strong “safe” claims without clear support.
 

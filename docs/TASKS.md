@@ -158,6 +158,7 @@
 **Acceptance criteria**
 - Detail page renders citation list with source name + URL.
 - Citation links are clearly labeled and functional.
+- Citation URLs resolve to the intended source page (direct response or valid redirect).
 - Missing citations show `Unknown` fallback copy.
 - Safety copy avoids absolute/medical-certainty language.
 
@@ -169,6 +170,7 @@
 **Verification steps**
 - Manual:
   - Open plants with citations and verify section content and links.
+  - Open each citation link and confirm it lands on the expected source page.
   - Open plants without citations and verify unknown fallback copy.
 - Tests:
   - Add/update test for citation rendering.
@@ -276,6 +278,7 @@
 **Acceptance criteria**
 - Unknown evidence always maps to `Unknown` safety display with caution language.
 - Plants missing required evidence are hidden or clearly labeled incomplete (document chosen policy).
+- Citation URL audit passes for published records (no broken links in release dataset).
 - List views use primary image only; detail can load full gallery.
 - Core touched flows pass loading/empty/error and keyboard/focus sanity checks.
 - `npm run lint` and `npm run build` pass in a network-capable environment.
@@ -289,6 +292,7 @@
 **Verification steps**
 - Manual:
   - Run end-to-end happy path: home search -> detail -> alternatives -> directory + filters.
+  - Run citation link spot-check/audit against release records and verify links resolve.
   - Validate loading/empty/error states across touched routes.
   - Verify mobile layout and keyboard navigation basics.
 - Tests:

@@ -169,6 +169,8 @@ If the product touches domains where incorrect info can harm users (health/safet
 - Do **not** invent claims, facts, or guarantees.
 - Require a **source per claim/record** when presenting factual assertions:
   - store/display a `source` field (URL, citation note, or doc reference)
+  - verify citation URLs resolve to a live source page (direct `200` or valid redirect) before shipping
+  - if a citation URL is broken/unreachable, treat the claim as unsourced until fixed
   - if no source is available, label as **unknown** and avoid strong wording
 - Add appropriate disclaimers and safety guidance where warranted.
 
