@@ -10,6 +10,7 @@ import {
   Stethoscope,
   FlaskConical,
 } from 'lucide-react';
+import Image from 'next/image';
 import type { Plant } from '@/src/lib/plants';
 import { getPlantById, getStatusColor, getStatusLabel } from '@/src/lib/plants';
 
@@ -56,7 +57,10 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
   const isToxic = plant.safety_status === 'mildly_toxic' || plant.safety_status === 'highly_toxic';
   const hasToxicDetailContent = Boolean(plant.symptoms || plant.toxic_parts);
 
-  const alternatives = plant.alternatives.map((id) => getPlantById(id)).filter(Boolean) as Plant[];
+  const alternatives = plant.alternatives
+    .map((id) => getPlantById(id))
+    .filter(Boolean)
+    .slice(0, 5) as Plant[];
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -156,7 +160,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                   {plant.citations.map((citation) => (
                     <li
                       key={`${citation.source_name}-${citation.source_url}`}
-                      className="flex sm:flex-row flex-col sm:items-center sm:justify-between gap-2 bg-gray-50 p-3 border border-gray-100 rounded-lg"
+                      className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-2 bg-gray-50 p-3 border border-gray-100 rounded-lg"
                     >
                       <span className="font-medium text-gray-800 text-sm">{citation.source_name}</span>
                       <a
@@ -172,17 +176,17 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                 </ul>
               ) : (
                 <p className="mt-3 text-gray-600 text-sm leading-relaxed">
-                  Evidence source: <span className="font-semibold">Unknown</span>. We do not currently have a
-                  source citation for this plant.
+                  Evidence source: <span className="font-semibold">Unknown</span>. We do not currently have a source
+                  citation for this plant.
                 </p>
               )}
             </section>
 
             <div className="bg-amber-50 p-4 border border-amber-200 rounded-xl">
               <p className="text-amber-900 text-sm leading-relaxed">
-                This information is for educational purposes only and is not a substitute for professional
-                veterinary care. If your cat may have ingested a toxic plant, contact your veterinarian or an
-                emergency animal poison service immediately.
+                This information is for educational purposes only and is not a substitute for professional veterinary
+                care. If your cat may have ingested a toxic plant, contact your veterinarian or an emergency animal
+                poison service immediately.
               </p>
             </div>
 
@@ -200,18 +204,31 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                         onClick={() => onSelectPlant(alt.id)}
                         className="group bg-white shadow-sm hover:shadow-md p-4 border border-gray-200 hover:border-emerald-200 rounded-xl text-left transition-all cursor-pointer"
                       >
-                        <div
-                          className={`w-full aspect-[4/3] rounded-lg flex items-center justify-center mb-3 ${altColor.bg} group-hover:scale-[1.02] transition-transform`}
-                        >
-                          <Leaf className={`w-8 h-8 ${altColor.text} opacity-60`} />
-                        </div>
+                        {alt.primary_image_url ? (
+                          <Image
+                            src={alt.primary_image_url}
+                            alt={`${alt.common_name} photo`}
+                            width={320}
+                            height={240}
+                            className="mb-3 rounded-lg w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform"
+                            unoptimized
+                          />
+                        ) : (
+                          <div
+                            className={`w-full aspect-4/3 rounded-lg flex items-center justify-center mb-3 ${altColor.bg} group-hover:scale-[1.02] transition-transform`}
+                            data-testid={`alternative-placeholder-${alt.id}`}
+                            aria-hidden="true"
+                          >
+                            <Leaf className={`w-8 h-8 ${altColor.text} opacity-60`} />
+                          </div>
+                        )}
                         <div className="font-medium text-gray-900 text-sm">{alt.common_name}</div>
                         <div className="text-gray-400 text-xs italic">{alt.scientific_name}</div>
                         <span
                           className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${altColor.bg} ${altColor.text} border ${altColor.border}`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${altColor.dot}`} />
-                          Safe
+                          {getStatusLabel(alt.safety_status)}
                         </span>
                       </button>
                     );

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailView } from '@/src/components/detail-view';
 import * as plantsModule from '@/src/lib/plants';
@@ -16,6 +16,7 @@ describe('DetailView', () => {
     expect(screen.getByText(/highly toxic/i)).toBeTruthy();
     expect(screen.getByRole('heading', { name: /symptoms/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /toxic parts/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /safe alternatives/i })).toBeTruthy();
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
   });
 
@@ -45,6 +46,7 @@ describe('DetailView', () => {
     expect(within(evidenceSection as HTMLElement).getByText(/we do not currently have a source citation/i)).toBeTruthy();
     expect(within(evidenceSection as HTMLElement).getByText('Unknown')).toBeTruthy();
     expect(screen.queryByRole('link', { name: /open source/i })).toBeNull();
+    expect(screen.queryByRole('heading', { name: /safe alternatives/i })).toBeNull();
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
   });
 
@@ -53,6 +55,7 @@ describe('DetailView', () => {
 
     expect(screen.getByText(/currently regarded as non-toxic/i)).toBeTruthy();
     expect(screen.getByText(/individual reactions can vary/i)).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: /safe alternatives/i })).toBeNull();
   });
 
   it('gracefully hides empty toxic details when toxic fields are missing', () => {
@@ -81,5 +84,21 @@ describe('DetailView', () => {
     expect(screen.queryByRole('heading', { name: /symptoms/i })).toBeNull();
     expect(screen.queryByRole('heading', { name: /toxic parts/i })).toBeNull();
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
+  });
+
+  it('opens selected alternative detail when an alternative card is clicked', () => {
+    const onSelectPlant = vi.fn();
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={onSelectPlant} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /spider plant/i }));
+
+    expect(onSelectPlant).toHaveBeenCalledWith('spider-plant');
+  });
+
+  it('renders alternative image when present and placeholder when missing', () => {
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(screen.getByRole('img', { name: /spider plant photo/i })).toBeTruthy();
+    expect(screen.getByTestId('alternative-placeholder-boston-fern')).toBeTruthy();
   });
 });
