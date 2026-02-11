@@ -299,3 +299,6 @@
   - Run `npm run test`.
   - Run `npm run lint`.
   - Run `npm run build`.
+
+**Deferred optimization note**
+- Do not implement in current slice: refactor detail data loading to query a single plant by id (plus only its alternative ids) instead of loading the full plants dataset client-side.

@@ -1,6 +1,8 @@
 'use client';
 
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AlertCircle,
   ArrowLeft,
   AlertTriangle,
   ShieldCheck,
@@ -9,10 +11,12 @@ import {
   Leaf,
   Stethoscope,
   FlaskConical,
+  LoaderCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { Plant } from '@/src/lib/plants';
-import { getPlantById, getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { loadPlants } from '@/src/lib/load-plants';
 
 interface DetailViewProps {
   plantId: string;
@@ -34,7 +38,72 @@ function StatusIcon({ status }: { status: Plant['safety_status'] }) {
 }
 
 export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) {
-  const plant = getPlantById(plantId);
+  const [plants, setPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPlants = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const loadedPlants = await loadPlants();
+      setPlants(loadedPlants);
+    } catch (err) {
+      setPlants([]);
+      setError(err instanceof Error ? err.message : 'Unable to load plant data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchPlants();
+  }, [fetchPlants]);
+
+  const plantsById = useMemo(() => new Map<string, Plant>(plants.map((item) => [item.id, item])), [plants]);
+  const plant = plantsById.get(plantId);
+
+  const alternatives = useMemo(() => {
+    if (!plant) {
+      return [];
+    }
+
+    return plant.alternatives
+      .map((id) => plantsById.get(id))
+      .filter((item): item is Plant => item !== undefined)
+      .slice(0, 5);
+  }, [plant, plantsById]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center bg-yellow-50 min-h-screen">
+        <div className="flex items-center gap-2 text-gray-600 text-sm">
+          <LoaderCircle className="w-4 h-4 animate-spin" />
+          Loading plant details...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center bg-yellow-50 px-4 min-h-screen">
+        <div className="bg-white shadow-sm p-6 border border-rose-200 rounded-xl w-full max-w-md text-center">
+          <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+          <button
+            type="button"
+            onClick={() => void fetchPlants()}
+            className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-4 px-3 py-2 border border-rose-200 rounded-lg text-rose-700 text-sm transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!plant) {
     return (
@@ -57,15 +126,9 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
   const isToxic = plant.safety_status === 'mildly_toxic' || plant.safety_status === 'highly_toxic';
   const hasToxicDetailContent = Boolean(plant.symptoms || plant.toxic_parts);
 
-  const alternatives = plant.alternatives
-    .map((id) => getPlantById(id))
-    .filter(Boolean)
-    .slice(0, 5) as Plant[];
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="mx-auto px-4 py-8 max-w-4xl">
-        {/* Back */}
         <button
           type="button"
           onClick={onBack}
@@ -76,7 +139,6 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
         </button>
 
         <div className="gap-8 grid grid-cols-1 md:grid-cols-3">
-          {/* Left: Plant image placeholder */}
           <div className="md:col-span-1">
             <div
               className={`aspect-square rounded-2xl flex flex-col items-center justify-center ${color.bg} border ${color.border}`}
@@ -85,7 +147,6 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
               <span className={`mt-2 text-sm font-medium ${color.text} opacity-70`}>{plant.common_name}</span>
             </div>
 
-            {/* AKA names */}
             {plant.aka_names.length > 0 && (
               <div className="mt-4">
                 <h3 className="mb-2 font-semibold text-gray-400 text-xs uppercase tracking-wider">Also known as</h3>
@@ -103,15 +164,12 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
             )}
           </div>
 
-          {/* Right: Details */}
           <div className="space-y-6 md:col-span-2">
-            {/* Header */}
             <div>
               <h1 className="font-bold text-gray-900 text-3xl">{plant.common_name}</h1>
               <p className="mt-1 text-gray-400 text-lg italic">{plant.scientific_name}</p>
             </div>
 
-            {/* Verdict Banner */}
             <div className={`flex items-center gap-4 p-5 rounded-xl border ${color.bg} ${color.border}`}>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color.text} bg-white/60`}>
                 <StatusIcon status={plant.safety_status} />
@@ -128,7 +186,6 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
               </div>
             </div>
 
-            {/* Toxic Details */}
             {isToxic && hasToxicDetailContent && (
               <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
                 {plant.symptoms && (
@@ -152,7 +209,6 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
               </div>
             )}
 
-            {/* Evidence */}
             <section className="bg-white shadow-sm p-5 border border-gray-200 rounded-xl">
               <h2 className="font-bold text-gray-900 text-lg">Evidence</h2>
               {plant.citations.length > 0 ? (
@@ -190,7 +246,6 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
               </p>
             </div>
 
-            {/* Safe Alternatives */}
             {isToxic && alternatives.length > 0 && (
               <div>
                 <h2 className="mb-3 font-bold text-gray-900 text-lg">Safe Alternatives</h2>
