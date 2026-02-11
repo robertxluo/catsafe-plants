@@ -1,10 +1,12 @@
 export type SafetyStatus = 'non_toxic' | 'mildly_toxic' | 'highly_toxic' | 'unknown';
+export type FlowerColor = 'white' | 'yellow' | 'orange' | 'red' | 'pink' | 'purple' | 'blue' | 'green';
 
 export interface Plant {
   id: string;
   common_name: string;
   scientific_name: string;
   aka_names: string[];
+  flower_colors: FlowerColor[];
   primary_image_url: string | null;
   safety_status: SafetyStatus;
   symptoms: string | null;
@@ -22,6 +24,7 @@ export const plants: Plant[] = [
     common_name: 'Lily',
     scientific_name: 'Lilium spp.',
     aka_names: ['Easter Lily', 'Tiger Lily', 'Asiatic Lily'],
+    flower_colors: ['white', 'orange', 'pink', 'red'],
     primary_image_url: '/flower_placeholder.png',
     safety_status: 'highly_toxic',
     symptoms:
@@ -45,6 +48,7 @@ export const plants: Plant[] = [
     common_name: 'Spider Plant',
     scientific_name: 'Chlorophytum comosum',
     aka_names: ['Airplane Plant', 'Ribbon Plant', 'Spider Ivy'],
+    flower_colors: ['white'],
     primary_image_url: '/flower_placeholder.png',
     safety_status: 'non_toxic',
     symptoms: null,
@@ -57,6 +61,7 @@ export const plants: Plant[] = [
     common_name: 'Monstera',
     scientific_name: 'Monstera deliciosa',
     aka_names: ['Swiss Cheese Plant', 'Split-Leaf Philodendron'],
+    flower_colors: ['white'],
     primary_image_url: null,
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, excessive drooling, vomiting, difficulty swallowing due to calcium oxalate crystals.',
@@ -69,6 +74,7 @@ export const plants: Plant[] = [
     common_name: 'Unknown Plant',
     scientific_name: 'Species unidentified',
     aka_names: ['Mystery Plant'],
+    flower_colors: ['green'],
     primary_image_url: null,
     safety_status: 'unknown',
     symptoms: null,
@@ -81,6 +87,7 @@ export const plants: Plant[] = [
     common_name: 'Boston Fern',
     scientific_name: 'Nephrolepis exaltata',
     aka_names: ['Sword Fern', 'Ladder Fern'],
+    flower_colors: ['green'],
     primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
@@ -93,6 +100,7 @@ export const plants: Plant[] = [
     common_name: 'Areca Palm',
     scientific_name: 'Dypsis lutescens',
     aka_names: ['Butterfly Palm', 'Golden Cane Palm'],
+    flower_colors: ['yellow'],
     primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
@@ -105,6 +113,7 @@ export const plants: Plant[] = [
     common_name: 'Calathea',
     scientific_name: 'Calathea spp.',
     aka_names: ['Prayer Plant', 'Zebra Plant'],
+    flower_colors: ['purple', 'pink'],
     primary_image_url: null,
     safety_status: 'non_toxic',
     symptoms: null,
@@ -117,6 +126,7 @@ export const plants: Plant[] = [
     common_name: 'Pothos',
     scientific_name: 'Epipremnum aureum',
     aka_names: ["Devil's Ivy", 'Golden Pothos', 'Taro Vine'],
+    flower_colors: ['green', 'white'],
     primary_image_url: null,
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, drooling, vomiting, difficulty swallowing.',

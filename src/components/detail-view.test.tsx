@@ -66,6 +66,7 @@ describe('DetailView', () => {
           common_name: 'Toxic Test Plant',
           scientific_name: 'Testus toxicus',
           aka_names: [],
+          flower_colors: ['red'],
           primary_image_url: null,
           safety_status: 'highly_toxic',
           symptoms: null,

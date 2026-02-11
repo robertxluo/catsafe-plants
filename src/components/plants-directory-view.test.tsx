@@ -21,6 +21,7 @@ vi.mock('@/src/lib/load-plants', () => ({
 }));
 
 const mockedLoadPlants = vi.mocked(loadPlants);
+const flowerColors = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'] as const;
 
 function makePlants(count: number): Plant[] {
   return Array.from({ length: count }, (_, index) => ({
@@ -28,6 +29,7 @@ function makePlants(count: number): Plant[] {
     common_name: `Plant ${index + 1}`,
     scientific_name: `Plantus ${index + 1}`,
     aka_names: [],
+    flower_colors: [flowerColors[index % flowerColors.length]],
     primary_image_url: index % 2 === 0 ? '/flower_placeholder.png' : null,
     safety_status: index % 3 === 0 ? 'non_toxic' : index % 3 === 1 ? 'mildly_toxic' : 'highly_toxic',
     symptoms: null,
@@ -42,6 +44,63 @@ function makeSearchParams(page: string | null) {
     get: (key: string) => (key === 'page' ? page : null),
     toString: () => (page ? `page=${page}` : ''),
   };
+}
+
+function makeFilterPlants(): Plant[] {
+  return [
+    {
+      id: 'safe-yellow',
+      common_name: 'Safe Yellow',
+      scientific_name: 'Safeus yellowii',
+      aka_names: [],
+      flower_colors: ['yellow'],
+      primary_image_url: null,
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    },
+    {
+      id: 'safe-blue',
+      common_name: 'Safe Blue',
+      scientific_name: 'Safeus blueii',
+      aka_names: [],
+      flower_colors: ['blue'],
+      primary_image_url: null,
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    },
+    {
+      id: 'toxic-yellow',
+      common_name: 'Toxic Yellow',
+      scientific_name: 'Toxicus yellowii',
+      aka_names: [],
+      flower_colors: ['yellow'],
+      primary_image_url: null,
+      safety_status: 'highly_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    },
+    {
+      id: 'unknown-red',
+      common_name: 'Unknown Red',
+      scientific_name: 'Unknownus redii',
+      aka_names: [],
+      flower_colors: ['red'],
+      primary_image_url: null,
+      safety_status: 'unknown',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    },
+  ];
 }
 
 describe('PlantsDirectoryView', () => {
@@ -174,5 +233,84 @@ describe('PlantsDirectoryView', () => {
     });
 
     expect(mockedLoadPlants).toHaveBeenCalledTimes(2);
+  });
+
+  it('filters results by safety status', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(9));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
+
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(3);
+  });
+
+  it('filters results by flower color', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(10));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
+
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(2);
+  });
+
+  it('applies safety and color filters with AND logic', async () => {
+    mockedLoadPlants.mockResolvedValue(makeFilterPlants());
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
+
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /open details for safe yellow/i })).toBeTruthy();
+  });
+
+  it('shows no-match state and resets filters', async () => {
+    mockedLoadPlants.mockResolvedValue(makeFilterPlants());
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^toxic only$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^blue$/i }));
+
+    expect(screen.getByText(/no plants match the selected safety and flower color filters\./i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /reset filters/i }));
+
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(4);
+  });
+
+  it('keeps pagination accurate when filters reduce result count', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(45));
+    mockUseSearchParams.mockReturnValue(makeSearchParams('3'));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/page 3 of 3/i)).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
+
+    expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
   });
 });
