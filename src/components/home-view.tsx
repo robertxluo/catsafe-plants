@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, Leaf, ShieldCheck, Cat, LoaderCircle, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
 import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -13,6 +14,7 @@ interface HomeViewProps {
 }
 
 export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
+  const router = useRouter();
   const thumbnailClassName = 'rounded-lg w-10 h-10 shrink-0 border border-gray-200';
 
   const [plants, setPlants] = useState<Plant[]>([]);
@@ -230,7 +232,15 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
 
         {/* Browse all */}
         <div className="mt-8 text-gray-400 text-sm">
-          Or browse all <span className="font-medium text-gray-500">{plants.length} plants</span> in our database
+          Or browse all{' '}
+          <button
+            type="button"
+            onClick={() => router.push('/plants')}
+            className="font-medium text-gray-600 hover:text-emerald-700 underline underline-offset-2 transition-colors cursor-pointer"
+          >
+            {plants.length} plants
+          </button>{' '}
+          in our database
         </div>
       </main>
 

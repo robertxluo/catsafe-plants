@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeView } from '@/src/components/home-view';
 import { loadPlants } from '@/src/lib/load-plants';
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock('@/src/lib/load-plants', () => ({
   loadPlants: vi.fn(),
 }));
