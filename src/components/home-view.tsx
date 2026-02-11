@@ -10,10 +10,9 @@ import { loadPlants } from '@/src/lib/load-plants';
 
 interface HomeViewProps {
   onSelectPlant: (id: string) => void;
-  onAdminClick?: () => void;
 }
 
-export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
+export function HomeView({ onSelectPlant }: HomeViewProps) {
   const router = useRouter();
   const thumbnailClassName = 'rounded-lg w-10 h-10 shrink-0 border border-gray-200';
 
@@ -249,18 +248,7 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-6 border-gray-100 border-t text-center">
-        {onAdminClick && (
-          <button
-            type="button"
-            onClick={onAdminClick}
-            className="text-gray-400 hover:text-gray-600 text-sm transition-colors cursor-pointer"
-          >
-            Admin
-          </button>
-        )}
-      </footer>
+      <footer className="py-6 border-gray-100 border-t" />
     </div>
   );
 }
