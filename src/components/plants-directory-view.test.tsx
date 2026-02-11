@@ -31,11 +31,17 @@ function makePlants(count: number): Plant[] {
     aka_names: [],
     flower_colors: [flowerColors[index % flowerColors.length]],
     primary_image_url: index % 2 === 0 ? '/flower_placeholder.png' : null,
+    photo_urls: index % 2 === 0 ? ['/flower_placeholder.png'] : [],
     safety_status: index % 3 === 0 ? 'non_toxic' : index % 3 === 1 ? 'mildly_toxic' : 'highly_toxic',
     symptoms: null,
     toxic_parts: null,
     alternatives: [],
-    citations: [],
+    citations: [
+      {
+        source_name: 'Test Source',
+        source_url: 'https://example.com/source',
+      },
+    ],
   }));
 }
 
@@ -55,11 +61,17 @@ function makeFilterPlants(): Plant[] {
       aka_names: [],
       flower_colors: ['yellow'],
       primary_image_url: null,
+      photo_urls: [],
       safety_status: 'non_toxic',
       symptoms: null,
       toxic_parts: null,
       alternatives: [],
-      citations: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
     },
     {
       id: 'safe-blue',
@@ -68,11 +80,17 @@ function makeFilterPlants(): Plant[] {
       aka_names: [],
       flower_colors: ['blue'],
       primary_image_url: null,
+      photo_urls: [],
       safety_status: 'non_toxic',
       symptoms: null,
       toxic_parts: null,
       alternatives: [],
-      citations: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
     },
     {
       id: 'toxic-yellow',
@@ -81,11 +99,17 @@ function makeFilterPlants(): Plant[] {
       aka_names: [],
       flower_colors: ['yellow'],
       primary_image_url: null,
+      photo_urls: [],
       safety_status: 'highly_toxic',
       symptoms: null,
       toxic_parts: null,
       alternatives: [],
-      citations: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
     },
     {
       id: 'unknown-red',
@@ -94,6 +118,7 @@ function makeFilterPlants(): Plant[] {
       aka_names: [],
       flower_colors: ['red'],
       primary_image_url: null,
+      photo_urls: [],
       safety_status: 'unknown',
       symptoms: null,
       toxic_parts: null,
@@ -312,5 +337,33 @@ describe('PlantsDirectoryView', () => {
 
     expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
+  });
+
+  it('labels uncited plants as evidence incomplete and displays unknown safety', async () => {
+    mockedLoadPlants.mockResolvedValue([
+      {
+        id: 'uncited-safe',
+        common_name: 'Uncited Safe',
+        scientific_name: 'Safeus unsourcedii',
+        aka_names: [],
+        flower_colors: ['green'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [],
+      },
+    ]);
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /open details for uncited safe/i })).toBeTruthy();
+    });
+
+    expect(screen.getByText(/evidence incomplete/i)).toBeTruthy();
+    expect(screen.getByText(/^unknown$/i)).toBeTruthy();
   });
 });

@@ -8,6 +8,7 @@ export interface Plant {
   aka_names: string[];
   flower_colors: FlowerColor[];
   primary_image_url: string | null;
+  photo_urls: string[];
   safety_status: SafetyStatus;
   symptoms: string | null;
   toxic_parts: string | null;
@@ -26,6 +27,7 @@ export const plants: Plant[] = [
     aka_names: ['Easter Lily', 'Tiger Lily', 'Asiatic Lily'],
     flower_colors: ['white', 'orange', 'pink', 'red'],
     primary_image_url: '/flower_placeholder.png',
+    photo_urls: ['/flower_placeholder.png', '/flower_placeholder.png', '/flower_placeholder.png'],
     safety_status: 'highly_toxic',
     symptoms:
       'Vomiting, loss of appetite, lethargy, kidney failure. Even small ingestions (pollen, water from vase) can be fatal to cats.',
@@ -50,6 +52,7 @@ export const plants: Plant[] = [
     aka_names: ['Airplane Plant', 'Ribbon Plant', 'Spider Ivy'],
     flower_colors: ['white'],
     primary_image_url: '/flower_placeholder.png',
+    photo_urls: ['/flower_placeholder.png'],
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -63,6 +66,7 @@ export const plants: Plant[] = [
     aka_names: ['Swiss Cheese Plant', 'Split-Leaf Philodendron'],
     flower_colors: ['white'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, excessive drooling, vomiting, difficulty swallowing due to calcium oxalate crystals.',
     toxic_parts: 'Leaves and stems contain insoluble calcium oxalate crystals.',
@@ -76,6 +80,7 @@ export const plants: Plant[] = [
     aka_names: ['Mystery Plant'],
     flower_colors: ['green'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'unknown',
     symptoms: null,
     toxic_parts: null,
@@ -89,6 +94,7 @@ export const plants: Plant[] = [
     aka_names: ['Sword Fern', 'Ladder Fern'],
     flower_colors: ['green'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -102,6 +108,7 @@ export const plants: Plant[] = [
     aka_names: ['Butterfly Palm', 'Golden Cane Palm'],
     flower_colors: ['yellow'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -115,6 +122,7 @@ export const plants: Plant[] = [
     aka_names: ['Prayer Plant', 'Zebra Plant'],
     flower_colors: ['purple', 'pink'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'non_toxic',
     symptoms: null,
     toxic_parts: null,
@@ -128,6 +136,7 @@ export const plants: Plant[] = [
     aka_names: ["Devil's Ivy", 'Golden Pothos', 'Taro Vine'],
     flower_colors: ['green', 'white'],
     primary_image_url: null,
+    photo_urls: [],
     safety_status: 'mildly_toxic',
     symptoms: 'Oral irritation, drooling, vomiting, difficulty swallowing.',
     toxic_parts: 'Leaves and stems.',
@@ -140,6 +149,18 @@ export function getPlantById(id: string): Plant | undefined {
   return plants.find((p) => p.id === id);
 }
 
+export function hasCitationEvidence(plant: Pick<Plant, 'citations'>): boolean {
+  return plant.citations.length > 0;
+}
+
+export function hasIncompleteEvidence(plant: Pick<Plant, 'citations'>): boolean {
+  return !hasCitationEvidence(plant);
+}
+
+export function getDisplaySafetyStatus(plant: Pick<Plant, 'safety_status' | 'citations'>): SafetyStatus {
+  return hasCitationEvidence(plant) ? plant.safety_status : 'unknown';
+}
+
 export function getStatusLabel(status: SafetyStatus): string {
   switch (status) {
     case 'non_toxic':
@@ -149,7 +170,7 @@ export function getStatusLabel(status: SafetyStatus): string {
     case 'highly_toxic':
       return 'Highly Toxic';
     case 'unknown':
-      return 'Unknown Safety';
+      return 'Unknown';
   }
 }
 

@@ -32,12 +32,53 @@ function readOptionalString(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function isHttpUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function isImageUrl(value: string): boolean {
+  if (value.startsWith('/')) {
+    return true;
+  }
+  return isHttpUrl(value);
+}
+
 function readStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
 
   return value.map((item) => readOptionalString(item)).filter((item): item is string => item !== null);
+}
+
+function readImageArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => readOptionalString(item)).filter((item): item is string => item !== null);
+  }
+
+  if (typeof value !== 'string') {
+    return [];
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed.startsWith('[')) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.map((item) => readOptionalString(item)).filter((item): item is string => item !== null);
+  } catch {
+    return [];
+  }
 }
 
 function normalizeSafetyStatus(value: unknown): SafetyStatus {
@@ -65,7 +106,7 @@ function mapCitationsByPlant(rows: GenericRow[]) {
     const sourceName = readOptionalString(row.source_name);
     const sourceUrl = readOptionalString(row.source_url);
 
-    if (!plantId || !sourceName || !sourceUrl) {
+    if (!plantId || !sourceName || !sourceUrl || !isHttpUrl(sourceUrl)) {
       continue;
     }
 
@@ -116,8 +157,15 @@ function mapPlantRow(
   const akaFromNames = names.slice(2);
   const rawAkaNames = explicitAkaNames.length > 0 ? explicitAkaNames : akaFromNames;
   const akaNames = Array.from(new Set(rawAkaNames)).filter((aka) => aka !== commonName && aka !== scientificName);
-
-  const primaryImageUrl = readOptionalString(row.primary_image_url) ?? readStringArray(row.photo_urls)[0] ?? null;
+  const primaryImageCandidate = readOptionalString(row.primary_image_url);
+  const primaryImageUrl = primaryImageCandidate && isImageUrl(primaryImageCandidate) ? primaryImageCandidate : null;
+  const normalizedPhotoUrls = readImageArray(row.photo_urls).filter(isImageUrl);
+  const photoUrls = Array.from(new Set(normalizedPhotoUrls));
+  const effectivePrimaryImageUrl = primaryImageUrl ?? photoUrls[0] ?? null;
+  const effectivePhotoUrls = photoUrls.length > 0 ? photoUrls : effectivePrimaryImageUrl ? [effectivePrimaryImageUrl] : [];
+  const citations = citationsByPlant.get(id) ?? [];
+  const normalizedSafetyStatus = normalizeSafetyStatus(row.safety_status);
+  const safetyStatus = citations.length > 0 ? normalizedSafetyStatus : 'unknown';
 
   return {
     id,
@@ -125,12 +173,13 @@ function mapPlantRow(
     scientific_name: scientificName,
     aka_names: akaNames,
     flower_colors: normalizeFlowerColors(row.flower_colors),
-    primary_image_url: primaryImageUrl,
-    safety_status: normalizeSafetyStatus(row.safety_status),
+    primary_image_url: effectivePrimaryImageUrl,
+    photo_urls: effectivePhotoUrls,
+    safety_status: safetyStatus,
     symptoms: readOptionalString(row.symptoms),
     toxic_parts: readOptionalString(row.toxic_parts),
     alternatives: alternativesByPlant.get(id) ?? [],
-    citations: citationsByPlant.get(id) ?? [],
+    citations,
   };
 }
 

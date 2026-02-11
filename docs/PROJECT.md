@@ -50,11 +50,15 @@
 - Production build: `npm run build`
 - Start production server locally: `npm run start`
 - Lint: `npm run lint`
+- Citation release audit (network required): `npm run audit:citations`
 
 ## Environment Variables
 Current required variables (already used by code):
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Optional variable (release check tuning):
+- `CITATION_AUDIT_TIMEOUT_MS` (timeout per citation URL check; defaults to `10000`)
 
 Planned/additional variables (when image ingestion and/or admin tooling is implemented):
 - `CLOUDINARY_CLOUD_NAME`
@@ -97,6 +101,7 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
 - Every plant record must include at least one citation before it is considered complete.
 - Every citation URL must resolve to the intended source page (HTTP `200` or valid redirect to the same source).
 - Broken citation links block publish; unresolved citations must be treated as `unknown` until corrected.
+- Chosen policy for missing required evidence: keep records visible but clearly label them as **Evidence incomplete**, and force safety display to `Unknown` with caution language.
 - Flower color values must come from a fixed controlled list (no free text).
 - Directory responses should prioritize performance:
   - Return primary image in list responses.

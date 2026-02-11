@@ -48,6 +48,7 @@ describe('loadPlants + Supabase mapping', () => {
               aka_names: ['Tiger Lily'],
               flower_colors: ['white', 'orange', 'invalid-color'],
               primary_image_url: '/flower_placeholder.png',
+              photo_urls: ['/gallery-1.jpg', '/gallery-2.jpg'],
               safety_status: 'highly_toxic',
               symptoms: 'Vomiting',
               toxic_parts: 'All parts',
@@ -56,9 +57,20 @@ describe('loadPlants + Supabase mapping', () => {
               id: 'fallback-plant',
               names: ['Fallback Plant', 'Fallbackus plantus', 'Alias One'],
               flower_colors: ['blue'],
-              photo_urls: ['https://example.com/fallback.jpg'],
-              safety_status: 'not-a-real-status',
+              photo_urls: '["https://example.com/fallback.jpg","/relative-fallback.jpg"]',
+              safety_status: 'non_toxic',
               symptoms: '',
+              toxic_parts: null,
+            },
+            {
+              id: 'primary-only-plant',
+              common_name: 'Primary Only Plant',
+              scientific_name: 'Primaryus onlyus',
+              flower_colors: ['white'],
+              primary_image_url: 'https://example.com/primary-only.jpg',
+              photo_urls: [],
+              safety_status: 'non_toxic',
+              symptoms: null,
               toxic_parts: null,
             },
             {
@@ -93,7 +105,7 @@ describe('loadPlants + Supabase mapping', () => {
 
     const plants = await loadPlantsFromSupabase();
 
-    expect(plants).toHaveLength(2);
+    expect(plants).toHaveLength(3);
 
     expect(plants[0]).toEqual({
       id: 'lilium',
@@ -102,6 +114,7 @@ describe('loadPlants + Supabase mapping', () => {
       aka_names: ['Tiger Lily'],
       flower_colors: ['white', 'orange'],
       primary_image_url: '/flower_placeholder.png',
+      photo_urls: ['/gallery-1.jpg', '/gallery-2.jpg'],
       safety_status: 'highly_toxic',
       symptoms: 'Vomiting',
       toxic_parts: 'All parts',
@@ -121,6 +134,22 @@ describe('loadPlants + Supabase mapping', () => {
       aka_names: ['Alias One'],
       flower_colors: ['blue'],
       primary_image_url: 'https://example.com/fallback.jpg',
+      photo_urls: ['https://example.com/fallback.jpg', '/relative-fallback.jpg'],
+      safety_status: 'unknown',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    });
+
+    expect(plants[2]).toEqual({
+      id: 'primary-only-plant',
+      common_name: 'Primary Only Plant',
+      scientific_name: 'Primaryus onlyus',
+      aka_names: [],
+      flower_colors: ['white'],
+      primary_image_url: 'https://example.com/primary-only.jpg',
+      photo_urls: ['https://example.com/primary-only.jpg'],
       safety_status: 'unknown',
       symptoms: null,
       toxic_parts: null,

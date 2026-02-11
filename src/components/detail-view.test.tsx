@@ -10,6 +10,28 @@ vi.mock('@/src/lib/load-plants', () => ({
 
 const mockedLoadPlants = vi.mocked(loadPlants);
 
+function makeGalleryPlant(photoUrls: string[]): Plant {
+  return {
+    id: 'gallery-plant',
+    common_name: 'Gallery Plant',
+    scientific_name: 'Galleryus plantii',
+    aka_names: [],
+    flower_colors: ['green'],
+    primary_image_url: photoUrls[0] ?? null,
+    photo_urls: photoUrls,
+    safety_status: 'non_toxic',
+    symptoms: null,
+    toxic_parts: null,
+    alternatives: [],
+    citations: [
+      {
+        source_name: 'Test Source',
+        source_url: 'https://example.com/source',
+      },
+    ],
+  };
+}
+
 describe('DetailView', () => {
   beforeEach(() => {
     mockedLoadPlants.mockReset();
@@ -48,26 +70,73 @@ describe('DetailView', () => {
     render(<DetailView plantId="unknown-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
 
     expect(await screen.findByRole('heading', { name: /unknown plant/i })).toBeTruthy();
-    expect(screen.getByText(/unknown safety/i)).toBeTruthy();
+    expect(screen.getAllByText(/^unknown$/i).length).toBeGreaterThan(0);
     expect(screen.queryByRole('heading', { name: /symptoms/i })).toBeNull();
     expect(screen.queryByRole('heading', { name: /toxic parts/i })).toBeNull();
 
     const evidenceHeading = screen.getByRole('heading', { name: /evidence/i });
     const evidenceSection = evidenceHeading.closest('section');
     expect(evidenceSection).not.toBeNull();
-    expect(within(evidenceSection as HTMLElement).getByText(/we do not currently have a source citation/i)).toBeTruthy();
-    expect(within(evidenceSection as HTMLElement).getByText('Unknown')).toBeTruthy();
+    expect(within(evidenceSection as HTMLElement).getByText(/required source citation/i)).toBeTruthy();
     expect(screen.queryByRole('link', { name: /open source/i })).toBeNull();
     expect(screen.queryByRole('heading', { name: /safe alternatives/i })).toBeNull();
     expect(screen.getByText(/not a substitute for professional veterinary care/i)).toBeTruthy();
   });
 
   it('uses cautious non-toxic wording instead of absolute safety language', async () => {
-    render(<DetailView plantId="spider-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+    const citedSafePlant: Plant = {
+      id: 'safe-with-evidence',
+      common_name: 'Safe With Evidence',
+      scientific_name: 'Safeus evidenceii',
+      aka_names: [],
+      flower_colors: ['green'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [
+        {
+          source_name: 'ASPCA',
+          source_url: 'https://www.aspca.org/example',
+        },
+      ],
+    };
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, citedSafePlant]);
+
+    render(<DetailView plantId="safe-with-evidence" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
 
     expect(await screen.findByText(/currently regarded as non-toxic/i)).toBeTruthy();
     expect(screen.getByText(/individual reactions can vary/i)).toBeTruthy();
     expect(screen.queryByRole('heading', { name: /safe alternatives/i })).toBeNull();
+  });
+
+  it('treats missing evidence as unknown and labels the record incomplete', async () => {
+    const uncitedPlant: Plant = {
+      id: 'uncited-safe',
+      common_name: 'Uncited Safe',
+      scientific_name: 'Safeus unsourcedii',
+      aka_names: [],
+      flower_colors: ['green'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [],
+    };
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, uncitedPlant]);
+
+    render(<DetailView plantId="uncited-safe" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: /uncited safe/i })).toBeTruthy();
+    expect(screen.getAllByText(/^unknown$/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/evidence incomplete/i)).toBeTruthy();
+    expect(screen.getByText(/treat safety as unknown and use caution/i)).toBeTruthy();
   });
 
   it('gracefully hides empty toxic details when toxic fields are missing', async () => {
@@ -78,11 +147,17 @@ describe('DetailView', () => {
       aka_names: [],
       flower_colors: ['red'],
       primary_image_url: null,
+      photo_urls: [],
       safety_status: 'highly_toxic',
       symptoms: null,
       toxic_parts: null,
       alternatives: [],
-      citations: [],
+      citations: [
+        {
+          source_name: 'ASPCA',
+          source_url: 'https://www.aspca.org/example',
+        },
+      ],
     };
 
     mockedLoadPlants.mockResolvedValueOnce([...mockPlants, toxicMissingFieldsPlant]);
@@ -110,6 +185,135 @@ describe('DetailView', () => {
 
     expect(await screen.findByRole('img', { name: /spider plant photo/i })).toBeTruthy();
     expect(screen.getByTestId('alternative-placeholder-boston-fern')).toBeTruthy();
+  });
+
+  it('renders carousel with first image active and dots', async () => {
+    const galleryPlant = makeGalleryPlant([
+      'https://example.com/primary.jpg',
+      'https://example.com/secondary.jpg',
+      'https://example.com/third.jpg',
+    ]);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 3/i })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: /gallery plant photo 2 of 3/i })).toBeNull();
+    expect(screen.getAllByRole('button', { name: /go to image/i })).toHaveLength(3);
+  });
+
+  it('navigates to next and previous image via edge arrows', async () => {
+    const galleryPlant = makeGalleryPlant([
+      'https://example.com/primary.jpg',
+      'https://example.com/secondary.jpg',
+      'https://example.com/third.jpg',
+    ]);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 3/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /next image/i }));
+    expect(screen.getByRole('img', { name: /gallery plant photo 2 of 3/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /previous image/i }));
+    expect(screen.getByRole('img', { name: /gallery plant photo 1 of 3/i })).toBeTruthy();
+  });
+
+  it('hides boundary arrows at first and last image', async () => {
+    const galleryPlant = makeGalleryPlant([
+      'https://example.com/primary.jpg',
+      'https://example.com/secondary.jpg',
+    ]);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 2/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /previous image/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /next image/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /next image/i }));
+    expect(screen.getByRole('img', { name: /gallery plant photo 2 of 2/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /next image/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /previous image/i })).toBeTruthy();
+  });
+
+  it('jumps to selected image when dot is clicked', async () => {
+    const galleryPlant = makeGalleryPlant([
+      'https://example.com/primary.jpg',
+      'https://example.com/secondary.jpg',
+      'https://example.com/third.jpg',
+    ]);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 3/i })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /go to image 3/i }));
+    expect(screen.getByRole('img', { name: /gallery plant photo 3 of 3/i })).toBeTruthy();
+  });
+
+  it('supports keyboard arrow navigation on focused carousel', async () => {
+    const galleryPlant = makeGalleryPlant([
+      'https://example.com/primary.jpg',
+      'https://example.com/secondary.jpg',
+      'https://example.com/third.jpg',
+    ]);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 3/i })).toBeTruthy();
+    const carousel = screen.getByLabelText(/gallery plant image carousel/i);
+
+    carousel.focus();
+    fireEvent.keyDown(carousel, { key: 'ArrowRight' });
+    expect(screen.getByRole('img', { name: /gallery plant photo 2 of 3/i })).toBeTruthy();
+
+    fireEvent.keyDown(carousel, { key: 'ArrowRight' });
+    expect(screen.getByRole('img', { name: /gallery plant photo 3 of 3/i })).toBeTruthy();
+
+    fireEvent.keyDown(carousel, { key: 'ArrowRight' });
+    expect(screen.getByRole('img', { name: /gallery plant photo 3 of 3/i })).toBeTruthy();
+
+    fireEvent.keyDown(carousel, { key: 'ArrowLeft' });
+    expect(screen.getByRole('img', { name: /gallery plant photo 2 of 3/i })).toBeTruthy();
+  });
+
+  it('single-image gallery hides navigation controls and dots', async () => {
+    const galleryPlant = makeGalleryPlant(['https://example.com/primary.jpg']);
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, galleryPlant]);
+
+    render(<DetailView plantId="gallery-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('img', { name: /gallery plant photo 1 of 1/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /next image/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /previous image/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /go to image/i })).toBeNull();
+  });
+
+  it('uses placeholder card when no gallery photos exist', async () => {
+    const noImagePlant = makeGalleryPlant([]);
+    noImagePlant.id = 'no-image-plant';
+    noImagePlant.common_name = 'No Image Plant';
+    noImagePlant.primary_image_url = null;
+    noImagePlant.photo_urls = [];
+
+    mockedLoadPlants.mockResolvedValueOnce([...mockPlants, noImagePlant]);
+
+    render(<DetailView plantId="no-image-plant" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: /no image plant/i })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: /no image plant photo/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /next image/i })).toBeNull();
   });
 
   it('shows configuration/load error state and can retry successfully', async () => {

@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, ArrowLeft, Leaf, LoaderCircle } from 'lucide-react';
 import Image from 'next/image';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
-import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
 
 const PAGE_SIZE = 20;
@@ -89,12 +89,13 @@ export function PlantsDirectoryView() {
 
   const filteredPlants = useMemo(() => {
     return plants.filter((plant) => {
+      const displaySafetyStatus = getDisplaySafetyStatus(plant);
       const matchesSafety =
         safetyFilter === 'all'
           ? true
           : safetyFilter === 'safe_only'
-            ? plant.safety_status === 'non_toxic'
-            : plant.safety_status === 'mildly_toxic' || plant.safety_status === 'highly_toxic';
+            ? displaySafetyStatus === 'non_toxic'
+            : displaySafetyStatus === 'mildly_toxic' || displaySafetyStatus === 'highly_toxic';
       const matchesFlowerColor =
         flowerColorFilter === 'all' ? true : plant.flower_colors.includes(flowerColorFilter);
       return matchesSafety && matchesFlowerColor;
@@ -306,7 +307,9 @@ export function PlantsDirectoryView() {
           <>
             <section aria-label="Plant directory results" className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {visiblePlants.map((plant) => {
-                const color = getStatusColor(plant.safety_status);
+                const displaySafetyStatus = getDisplaySafetyStatus(plant);
+                const color = getStatusColor(displaySafetyStatus);
+                const isEvidenceIncomplete = hasIncompleteEvidence(plant);
                 return (
                   <button
                     key={plant.id}
@@ -335,11 +338,14 @@ export function PlantsDirectoryView() {
                     )}
                     <div className="font-semibold text-gray-900 text-base tracking-tight">{plant.common_name}</div>
                     <div className="text-gray-500 text-sm italic">{plant.scientific_name}</div>
+                    {isEvidenceIncomplete ? (
+                      <div className="mt-2 text-amber-700 text-xs">Evidence incomplete</div>
+                    ) : null}
                     <span
                       className={`mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${color.bg} ${color.text} ${color.border}`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                      {getStatusLabel(plant.safety_status)}
+                      {getStatusLabel(displaySafetyStatus)}
                     </span>
                   </button>
                 );

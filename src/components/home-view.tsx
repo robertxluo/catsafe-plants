@@ -5,7 +5,7 @@ import { Search, Leaf, ShieldCheck, Cat, LoaderCircle, AlertCircle } from 'lucid
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
-import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
 
 interface HomeViewProps {
@@ -181,12 +181,14 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
               ) : (
                 <ul role="listbox" aria-label="Plant search results">
                   {filtered.map((plant) => {
-                    const color = getStatusColor(plant.safety_status);
+                    const displaySafetyStatus = getDisplaySafetyStatus(plant);
+                    const color = getStatusColor(displaySafetyStatus);
+                    const isEvidenceIncomplete = hasIncompleteEvidence(plant);
                     return (
                       <li key={plant.id}>
                         <button
                           type="button"
-                          className="flex items-center gap-3 hover:bg-gray-50 px-4 py-3 w-full text-left transition-colors cursor-pointer"
+                          className="flex items-center gap-3 hover:bg-gray-50 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset w-full text-left transition-colors cursor-pointer"
                           onClick={() => {
                             onSelectPlant(plant.id);
                             setQuery('');
@@ -213,12 +215,15 @@ export function HomeView({ onSelectPlant, onAdminClick }: HomeViewProps) {
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{plant.common_name}</div>
                             <div className="text-gray-500 text-sm truncate italic">{plant.scientific_name}</div>
+                            {isEvidenceIncomplete ? (
+                              <div className="mt-1 text-amber-700 text-xs">Evidence incomplete</div>
+                            ) : null}
                           </div>
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-sm ${color.bg} ${color.text} border ${color.border}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                            {getStatusLabel(plant.safety_status)}
+                            {getStatusLabel(displaySafetyStatus)}
                           </span>
                         </button>
                       </li>

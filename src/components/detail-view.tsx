@@ -1,9 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
@@ -15,7 +17,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import type { Plant } from '@/src/lib/plants';
-import { getStatusColor, getStatusLabel } from '@/src/lib/plants';
+import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
 
 interface DetailViewProps {
@@ -41,6 +43,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const fetchPlants = useCallback(async () => {
     try {
@@ -59,6 +62,10 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
   useEffect(() => {
     void fetchPlants();
   }, [fetchPlants]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [plantId]);
 
   const plantsById = useMemo(() => new Map<string, Plant>(plants.map((item) => [item.id, item])), [plants]);
   const plant = plantsById.get(plantId);
@@ -122,9 +129,41 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
     );
   }
 
-  const color = getStatusColor(plant.safety_status);
-  const isToxic = plant.safety_status === 'mildly_toxic' || plant.safety_status === 'highly_toxic';
+  const displaySafetyStatus = getDisplaySafetyStatus(plant);
+  const color = getStatusColor(displaySafetyStatus);
+  const isToxic = displaySafetyStatus === 'mildly_toxic' || displaySafetyStatus === 'highly_toxic';
+  const isEvidenceIncomplete = hasIncompleteEvidence(plant);
   const hasToxicDetailContent = Boolean(plant.symptoms || plant.toxic_parts);
+  const galleryImages =
+    plant.photo_urls.length > 0 ? plant.photo_urls : plant.primary_image_url ? [plant.primary_image_url] : [];
+  const hasPlaceholder = galleryImages.length === 0;
+  const hasMultipleImages = galleryImages.length > 1;
+  const isFirstImage = activeImageIndex === 0;
+  const isLastImage = activeImageIndex === galleryImages.length - 1;
+
+  function goToPreviousImage() {
+    setActiveImageIndex((current) => Math.max(0, current - 1));
+  }
+
+  function goToNextImage() {
+    setActiveImageIndex((current) => Math.min(galleryImages.length - 1, current + 1));
+  }
+
+  function handleCarouselKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'ArrowLeft') {
+      if (!isFirstImage) {
+        event.preventDefault();
+        goToPreviousImage();
+      }
+    }
+
+    if (event.key === 'ArrowRight') {
+      if (!isLastImage) {
+        event.preventDefault();
+        goToNextImage();
+      }
+    }
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -140,12 +179,79 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
 
         <div className="gap-8 grid grid-cols-1 md:grid-cols-3">
           <div className="md:col-span-1">
-            <div
-              className={`aspect-square rounded-2xl flex flex-col items-center justify-center ${color.bg} border ${color.border}`}
-            >
-              <Leaf className={`w-16 h-16 ${color.text} opacity-60`} />
-              <span className={`mt-2 text-sm font-medium ${color.text} opacity-70`}>{plant.common_name}</span>
-            </div>
+            {galleryImages.length > 0 ? (
+              <div className="space-y-3">
+                <div
+                  className="relative border border-gray-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-full aspect-square overflow-hidden"
+                  tabIndex={0}
+                  onKeyDown={handleCarouselKeyDown}
+                  aria-label={`${plant.common_name} image carousel`}
+                >
+                  {hasPlaceholder ? (
+                    <div className={`w-full h-full rounded-xl flex items-center justify-center ${color.bg}`}>
+                      <Leaf className={`w-8 h-8 ${color.text} opacity-70`} />
+                    </div>
+                  ) : (
+                    <Image
+                      src={galleryImages[activeImageIndex]}
+                      alt={`${plant.common_name} photo ${activeImageIndex + 1} of ${galleryImages.length}`}
+                      width={720}
+                      height={540}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  )}
+
+                  {hasMultipleImages && !isFirstImage ? (
+                    <button
+                      type="button"
+                      onClick={goToPreviousImage}
+                      aria-label="Previous image"
+                      className="top-1/2 left-2 absolute flex justify-center items-center bg-white/85 hover:bg-white border border-gray-200 rounded-full w-10 h-10 text-gray-700 transition-colors -translate-y-1/2 cursor-pointer"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                  ) : null}
+
+                  {hasMultipleImages && !isLastImage ? (
+                    <button
+                      type="button"
+                      onClick={goToNextImage}
+                      aria-label="Next image"
+                      className="top-1/2 right-2 absolute flex justify-center items-center bg-white/85 hover:bg-white border border-gray-200 rounded-full w-10 h-10 text-gray-700 transition-colors -translate-y-1/2 cursor-pointer"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  ) : null}
+                </div>
+
+                {hasMultipleImages ? (
+                  <div className="flex justify-center items-center gap-2">
+                    {galleryImages.map((_, index) => (
+                      <button
+                        key={`gallery-dot-${index}`}
+                        type="button"
+                        aria-label={`Go to image ${index + 1}`}
+                        aria-current={index === activeImageIndex ? 'true' : undefined}
+                        onClick={() => setActiveImageIndex(index)}
+                        className={`rounded-full transition-all cursor-pointer ${
+                          index === activeImageIndex
+                            ? 'bg-emerald-600 w-2.5 h-2.5 scale-110'
+                            : 'bg-gray-300 hover:bg-gray-400 w-2 h-2'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div
+                className={`aspect-square rounded-2xl flex flex-col items-center justify-center ${color.bg} border ${color.border}`}
+              >
+                <Leaf className={`w-16 h-16 ${color.text} opacity-60`} />
+                <span className={`mt-2 text-sm font-medium ${color.text} opacity-70`}>{plant.common_name}</span>
+              </div>
+            )}
 
             {plant.aka_names.length > 0 && (
               <div className="mt-4">
@@ -172,17 +278,24 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
 
             <div className={`flex items-center gap-4 p-5 rounded-xl border ${color.bg} ${color.border}`}>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color.text} bg-white/60`}>
-                <StatusIcon status={plant.safety_status} />
+                <StatusIcon status={displaySafetyStatus} />
               </div>
               <div>
-                <div className={`text-lg font-bold ${color.text}`}>{getStatusLabel(plant.safety_status)}</div>
+                <div className={`text-lg font-bold ${color.text}`}>{getStatusLabel(displaySafetyStatus)}</div>
                 <div className={`text-sm ${color.text} opacity-80`}>
-                  {plant.safety_status === 'non_toxic'
+                  {displaySafetyStatus === 'non_toxic'
                     ? 'This plant is currently regarded as non-toxic to cats, but individual reactions can vary. Monitor your cat around any new plant.'
-                    : plant.safety_status === 'unknown'
-                      ? 'Toxicity data is not yet available for this plant. Exercise caution.'
+                    : displaySafetyStatus === 'unknown'
+                      ? isEvidenceIncomplete
+                        ? 'Evidence is incomplete for this plant because required source citations are missing. Treat safety as unknown and use caution.'
+                        : 'Toxicity data is not yet available for this plant. Exercise caution.'
                       : 'This plant is reported to pose a risk to cats. Keep it out of reach or choose an alternative.'}
                 </div>
+                {isEvidenceIncomplete ? (
+                  <div className="inline-flex items-center bg-amber-100 mt-2 px-2 py-0.5 border border-amber-200 rounded-full text-amber-800 text-xs">
+                    Evidence incomplete
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -231,9 +344,9 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                   ))}
                 </ul>
               ) : (
-                <p className="mt-3 text-gray-600 text-sm leading-relaxed">
-                  Evidence source: <span className="font-semibold">Unknown</span>. We do not currently have a source
-                  citation for this plant.
+                <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                  We do not currently have a required source citation for this plant, so this record is considered
+                  incomplete.
                 </p>
               )}
             </section>
@@ -251,7 +364,8 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                 <h2 className="mb-3 font-bold text-gray-900 text-lg">Safe Alternatives</h2>
                 <div className="gap-3 grid grid-cols-1 sm:grid-cols-3">
                   {alternatives.map((alt) => {
-                    const altColor = getStatusColor(alt.safety_status);
+                    const altDisplayStatus = getDisplaySafetyStatus(alt);
+                    const altColor = getStatusColor(altDisplayStatus);
                     return (
                       <button
                         key={alt.id}
@@ -265,7 +379,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                             alt={`${alt.common_name} photo`}
                             width={320}
                             height={240}
-                            className="mb-3 rounded-lg w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform"
+                            className="mb-3 rounded-lg w-full object-cover aspect-4/3 group-hover:scale-[1.02] transition-transform"
                             unoptimized
                           />
                         ) : (
@@ -283,7 +397,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                           className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${altColor.bg} ${altColor.text} border ${altColor.border}`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${altColor.dot}`} />
-                          {getStatusLabel(alt.safety_status)}
+                          {getStatusLabel(altDisplayStatus)}
                         </span>
                       </button>
                     );
