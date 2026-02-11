@@ -51,6 +51,7 @@
 - Start production server locally: `npm run start`
 - Lint: `npm run lint`
 - Citation release audit (network required): `npm run audit:citations`
+- MVP top-50 seed SQL (run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
 
 ## Environment Variables
 Current required variables (already used by code):
@@ -107,6 +108,21 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
   - Return primary image in list responses.
   - Load full gallery on detail pages.
 - If safety evidence is missing, mark status/content as `unknown`; avoid strong claims.
+
+### Seed Workflow (Top-50 Popular Catalog)
+- Canonical method doc: `docs/data/top50-popularity-method.md`
+- Canonical ranked seed summary: `docs/data/top50-seed-summary.json`
+- SQL seed file: `scripts/sql/seed-mvp-top50-popular.sql`
+- Seed behavior:
+  - Full reset of `plants`, `citations`, and `alternatives` tables before insert.
+  - Rebuild with 50 popular indoor plants/potted flowers.
+  - Add one ASPCA citation per plant.
+  - Add 3-5 safe alternatives for each toxic plant.
+- Verification order after seed:
+  1. `npm run audit:citations`
+  2. `npm run test:run`
+  3. `npm run lint`
+  4. `npm run build`
 
 ### Safety/Trust Constraints
 - This product is safety-adjacent; avoid unverified medical certainty language.
