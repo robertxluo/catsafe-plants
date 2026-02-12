@@ -6,6 +6,7 @@ import type { Plant } from '@/src/lib/plants';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => '/',
 }));
 
 vi.mock('@/src/lib/load-plants', () => ({
@@ -28,6 +29,9 @@ describe('HomeView', () => {
 
     expect(screen.getByRole('heading', { name: /keep your cat safe\./i })).toBeTruthy();
     expect(screen.getByLabelText(/search plants by name/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /home/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /plant directory/i })).toBeTruthy();
+    expect(screen.getByText(/browse all/i)).toBeTruthy();
 
     await waitFor(() => {
       expect(mockedLoadPlants).toHaveBeenCalledTimes(1);
