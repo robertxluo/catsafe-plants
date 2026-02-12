@@ -43,7 +43,7 @@
 - Non-color arbitrary utilities are allowed for layout/size only (example: `rounded-[2rem]`).
 
 ## 4) Typography
-- Font family: Geist Sans stack from app layout/globals.
+- Font family: DM Sans stack from app layout/globals.
 - Hero heading: `font-semibold text-[2.5rem] sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight`
 - Section/body default: `text-base sm:text-xl` for lead text and `text-sm` for supporting copy.
 - Keep heading hierarchy clear:
