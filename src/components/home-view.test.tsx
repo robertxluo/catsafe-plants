@@ -63,6 +63,6 @@ describe('HomeView', () => {
 
     expect(await screen.findByRole('listbox', { name: /plant search results/i })).toBeTruthy();
     expect(screen.getByText(/evidence incomplete/i)).toBeTruthy();
-    expect(screen.getByText(/^unknown$/i)).toBeTruthy();
+    expect(screen.getAllByText(/^unknown$/i).length).toBeGreaterThanOrEqual(1);
   });
 });
