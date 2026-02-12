@@ -145,6 +145,33 @@ When you stop: present **2 options + your recommendation** and the tradeoffs.
 
 ---
 
+## Visual Development (UI/UX)
+
+### Design Principles
+- Comprehensive design checklist in: `docs/design-principles.md`
+- Brand style guide in (if present): `docs/style-guide.md`
+- When making visual (front-end, UI/UX) changes, always refer to these files for guidance
+
+### Quick Visual Check (required after any UI change)
+IMMEDIATELY after implementing any front-end change:  
+1) Identify what changed - Review the modified components/pages
+2) Navigate to the affected views - Use `mcp__playwright__browser_navigate` to visit each changed view
+3) Verify design compliance - Compare against `docs/design-principles.md` and `docs/style-guide.md`
+4) **Validate feature implementation** - Ensure the change fulfills the user's specific request
+5. **Check acceptance criteria** - Review any provided context files or requirements
+6. **Capture evidence** - Take full page screenshot at desktop viewport (1440px) of each changed view
+7. **Check for errors** - Run `mcp__playwright__browser_console_messages`
+
+This verification ensures changes meet design standards and user requirements.
+
+### Comprehensive Design Review
+Invoke the `@agent-design-review` subagent for thorough design validation when:
+- Completing significant UI/UX features
+- Before finalizing PRs with visual changes
+- Needing comprehensive accessibility and responsiveness testing
+
+---
+
 ## Review & Testing Requirements
 - Prefer adding/updating tests when behavior changes.
 - Run the repo’s standard checks before finishing a task.
