@@ -132,6 +132,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   }, [error, filtered.length, isDataLoading, isOpen, isSearchLoading, query]);
 
   const shouldShowResults = isOpen && query.trim().length > 0;
+  const isSearchPanelExpanded = isDataLoading || Boolean(error) || shouldShowResults;
   const showInteractiveResults =
     shouldShowResults && !isSearchLoading && filtered.length > 0 && !isDataLoading && !error;
 
@@ -377,17 +378,21 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               ) : null}
 
               <div
-                className={`mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-colors duration-200 ${
-                  shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'
-                }`}
+                className={`mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-all duration-300 ease-in-out ${
+                  isOpen
+                    ? isSearchPanelExpanded
+                      ? 'h-80 opacity-100'
+                      : 'h-32 opacity-100'
+                    : 'h-0 opacity-0 border-none'
+                } ${shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'}`}
               >
                 {isDataLoading ? (
-                  <div className="flex justify-center items-center gap-2 px-4 py-8 text-slate-500 text-sm">
+                  <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
                     <LoaderCircle className="w-4 h-4 animate-spin" />
                     Loading plants...
                   </div>
                 ) : error ? (
-                  <div className="px-4 py-5 text-center">
+                  <div className="flex flex-col justify-center items-center px-4 h-full text-center">
                     <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
                       <AlertCircle className="w-4 h-4" />
                       {error}
@@ -402,12 +407,12 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   </div>
                 ) : shouldShowResults ? (
                   isSearchLoading ? (
-                    <div className="flex justify-center items-center gap-2 px-4 py-8 text-slate-500 text-sm">
+                    <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
                       <LoaderCircle className="w-4 h-4 animate-spin" />
                       Searching...
                     </div>
                   ) : filtered.length === 0 ? (
-                    <div className="px-4 py-8 text-slate-600 text-sm text-center">
+                    <div className="flex justify-center items-center px-4 h-full text-slate-600 text-sm text-center">
                       No plants found matching &quot;{query}&quot;
                     </div>
                   ) : (
@@ -415,7 +420,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                       id={listboxId}
                       role="listbox"
                       aria-label="Plant search results"
-                      className="max-h-80 overflow-y-auto"
+                      className="h-full overflow-y-auto"
                     >
                       {filtered.map((plant, index) => {
                         const displaySafetyStatus = getDisplaySafetyStatus(plant);
@@ -431,7 +436,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                           >
                             <button
                               type="button"
-                              className={`w-full cursor-pointer px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset ${
+                              className={`w-full min-h-[5.25rem] cursor-pointer px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset ${
                                 isActiveOption ? 'bg-emerald-50/60' : 'hover:bg-emerald-50/45'
                               }`}
                               onMouseEnter={() => setActiveIndex(index)}
@@ -456,8 +461,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                   </span>
                                 )}
                                 <span className="flex-1 min-w-0">
-                                  <span className="font-medium text-slate-900 truncate">{plant.common_name}</span>
-                                  <span className="text-slate-500 text-sm truncate italic">
+                                  <span className="block font-medium text-slate-900 truncate">{plant.common_name}</span>
+                                  <span className="block text-slate-500 text-sm truncate italic">
                                     {plant.scientific_name}
                                   </span>
                                   {isEvidenceIncomplete ? (
@@ -478,7 +483,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                     </ul>
                   )
                 ) : (
-                  <div className="px-4 py-8 text-slate-600 text-sm leading-relaxed">
+                  <div className="flex flex-col justify-center items-center px-8 h-full text-slate-600 text-sm text-center leading-relaxed">
                     Start typing to search by common name, scientific name, or alias.
                   </div>
                 )}

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeView } from '@/src/components/home-view';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -171,6 +171,43 @@ describe('HomeView', () => {
     await waitFor(() => {
       expect(onSelectPlant).toHaveBeenCalledWith('areca-id');
     });
+  });
+
+  it('keeps search rows truncation-safe for long plant names', async () => {
+    const longNamePlant: Plant = {
+      id: 'long-name-id',
+      common_name: 'Very Long Common Name That Would Normally Wrap Across Multiple Lines In A Small Result Row',
+      scientific_name: 'Extremelylongscientificname plantus demonstratio var. catfriendlyexample',
+      aka_names: ['Long Name Alias'],
+      flower_colors: ['white'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+    };
+
+    mockedLoadPlants.mockResolvedValueOnce([longNamePlant]);
+    render(<HomeView onSelectPlant={vi.fn()} />);
+
+    const input = await screen.findByLabelText(/search plants by name/i);
+    fireEvent.change(input, { target: { value: 'long' } });
+
+    const listbox = await screen.findByRole('listbox', { name: /plant search results/i });
+    expect(listbox.className).toContain('h-full');
+
+    const resultsPanel = listbox.closest('div');
+    expect(resultsPanel?.className).toContain('h-80');
+
+    const commonNameNode = within(listbox).getByText(longNamePlant.common_name);
+    expect(commonNameNode.className).toContain('block');
+    expect(commonNameNode.className).toContain('truncate');
+
+    const scientificNameNode = within(listbox).getByText(longNamePlant.scientific_name);
+    expect(scientificNameNode.className).toContain('block');
+    expect(scientificNameNode.className).toContain('truncate');
   });
 
   it('closes search results when escape is pressed', async () => {
