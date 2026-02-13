@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, Leaf, LoaderCircle, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Leaf, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
@@ -70,6 +70,9 @@ export function PlantsDirectoryView() {
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
 
   const requestedPage = parsePageParam(searchParams.get('page'));
+  const committedQuery = searchParams.get('q')?.trim() ?? '';
+  const normalizedCommittedQuery = committedQuery.toLowerCase();
+  const [searchInput, setSearchInput] = useState(committedQuery);
 
   const fetchPlants = useCallback(async () => {
     try {
@@ -89,8 +92,61 @@ export function PlantsDirectoryView() {
     void fetchPlants();
   }, [fetchPlants]);
 
+  const pushWithUpdatedParams = useCallback(
+    (updateParams: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams.toString());
+      updateParams(params);
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname);
+    },
+    [pathname, router, searchParams]
+  );
+
+  useEffect(() => {
+    setSearchInput(committedQuery);
+  }, [committedQuery]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const nextQuery = searchInput.trim();
+      if (nextQuery === committedQuery) return;
+
+      pushWithUpdatedParams((params) => {
+        if (nextQuery.length > 0) {
+          params.set('q', nextQuery);
+        } else {
+          params.delete('q');
+        }
+        params.delete('page');
+      });
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [committedQuery, pushWithUpdatedParams, searchInput]);
+
+  const clearRefinements = useCallback(() => {
+    setSafetyFilter('all');
+    setFlowerColorFilter('all');
+    setSearchInput('');
+
+    if (committedQuery.length > 0) {
+      pushWithUpdatedParams((params) => {
+        params.delete('q');
+        params.delete('page');
+      });
+    }
+  }, [committedQuery, pushWithUpdatedParams]);
+
   const filteredPlants = useMemo(() => {
     return plants.filter((plant) => {
+      const matchesSearch =
+        normalizedCommittedQuery.length === 0
+          ? true
+          : plant.common_name.toLowerCase().includes(normalizedCommittedQuery) ||
+            plant.scientific_name.toLowerCase().includes(normalizedCommittedQuery) ||
+            plant.aka_names.some((alias) => alias.toLowerCase().includes(normalizedCommittedQuery));
       const displaySafetyStatus = getDisplaySafetyStatus(plant);
       const matchesSafety =
         safetyFilter === 'all'
@@ -99,9 +155,9 @@ export function PlantsDirectoryView() {
             ? displaySafetyStatus === 'non_toxic'
             : displaySafetyStatus === 'mildly_toxic' || displaySafetyStatus === 'highly_toxic';
       const matchesFlowerColor = flowerColorFilter === 'all' ? true : plant.flower_colors.includes(flowerColorFilter);
-      return matchesSafety && matchesFlowerColor;
+      return matchesSearch && matchesSafety && matchesFlowerColor;
     });
-  }, [flowerColorFilter, plants, safetyFilter]);
+  }, [flowerColorFilter, normalizedCommittedQuery, plants, safetyFilter]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredPlants.length / PAGE_SIZE)), [filteredPlants.length]);
   const currentPage = useMemo(() => Math.min(requestedPage, totalPages), [requestedPage, totalPages]);
@@ -110,17 +166,16 @@ export function PlantsDirectoryView() {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredPlants.slice(start, start + PAGE_SIZE);
   }, [currentPage, filteredPlants]);
-  const hasActiveFilters = safetyFilter !== 'all' || flowerColorFilter !== 'all';
+  const hasActiveFilters = safetyFilter !== 'all' || flowerColorFilter !== 'all' || committedQuery.length > 0;
 
   function pushPage(nextPage: number) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (nextPage <= 1) {
-      params.delete('page');
-    } else {
-      params.set('page', String(nextPage));
-    }
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    pushWithUpdatedParams((params) => {
+      if (nextPage <= 1) {
+        params.delete('page');
+      } else {
+        params.set('page', String(nextPage));
+      }
+    });
   }
 
   const resultsLabel = `${filteredPlants.length} result${filteredPlants.length === 1 ? '' : 's'}`;
@@ -150,10 +205,10 @@ export function PlantsDirectoryView() {
             <button
               type="button"
               onClick={() => router.push('/')}
-              className="inline-flex items-center justify-center gap-2 bg-white/95 hover:bg-slate-50 min-h-10 px-3.5 sm:px-4.5 py-2 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm active:scale-[0.97] transition-all duration-200 cursor-pointer"
+              className="inline-flex justify-center items-center gap-2 bg-white/95 hover:bg-slate-50 px-3.5 sm:px-4.5 py-2 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-xs sm:text-sm active:scale-[0.97] transition-all duration-200 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-              <span className="font-semibold truncate tracking-tight">Back to Search</span>
+              <span className="font-semibold truncate tracking-tight">Back</span>
             </button>
 
             <nav aria-label="Primary" className="flex items-center gap-1.5 shrink-0">
@@ -241,6 +296,29 @@ export function PlantsDirectoryView() {
 
           {!isLoading && !error && plants.length > 0 ? (
             <>
+              <section className="bg-white/88 shadow-sm backdrop-blur mb-4 p-4 sm:p-5 border border-white/85 rounded-3xl">
+                <div className="font-semibold text-slate-700 text-xs uppercase tracking-wide">Search plants</div>
+                <p id="directory-search-hint" className="mt-1 text-slate-500 text-xs sm:text-sm">
+                  Filter by common name, scientific name, or known alias.
+                </p>
+                <div className="relative mt-3">
+                  <Search
+                    className="top-1/2 left-3 absolute w-4 h-4 text-slate-400 -translate-y-1/2 pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="directory-search"
+                    type="search"
+                    aria-label="Search plant directory"
+                    aria-describedby="directory-search-hint"
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder="Search by plant name, scientific name, or alias..."
+                    className="bg-white pr-4 pl-10 border border-slate-200 focus:border-emerald-300 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-full min-h-11 text-slate-800 placeholder:text-slate-400 text-sm sm:text-base transition-colors"
+                  />
+                </div>
+              </section>
+
               <section
                 aria-label="Directory filters"
                 className="bg-white/88 shadow-lg backdrop-blur mb-5 p-4 sm:p-6 border border-white/85 rounded-3xl"
@@ -258,10 +336,7 @@ export function PlantsDirectoryView() {
                   {hasActiveFilters ? (
                     <button
                       type="button"
-                      onClick={() => {
-                        setSafetyFilter('all');
-                        setFlowerColorFilter('all');
-                      }}
+                      onClick={clearRefinements}
                       className="inline-flex items-center self-start sm:self-auto gap-1.5 bg-white hover:bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs transition-colors cursor-pointer"
                     >
                       Clear all filters
@@ -362,7 +437,7 @@ export function PlantsDirectoryView() {
                     type="button"
                     onClick={() => pushPage(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 min-h-10 px-3.5 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-3.5 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                     <span>Previous</span>
@@ -371,7 +446,7 @@ export function PlantsDirectoryView() {
                     type="button"
                     onClick={() => pushPage(currentPage + 1)}
                     disabled={currentPage >= totalPages}
-                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 min-h-10 px-3.5 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-3.5 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     <span>Next</span>
                     <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -381,15 +456,10 @@ export function PlantsDirectoryView() {
 
               {filteredPlants.length === 0 ? (
                 <section className="bg-white/90 p-6 border border-slate-200 rounded-2xl text-center">
-                  <p className="text-slate-600 text-sm">
-                    No plants match the selected safety and flower color filters.
-                  </p>
+                  <p className="text-slate-600 text-sm">No plants match your current search and filter selections.</p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setSafetyFilter('all');
-                      setFlowerColorFilter('all');
-                    }}
+                    onClick={clearRefinements}
                     className="bg-emerald-50 hover:bg-emerald-100 mt-4 px-3 py-2 border border-emerald-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-emerald-700 text-sm transition-colors cursor-pointer"
                   >
                     Reset filters
@@ -434,7 +504,7 @@ export function PlantsDirectoryView() {
                               <Leaf className={`w-8 h-8 ${color.text} opacity-70`} />
                             </div>
                           )}
-                          <div className="font-semibold text-slate-900 text-[15px] sm:text-base tracking-tight">
+                          <div className="font-semibold text-[15px] text-slate-900 sm:text-base tracking-tight">
                             {plant.common_name}
                           </div>
                           <div className="mt-0.5 text-slate-600 text-xs sm:text-sm italic">{plant.scientific_name}</div>
@@ -460,7 +530,7 @@ export function PlantsDirectoryView() {
                       type="button"
                       onClick={() => pushPage(currentPage - 1)}
                       disabled={currentPage <= 1}
-                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 min-h-10 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                       <span>Previous</span>
@@ -472,7 +542,7 @@ export function PlantsDirectoryView() {
                       type="button"
                       onClick={() => pushPage(currentPage + 1)}
                       disabled={currentPage >= totalPages}
-                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 min-h-10 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       <span>Next</span>
                       <ArrowRight className="w-4 h-4" aria-hidden="true" />

@@ -45,10 +45,22 @@ function makePlants(count: number): Plant[] {
   }));
 }
 
-function makeSearchParams(page: string | null) {
+function makeSearchParams({ page = null, q = null }: { page?: string | null; q?: string | null } = {}) {
+  const params = new URLSearchParams();
+  if (q) {
+    params.set('q', q);
+  }
+  if (page) {
+    params.set('page', page);
+  }
+
   return {
-    get: (key: string) => (key === 'page' ? page : null),
-    toString: () => (page ? `page=${page}` : ''),
+    get: (key: string) => {
+      if (key === 'page') return page;
+      if (key === 'q') return q;
+      return null;
+    },
+    toString: () => params.toString(),
   };
 }
 
@@ -128,6 +140,68 @@ function makeFilterPlants(): Plant[] {
   ];
 }
 
+function makeSearchablePlants(): Plant[] {
+  return [
+    {
+      id: 'hibiscus',
+      common_name: 'Hibiscus',
+      scientific_name: 'Hibiscus rosa-sinensis',
+      aka_names: ['Rose Mallow'],
+      flower_colors: ['pink'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
+    },
+    {
+      id: 'orchid',
+      common_name: 'Phalaenopsis Orchid',
+      scientific_name: 'Phalaenopsis amabilis',
+      aka_names: ['Moth Orchid'],
+      flower_colors: ['white'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
+    },
+    {
+      id: 'tulip',
+      common_name: 'Tulip',
+      scientific_name: 'Tulipa gesneriana',
+      aka_names: ['Garden Tulip'],
+      flower_colors: ['yellow'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'highly_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [
+        {
+          source_name: 'Test Source',
+          source_url: 'https://example.com/source',
+        },
+      ],
+    },
+  ];
+}
+
 describe('PlantsDirectoryView', () => {
   afterEach(() => {
     cleanup();
@@ -140,7 +214,7 @@ describe('PlantsDirectoryView', () => {
     mockedLoadPlants.mockReset();
 
     mockUsePathname.mockReturnValue('/plants');
-    mockUseSearchParams.mockReturnValue(makeSearchParams(null));
+    mockUseSearchParams.mockReturnValue(makeSearchParams());
   });
 
   it('shows a loading state while plant data is being fetched', async () => {
@@ -168,10 +242,10 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /back to search/i })).toBeTruthy();
+      expect(screen.getByRole('button', { name: /back/i })).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /back to search/i }));
+    fireEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(mockPush).toHaveBeenCalledWith('/');
   });
 
@@ -221,7 +295,7 @@ describe('PlantsDirectoryView', () => {
 
   it('supports boundary paging controls on middle and last pages', async () => {
     mockedLoadPlants.mockResolvedValue(makePlants(45));
-    mockUseSearchParams.mockReturnValue(makeSearchParams('2'));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: '2' }));
 
     const { rerender } = render(<PlantsDirectoryView />);
 
@@ -235,7 +309,7 @@ describe('PlantsDirectoryView', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /next/i })[0]);
     expect(mockPush).toHaveBeenCalledWith('/plants?page=3');
 
-    mockUseSearchParams.mockReturnValue(makeSearchParams('3'));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: '3' }));
     rerender(<PlantsDirectoryView />);
 
     await waitFor(() => {
@@ -248,7 +322,7 @@ describe('PlantsDirectoryView', () => {
 
   it('normalizes invalid page query values to page 1', async () => {
     mockedLoadPlants.mockResolvedValue(makePlants(45));
-    mockUseSearchParams.mockReturnValue(makeSearchParams('invalid'));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: 'invalid' }));
 
     render(<PlantsDirectoryView />);
 
@@ -343,7 +417,7 @@ describe('PlantsDirectoryView', () => {
     fireEvent.click(screen.getByRole('button', { name: /^toxic only$/i }));
     fireEvent.click(screen.getByRole('button', { name: /^blue$/i }));
 
-    expect(screen.getByText(/no plants match the selected safety and flower color filters\./i)).toBeTruthy();
+    expect(screen.getByText(/no plants match your current search and filter selections\./i)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /reset filters/i }));
 
@@ -352,7 +426,7 @@ describe('PlantsDirectoryView', () => {
 
   it('keeps pagination accurate when filters reduce result count', async () => {
     mockedLoadPlants.mockResolvedValue(makePlants(45));
-    mockUseSearchParams.mockReturnValue(makeSearchParams('3'));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: '3' }));
 
     render(<PlantsDirectoryView />);
 
@@ -392,5 +466,118 @@ describe('PlantsDirectoryView', () => {
 
     expect(screen.getByText(/evidence incomplete/i)).toBeTruthy();
     expect(screen.getByText(/^unknown$/i)).toBeTruthy();
+  });
+
+  it('renders the search input above filters', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('searchbox', { name: /search plant directory/i })).toBeTruthy();
+    });
+  });
+
+  it('initializes search input and results from q in URL', async () => {
+    mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus' }));
+
+    render(<PlantsDirectoryView />);
+
+    const input = await screen.findByRole('searchbox', { name: /search plant directory/i });
+    expect((input as HTMLInputElement).value).toBe('hibiscus');
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /open details for hibiscus/i })).toBeTruthy();
+  });
+
+  it('matches search case-insensitively across common, scientific, and alias names', async () => {
+    mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'mOtH' }));
+
+    const { rerender } = render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    });
+    expect(screen.getByRole('button', { name: /open details for phalaenopsis orchid/i })).toBeTruthy();
+
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'TULIPA' }));
+    rerender(<PlantsDirectoryView />);
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    });
+    expect(screen.getByRole('button', { name: /open details for tulip/i })).toBeTruthy();
+
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus' }));
+    rerender(<PlantsDirectoryView />);
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    });
+    expect(screen.getByRole('button', { name: /open details for hibiscus/i })).toBeTruthy();
+  });
+
+  it('applies search with safety and color filters using AND logic', async () => {
+    mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'orchid' }));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(1);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
+    expect(screen.getByText(/no plants match your current search and filter selections\./i)).toBeTruthy();
+
+    fireEvent.click(screen.getAllByRole('button', { name: /^all$/i })[1]);
+    fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
+    expect(screen.getByRole('button', { name: /open details for phalaenopsis orchid/i })).toBeTruthy();
+  });
+
+  it('updates q in URL with debounce and removes page when search changes', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(45));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: '2' }));
+
+    render(<PlantsDirectoryView />);
+
+    const input = await screen.findByRole('searchbox', { name: /search plant directory/i });
+    fireEvent.change(input, { target: { value: 'hibiscus' } });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/plants?q=hibiscus');
+    });
+  });
+
+  it('clears q from URL after debounce when search input is emptied', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(45));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus', page: '2' }));
+
+    render(<PlantsDirectoryView />);
+
+    const input = await screen.findByRole('searchbox', { name: /search plant directory/i });
+    fireEvent.change(input, { target: { value: '' } });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/plants');
+    });
+  });
+
+  it('syncs search input with browser navigation changes to q', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(20));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus' }));
+
+    const { rerender } = render(<PlantsDirectoryView />);
+
+    const input = await screen.findByRole('searchbox', { name: /search plant directory/i });
+    expect((input as HTMLInputElement).value).toBe('hibiscus');
+
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'orchid' }));
+    rerender(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect((screen.getByRole('searchbox', { name: /search plant directory/i }) as HTMLInputElement).value).toBe(
+        'orchid'
+      );
+    });
   });
 });
