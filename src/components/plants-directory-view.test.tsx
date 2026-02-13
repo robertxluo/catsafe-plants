@@ -205,7 +205,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 3 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 3 pages/i).length).toBeGreaterThan(0);
     });
 
     const previousButtons = screen.getAllByRole('button', { name: /previous/i });
@@ -226,7 +226,7 @@ describe('PlantsDirectoryView', () => {
     const { rerender } = render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 2 of 3 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 2 of 3 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getAllByRole('button', { name: /previous/i })[0]);
@@ -239,7 +239,7 @@ describe('PlantsDirectoryView', () => {
     rerender(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 3 of 3 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 3 of 3 pages/i).length).toBeGreaterThan(0);
     });
 
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(5);
@@ -253,7 +253,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 3 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 3 pages/i).length).toBeGreaterThan(0);
     });
   });
 
@@ -281,7 +281,7 @@ describe('PlantsDirectoryView', () => {
     fireEvent.click(screen.getByRole('button', { name: /retry/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     });
 
     expect(mockedLoadPlants).toHaveBeenCalledTimes(2);
@@ -293,7 +293,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -307,7 +307,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
@@ -321,7 +321,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -337,7 +337,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^toxic only$/i }));
@@ -357,12 +357,12 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/viewing 3 of 3 pages/i)).toBeTruthy();
+      expect(screen.getAllByText(/viewing 3 of 3 pages/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
 
-    expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
+    expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
   });
 
