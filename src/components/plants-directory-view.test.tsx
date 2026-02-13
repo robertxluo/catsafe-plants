@@ -175,20 +175,47 @@ describe('PlantsDirectoryView', () => {
     expect(mockPush).toHaveBeenCalledWith('/');
   });
 
+  it('includes homepage nav pills and routes home from the Home pill', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /^home$/i })).toBeTruthy();
+      expect(screen.getByRole('button', { name: /plant directory/i })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^home$/i }));
+    expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  it('marks the Plant Directory nav pill as the active page', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    const plantDirectoryButton = await screen.findByRole('button', { name: /plant directory/i });
+    expect(plantDirectoryButton.getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('button', { name: /^home$/i }).getAttribute('aria-current')).toBeNull();
+  });
+
   it('renders 20 plants per page with pagination controls and page indicator', async () => {
     mockedLoadPlants.mockResolvedValue(makePlants(45));
 
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 3/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 3 pages/i)).toBeTruthy();
     });
 
-    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(20);
-    expect(screen.getByRole('button', { name: /previous/i }).hasAttribute('disabled')).toBe(true);
-    expect(screen.getByRole('button', { name: /next/i }).hasAttribute('disabled')).toBe(false);
+    const previousButtons = screen.getAllByRole('button', { name: /previous/i });
+    const nextButtons = screen.getAllByRole('button', { name: /next/i });
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(20);
+    expect(previousButtons[0].hasAttribute('disabled')).toBe(true);
+    expect(nextButtons[0].hasAttribute('disabled')).toBe(false);
+
+    fireEvent.click(nextButtons[0]);
     expect(mockPush).toHaveBeenCalledWith('/plants?page=2');
   });
 
@@ -199,24 +226,24 @@ describe('PlantsDirectoryView', () => {
     const { rerender } = render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 2 of 3/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 2 of 3 pages/i)).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /previous/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /previous/i })[0]);
     expect(mockPush).toHaveBeenCalledWith('/plants');
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /next/i })[0]);
     expect(mockPush).toHaveBeenCalledWith('/plants?page=3');
 
     mockUseSearchParams.mockReturnValue(makeSearchParams('3'));
     rerender(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 3 of 3/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 3 of 3 pages/i)).toBeTruthy();
     });
 
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(5);
-    expect(screen.getByRole('button', { name: /next/i }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getAllByRole('button', { name: /next/i })[0].hasAttribute('disabled')).toBe(true);
   });
 
   it('normalizes invalid page query values to page 1', async () => {
@@ -226,7 +253,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 3/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 3 pages/i)).toBeTruthy();
     });
   });
 
@@ -254,7 +281,7 @@ describe('PlantsDirectoryView', () => {
     fireEvent.click(screen.getByRole('button', { name: /retry/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     });
 
     expect(mockedLoadPlants).toHaveBeenCalledTimes(2);
@@ -266,7 +293,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -280,7 +307,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
@@ -294,7 +321,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -310,7 +337,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^toxic only$/i }));
@@ -330,12 +357,12 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getByText(/page 3 of 3/i)).toBeTruthy();
+      expect(screen.getByText(/viewing 3 of 3 pages/i)).toBeTruthy();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
 
-    expect(screen.getByText(/page 1 of 1/i)).toBeTruthy();
+    expect(screen.getByText(/viewing 1 of 1 pages/i)).toBeTruthy();
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
   });
 

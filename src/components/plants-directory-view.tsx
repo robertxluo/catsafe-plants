@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, Leaf, LoaderCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Leaf, LoaderCircle, SlidersHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
@@ -11,9 +11,11 @@ import { loadPlants } from '@/src/lib/load-plants';
 const PAGE_SIZE = 20;
 type SafetyFilter = 'all' | 'safe_only' | 'toxic_only';
 const FLOWER_COLOR_OPTIONS: FlowerColor[] = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'];
+const navButtonClass =
+  'cursor-pointer rounded-full px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
 const PILL_BASE_CLASS =
-  'inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-sm font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200';
-const PILL_INACTIVE_CLASS = 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50';
+  'inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
+const PILL_INACTIVE_CLASS = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50';
 const FLOWER_COLOR_STYLES: Record<FlowerColor, { active: string; dot: string }> = {
   white: {
     active: 'border-slate-300 bg-slate-50 text-slate-900 shadow-sm',
@@ -96,8 +98,7 @@ export function PlantsDirectoryView() {
           : safetyFilter === 'safe_only'
             ? displaySafetyStatus === 'non_toxic'
             : displaySafetyStatus === 'mildly_toxic' || displaySafetyStatus === 'highly_toxic';
-      const matchesFlowerColor =
-        flowerColorFilter === 'all' ? true : plant.flower_colors.includes(flowerColorFilter);
+      const matchesFlowerColor = flowerColorFilter === 'all' ? true : plant.flower_colors.includes(flowerColorFilter);
       return matchesSafety && matchesFlowerColor;
     });
   }, [flowerColorFilter, plants, safetyFilter]);
@@ -122,263 +123,359 @@ export function PlantsDirectoryView() {
     router.push(query ? `${pathname}?${query}` : pathname);
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center bg-yellow-50 min-h-screen">
-        <div className="flex items-center gap-2 text-gray-600 text-sm">
-          <LoaderCircle className="w-4 h-4 animate-spin" />
-          Loading plants...
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center bg-yellow-50 px-4 min-h-screen">
-        <div className="bg-white shadow-sm p-6 border border-rose-200 rounded-xl w-full max-w-md text-center">
-          <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-          <button
-            type="button"
-            onClick={() => void fetchPlants()}
-            className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-4 px-3 py-2 border border-rose-200 rounded-lg text-rose-700 text-sm transition-colors cursor-pointer"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (plants.length === 0) {
-    return (
-      <div className="flex justify-center items-center bg-yellow-50 px-4 min-h-screen">
-        <div className="bg-white shadow-sm p-6 border border-gray-200 rounded-xl w-full max-w-md text-center">
-          <p className="text-gray-600 text-sm">No plants available in the directory yet.</p>
-        </div>
-      </div>
-    );
-  }
+  const resultsLabel = `${filteredPlants.length} result${filteredPlants.length === 1 ? '' : 's'}`;
 
   return (
-    <main className="relative bg-yellow-50 min-h-screen overflow-hidden">
+    <div className="relative bg-slate-100 min-h-screen overflow-hidden text-slate-900">
       <div
-        className="top-0 right-0 absolute bg-[radial-gradient(circle_at_center,_rgba(253,224,71,0.25),_transparent_65%)] w-[38rem] h-[38rem] -translate-y-1/3 translate-x-1/3 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-b from-slate-100 via-slate-100 to-emerald-50/40"
         aria-hidden="true"
       />
       <div
-        className="bottom-0 left-0 absolute bg-[radial-gradient(circle_at_center,_rgba(110,231,183,0.18),_transparent_65%)] w-[34rem] h-[34rem] translate-y-1/3 -translate-x-1/3 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 via-transparent to-slate-100/30"
         aria-hidden="true"
       />
-      <div className="relative mx-auto px-4 py-8 sm:py-10 max-w-6xl">
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="inline-flex items-center gap-2 bg-white/95 hover:bg-white mb-5 px-4 py-2 border border-yellow-200 rounded-full font-medium text-gray-700 text-sm transition-colors cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Search
-        </button>
+      <div
+        className="-top-24 -right-16 absolute bg-emerald-100/60 blur-3xl rounded-full w-72 h-72 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="-bottom-24 -left-16 absolute bg-slate-200/60 blur-3xl rounded-full w-72 h-72 pointer-events-none"
+        aria-hidden="true"
+      />
 
-        <header className="flex sm:flex-row flex-col sm:justify-between sm:items-end gap-3 mb-5">
-          <div>
-            <p className="font-semibold text-emerald-700 text-xs uppercase tracking-[0.18em]">Curated For Cat Safety</p>
-            <h1 className="mt-1 font-bold text-gray-900 text-3xl sm:text-4xl leading-tight">Plant Directory</h1>
-            <p className="mt-1.5 text-gray-600 text-sm sm:text-base">Browse all plants and check cat safety status.</p>
-          </div>
-          <div className="inline-flex items-center bg-white/95 shadow-sm px-3 py-1.5 border border-yellow-200 rounded-full font-medium text-gray-700 text-xs sm:text-sm">
-            {filteredPlants.length} result{filteredPlants.length === 1 ? '' : 's'}
+      <div className="z-10 relative flex flex-col min-h-screen">
+        <header className="mx-auto px-4 sm:px-6 pt-5 sm:pt-7 w-full max-w-6xl">
+          <div className="flex justify-between items-center gap-2 sm:gap-3 bg-white/86 shadow-sm backdrop-blur px-3 sm:px-4 py-2 border border-white/70 rounded-full">
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="inline-flex items-center gap-2 bg-white/95 hover:bg-slate-50 px-3 sm:px-4 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm active:scale-[0.97] transition-all duration-200 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+              <span className="font-semibold truncate tracking-tight">Back to Search</span>
+            </button>
+
+            <nav aria-label="Primary" className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => router.push('/')}
+                aria-current={pathname === '/' ? 'page' : undefined}
+                className={`${navButtonClass} ${
+                  pathname === '/'
+                    ? 'bg-green-100 text-green-900 shadow-sm'
+                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
+                }`}
+              >
+                Home
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/plants')}
+                aria-label="Plant Directory"
+                aria-current={pathname.startsWith('/plants') ? 'page' : undefined}
+                className={`${navButtonClass} ${
+                  pathname.startsWith('/plants')
+                    ? 'bg-green-100 text-green-900 shadow-sm'
+                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
+                }`}
+              >
+                <span className="sm:hidden">Directory</span>
+                <span className="hidden sm:inline">Plant Directory</span>
+              </button>
+            </nav>
           </div>
         </header>
 
-        <section
-          aria-label="Directory filters"
-          className="gap-3 grid sm:grid-cols-2 bg-gradient-to-br from-white via-yellow-50/70 to-emerald-50/40 shadow-sm mb-4 p-3 sm:p-4 border border-yellow-200/80 rounded-2xl"
-        >
-          <fieldset className="bg-white/75 p-2.5 border border-white rounded-xl">
-            <legend className="mb-1.5 font-semibold text-gray-700 text-xs uppercase tracking-wide">Safety filter</legend>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Safety filter options">
-              <button
-                type="button"
-                aria-pressed={safetyFilter === 'all'}
-                onClick={() => setSafetyFilter('all')}
-                className={`${PILL_BASE_CLASS} ${
-                  safetyFilter === 'all'
-                    ? 'border-gray-400 bg-gray-100 text-gray-900 shadow-sm'
-                    : PILL_INACTIVE_CLASS
-                }`}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                aria-pressed={safetyFilter === 'safe_only'}
-                onClick={() => setSafetyFilter('safe_only')}
-                className={`${PILL_BASE_CLASS} ${
-                  safetyFilter === 'safe_only'
-                    ? 'border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm'
-                    : PILL_INACTIVE_CLASS
-                }`}
-              >
-                Safe only
-              </button>
-              <button
-                type="button"
-                aria-pressed={safetyFilter === 'toxic_only'}
-                onClick={() => setSafetyFilter('toxic_only')}
-                className={`${PILL_BASE_CLASS} ${
-                  safetyFilter === 'toxic_only'
-                    ? 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm'
-                    : PILL_INACTIVE_CLASS
-                }`}
-              >
-                Toxic only
-              </button>
-            </div>
-          </fieldset>
-
-          <fieldset className="bg-white/75 p-2.5 border border-white rounded-xl">
-            <legend className="mb-1.5 font-semibold text-gray-700 text-xs uppercase tracking-wide">Flower color filter</legend>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Flower color filter options">
-              <button
-                type="button"
-                aria-pressed={flowerColorFilter === 'all'}
-                onClick={() => setFlowerColorFilter('all')}
-                className={`${PILL_BASE_CLASS} ${
-                  flowerColorFilter === 'all'
-                    ? 'border-gray-400 bg-gray-100 text-gray-900 shadow-sm'
-                    : PILL_INACTIVE_CLASS
-                }`}
-              >
-                All
-              </button>
-              {FLOWER_COLOR_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={flowerColorFilter === option}
-                  onClick={() => setFlowerColorFilter(option)}
-                  className={`${PILL_BASE_CLASS} capitalize ${
-                    flowerColorFilter === option ? FLOWER_COLOR_STYLES[option].active : PILL_INACTIVE_CLASS
-                  }`}
-                >
-                  <span className={`h-2.5 w-2.5 rounded-full ${FLOWER_COLOR_STYLES[option].dot}`} aria-hidden="true" />
-                  {option}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </section>
-
-        <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-2 mb-5">
-          <p className="text-gray-500 text-xs sm:text-sm">Viewing {currentPage} of {totalPages} pages</p>
-          {hasActiveFilters ? (
-            <button
-              type="button"
-              onClick={() => {
-                setSafetyFilter('all');
-                setFlowerColorFilter('all');
-              }}
-              className="self-start sm:self-auto inline-flex items-center bg-white hover:bg-gray-50 px-2.5 py-1.5 border border-gray-200 rounded-full text-gray-700 text-xs sm:text-sm transition-colors cursor-pointer"
-            >
-              Clear all filters
-            </button>
-          ) : null}
-        </div>
-
-        {filteredPlants.length === 0 ? (
-          <section className="bg-white p-6 border border-gray-200 rounded-xl text-center">
-            <p className="text-gray-600 text-sm">No plants match the selected safety and flower color filters.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSafetyFilter('all');
-                setFlowerColorFilter('all');
-              }}
-              className="bg-emerald-50 hover:bg-emerald-100 mt-4 px-3 py-2 border border-emerald-200 rounded-lg text-emerald-700 text-sm transition-colors cursor-pointer"
-            >
-              Reset filters
-            </button>
-          </section>
-        ) : (
-          <>
-            <section aria-label="Plant directory results" className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {visiblePlants.map((plant) => {
-                const displaySafetyStatus = getDisplaySafetyStatus(plant);
-                const color = getStatusColor(displaySafetyStatus);
-                const isEvidenceIncomplete = hasIncompleteEvidence(plant);
-                return (
-                  <button
-                    key={plant.id}
-                    type="button"
-                    onClick={() => router.push(`/plants/${plant.id}`)}
-                    aria-label={`Open details for ${plant.common_name}`}
-                    className="group bg-white/95 shadow-sm hover:shadow-lg p-4 border border-yellow-100 hover:border-emerald-200 rounded-2xl text-left transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
-                  >
-                    {plant.primary_image_url ? (
-                      <Image
-                        src={plant.primary_image_url}
-                        alt={`${plant.common_name} photo`}
-                        width={480}
-                        height={360}
-                        className="mb-3 rounded-xl w-full object-cover aspect-[4/3] group-hover:scale-[1.01] transition-transform"
-                        unoptimized
-                      />
-                    ) : (
-                      <div
-                        className={`w-full aspect-[4/3] rounded-xl flex items-center justify-center mb-3 ${color.bg}`}
-                        data-testid={`directory-placeholder-${plant.id}`}
-                        aria-hidden="true"
-                      >
-                        <Leaf className={`w-8 h-8 ${color.text} opacity-70`} />
-                      </div>
-                    )}
-                    <div className="font-semibold text-gray-900 text-base tracking-tight">{plant.common_name}</div>
-                    <div className="text-gray-500 text-sm italic">{plant.scientific_name}</div>
-                    {isEvidenceIncomplete ? (
-                      <div className="mt-2 text-amber-700 text-xs">Evidence incomplete</div>
-                    ) : null}
-                    <span
-                      className={`mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${color.bg} ${color.text} ${color.border}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                      {getStatusLabel(displaySafetyStatus)}
-                    </span>
-                  </button>
-                );
-              })}
-            </section>
-
-            <nav
-              className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3 mt-8 bg-white/90 p-3 border border-yellow-100 rounded-2xl"
-              aria-label="Pagination"
-            >
-              <button
-                type="button"
-                onClick={() => pushPage(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="bg-white hover:bg-gray-50 disabled:opacity-50 px-4 py-2 border border-gray-300 rounded-full font-medium text-gray-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <p className="font-medium text-gray-600 text-sm text-center">
-                Page {currentPage} of {totalPages}
+        <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-9 pb-8 sm:pb-10 w-full max-w-6xl">
+          <header className="flex sm:flex-row flex-col sm:justify-between sm:items-end gap-3 mb-5">
+            <div className="max-w-2xl">
+              <p className="font-semibold text-emerald-700 text-xs uppercase tracking-[0.18em]">
+                Curated For Cat Safety
               </p>
-              <button
-                type="button"
-                onClick={() => pushPage(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="bg-white hover:bg-gray-50 disabled:opacity-50 px-4 py-2 border border-gray-300 rounded-full font-medium text-gray-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+              <h1 className="mt-1 font-semibold text-slate-900 text-3xl sm:text-4xl leading-tight tracking-tight">
+                Plant Directory
+              </h1>
+              <p className="mt-1.5 text-slate-700 text-sm sm:text-base">
+                Browse all plants and check cat safety status.
+              </p>
+            </div>
+            <div className="inline-flex items-center bg-white/90 shadow-sm px-3 py-1.5 border border-white rounded-full font-medium text-slate-700 text-xs sm:text-sm">
+              {resultsLabel}
+            </div>
+          </header>
+
+          {isLoading ? (
+            <section className="flex flex-1 justify-center items-start pt-10">
+              <div className="inline-flex items-center gap-2 bg-white/95 shadow-sm backdrop-blur px-4 py-3 border border-white rounded-2xl text-slate-600 text-sm">
+                <LoaderCircle className="w-4 h-4 animate-spin" />
+                Loading plants...
+              </div>
+            </section>
+          ) : error ? (
+            <section className="flex flex-1 justify-center items-start pt-10">
+              <div
+                role="alert"
+                className="bg-white/95 shadow-xl backdrop-blur p-6 border border-rose-200 rounded-3xl w-full max-w-md text-center"
               >
-                Next
-              </button>
-            </nav>
-          </>
-        )}
+                <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void fetchPlants()}
+                  className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-4 px-3 py-2 border border-rose-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 text-rose-700 text-sm transition-colors cursor-pointer"
+                >
+                  Retry
+                </button>
+              </div>
+            </section>
+          ) : plants.length === 0 ? (
+            <section className="flex flex-1 justify-center items-start pt-10">
+              <div className="bg-white/95 shadow-sm backdrop-blur p-6 border border-slate-200 rounded-3xl w-full max-w-md text-center">
+                <p className="text-slate-600 text-sm">No plants available in the directory yet.</p>
+              </div>
+            </section>
+          ) : null}
+
+          {!isLoading && !error && plants.length > 0 ? (
+            <>
+              <section
+                aria-label="Directory filters"
+                className="bg-white/86 shadow-lg backdrop-blur mb-4 p-4 sm:p-5 border border-white/85 rounded-3xl"
+              >
+                <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-2 mb-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 font-medium text-slate-700 text-xs uppercase tracking-wide">
+                    <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+                    Filter plants
+                  </div>
+                  {hasActiveFilters ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSafetyFilter('all');
+                        setFlowerColorFilter('all');
+                      }}
+                      className="inline-flex items-center self-start sm:self-auto gap-1.5 bg-white hover:bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs transition-colors cursor-pointer"
+                    >
+                      Clear all filters
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="gap-3 grid sm:grid-cols-2">
+                  <fieldset className="bg-emerald-50/40 p-3 border border-emerald-100 rounded-2xl">
+                    <legend className="mb-2 font-semibold text-slate-700 text-xs uppercase tracking-wide">
+                      Safety filter
+                    </legend>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="Safety filter options">
+                      <button
+                        type="button"
+                        aria-pressed={safetyFilter === 'all'}
+                        onClick={() => setSafetyFilter('all')}
+                        className={`${PILL_BASE_CLASS} ${
+                          safetyFilter === 'all'
+                            ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
+                            : PILL_INACTIVE_CLASS
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={safetyFilter === 'safe_only'}
+                        onClick={() => setSafetyFilter('safe_only')}
+                        className={`${PILL_BASE_CLASS} ${
+                          safetyFilter === 'safe_only'
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm'
+                            : PILL_INACTIVE_CLASS
+                        }`}
+                      >
+                        Safe only
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={safetyFilter === 'toxic_only'}
+                        onClick={() => setSafetyFilter('toxic_only')}
+                        className={`${PILL_BASE_CLASS} ${
+                          safetyFilter === 'toxic_only'
+                            ? 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm'
+                            : PILL_INACTIVE_CLASS
+                        }`}
+                      >
+                        Toxic only
+                      </button>
+                    </div>
+                  </fieldset>
+
+                  <fieldset className="bg-sky-50/40 p-3 border border-sky-100 rounded-2xl">
+                    <legend className="mb-2 font-semibold text-slate-700 text-xs uppercase tracking-wide">
+                      Flower color filter
+                    </legend>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="Flower color filter options">
+                      <button
+                        type="button"
+                        aria-pressed={flowerColorFilter === 'all'}
+                        onClick={() => setFlowerColorFilter('all')}
+                        className={`${PILL_BASE_CLASS} ${
+                          flowerColorFilter === 'all'
+                            ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
+                            : PILL_INACTIVE_CLASS
+                        }`}
+                      >
+                        All
+                      </button>
+                      {FLOWER_COLOR_OPTIONS.map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          aria-pressed={flowerColorFilter === option}
+                          onClick={() => setFlowerColorFilter(option)}
+                          className={`${PILL_BASE_CLASS} capitalize ${
+                            flowerColorFilter === option ? FLOWER_COLOR_STYLES[option].active : PILL_INACTIVE_CLASS
+                          }`}
+                        >
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full ${FLOWER_COLOR_STYLES[option].dot}`}
+                            aria-hidden="true"
+                          />
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+              </section>
+
+              <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-2 mb-5">
+                <p className="text-slate-500 text-xs sm:text-sm">
+                  Viewing {currentPage} of {totalPages} pages
+                </p>
+                <nav className="flex items-center self-start sm:self-auto gap-2" aria-label="Pagination">
+                  <button
+                    type="button"
+                    onClick={() => pushPage(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-3 py-1.5 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                    <span>Previous</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pushPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-3 py-1.5 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <span>Next</span>
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+
+              {filteredPlants.length === 0 ? (
+                <section className="bg-white/90 p-6 border border-slate-200 rounded-2xl text-center">
+                  <p className="text-slate-600 text-sm">
+                    No plants match the selected safety and flower color filters.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSafetyFilter('all');
+                      setFlowerColorFilter('all');
+                    }}
+                    className="bg-emerald-50 hover:bg-emerald-100 mt-4 px-3 py-2 border border-emerald-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-emerald-700 text-sm transition-colors cursor-pointer"
+                  >
+                    Reset filters
+                  </button>
+                </section>
+              ) : (
+                <>
+                  <section
+                    aria-label="Plant directory results"
+                    className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                  >
+                    {visiblePlants.map((plant) => {
+                      const displaySafetyStatus = getDisplaySafetyStatus(plant);
+                      const color = getStatusColor(displaySafetyStatus);
+                      const isEvidenceIncomplete = hasIncompleteEvidence(plant);
+                      return (
+                        <button
+                          key={plant.id}
+                          type="button"
+                          onClick={() => router.push(`/plants/${plant.id}`)}
+                          aria-label={`Open details for ${plant.common_name}`}
+                          className="group bg-white/85 hover:bg-white shadow-sm hover:shadow-md backdrop-blur p-3 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                        >
+                          {plant.primary_image_url ? (
+                            <Image
+                              src={plant.primary_image_url}
+                              alt={`${plant.common_name} photo`}
+                              width={480}
+                              height={360}
+                              className="mb-3 rounded-xl w-full object-cover aspect-[4/3] group-hover:scale-[1.01] transition-transform duration-200"
+                              unoptimized
+                            />
+                          ) : (
+                            <div
+                              className={`w-full aspect-[4/3] rounded-xl flex items-center justify-center mb-3 ${color.bg}`}
+                              data-testid={`directory-placeholder-${plant.id}`}
+                              aria-hidden="true"
+                            >
+                              <Leaf className={`w-8 h-8 ${color.text} opacity-70`} />
+                            </div>
+                          )}
+                          <div className="font-semibold text-slate-900 text-base tracking-tight">
+                            {plant.common_name}
+                          </div>
+                          <div className="text-slate-500 text-sm italic">{plant.scientific_name}</div>
+                          {isEvidenceIncomplete ? (
+                            <div className="mt-2 text-amber-700 text-xs">Evidence incomplete</div>
+                          ) : null}
+                          <span
+                            className={`mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${color.bg} ${color.text} ${color.border}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
+                            {getStatusLabel(displaySafetyStatus)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </section>
+
+                  <nav
+                    className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3 bg-white/90 backdrop-blur mt-8 p-3 border border-slate-200 rounded-2xl"
+                    aria-label="Pagination footer"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => pushPage(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                      <span>Previous</span>
+                    </button>
+                    <p className="font-medium text-slate-600 text-sm text-center">
+                      Page {currentPage} of {totalPages}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => pushPage(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                      className="inline-flex justify-center items-center gap-1.5 bg-white hover:bg-slate-50 disabled:opacity-50 px-4 py-2 border border-slate-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 text-sm transition-colors cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </nav>
+                </>
+              )}
+            </>
+          ) : null}
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

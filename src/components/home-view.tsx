@@ -244,7 +244,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                 <ShieldCheck className="w-3 h-3" />
                 Source-backed plant safety
               </span>
-              <h1 className="mt-4 font-semibold text-[2.5rem] sm:text-6xl lg:text-7xl text-balance leading-[1.05] tracking-tight">
+              <h1 className="mt-4 font-semibold text-[2.5rem] sm:text-6xl lg:text-6xl text-balance leading-[1.05] tracking-tight">
                 Keep your cat safe.
               </h1>
               <p className="mt-3.5 max-w-2xl text-slate-700 text-base sm:text-xl text-pretty leading-relaxed">
@@ -566,7 +566,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
             </p>
             <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 sm:text-[13px] text-xs">
               <Cat className="w-3.5 h-3.5" />
-              Built for cat owners who want safer plant choices.
+              For cat owners, by a cat lover.
             </p>
           </footer>
         </main>
