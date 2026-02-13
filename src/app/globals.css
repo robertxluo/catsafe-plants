@@ -20,6 +20,12 @@
   animation: fadeUp 0.5s ease-out both;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+}
+
 body {
   font-family: var(--font-dm-sans), 'Avenir Next', 'Segoe UI', sans-serif;
 }
