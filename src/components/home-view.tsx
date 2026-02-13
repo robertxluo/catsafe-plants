@@ -24,6 +24,7 @@ interface HomeViewProps {
 
 const navButtonClass =
   'cursor-pointer rounded-full px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
+const POPULAR_PLANT_ORDER = ['Parlor Palm', 'Spider Plant', 'Boston Fern', 'Prayer Plant'] as const;
 
 export function HomeView({ onSelectPlant }: HomeViewProps) {
   const router = useRouter();
@@ -71,6 +72,20 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
     }
 
     return suggestions;
+  }, [plants]);
+
+  const popularPlants = useMemo(() => {
+    const selected = POPULAR_PLANT_ORDER.map((name) =>
+      plants.find((plant) => plant.common_name.toLowerCase() === name.toLowerCase())
+    ).filter((plant): plant is Plant => Boolean(plant));
+
+    if (selected.length === POPULAR_PLANT_ORDER.length) {
+      return selected;
+    }
+
+    const selectedIds = new Set(selected.map((plant) => plant.id));
+    const fallbacks = plants.filter((plant) => !selectedIds.has(plant.id)).slice(0, POPULAR_PLANT_ORDER.length - selected.length);
+    return [...selected, ...fallbacks];
   }, [plants]);
 
   const fetchPlants = useCallback(async () => {
@@ -512,7 +527,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               </div>
 
               <div className="gap-3 sm:gap-4 grid grid-cols-2 lg:grid-cols-4">
-                {plants.slice(0, 4).map((plant) => {
+                {popularPlants.map((plant) => {
                   const displaySafetyStatus = getDisplaySafetyStatus(plant);
                   const color = getStatusColor(displaySafetyStatus);
                   return (

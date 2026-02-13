@@ -239,4 +239,99 @@ describe('HomeView', () => {
       expect(screen.queryByRole('listbox', { name: /plant search results/i })).toBeNull();
     });
   });
+
+  it('renders the popular plants cards as Parlor Palm, Spider Plant, Boston Fern, and Prayer Plant', async () => {
+    const plants: Plant[] = [
+      {
+        id: 'hibiscus',
+        common_name: 'Hibiscus',
+        scientific_name: 'Hibiscus syriacus',
+        aka_names: [],
+        flower_colors: ['pink'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+      },
+      {
+        id: 'prayer',
+        common_name: 'Prayer Plant',
+        scientific_name: 'Maranta leuconeura',
+        aka_names: [],
+        flower_colors: ['pink'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+      },
+      {
+        id: 'boston',
+        common_name: 'Boston Fern',
+        scientific_name: 'Nephrolepis exaltata',
+        aka_names: [],
+        flower_colors: ['green'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+      },
+      {
+        id: 'spider',
+        common_name: 'Spider Plant',
+        scientific_name: 'Chlorophytum comosum',
+        aka_names: [],
+        flower_colors: ['white'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+      },
+      {
+        id: 'parlor',
+        common_name: 'Parlor Palm',
+        scientific_name: 'Chamaedorea elegans',
+        aka_names: [],
+        flower_colors: ['green'],
+        primary_image_url: null,
+        photo_urls: [],
+        safety_status: 'non_toxic',
+        symptoms: null,
+        toxic_parts: null,
+        alternatives: [],
+        citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+      },
+    ];
+
+    mockedLoadPlants.mockResolvedValueOnce(plants);
+
+    render(<HomeView onSelectPlant={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /popular plants/i })).toBeTruthy();
+    });
+
+    const popularSection = screen.getByRole('heading', { name: /popular plants/i }).closest('section');
+    expect(popularSection).toBeTruthy();
+    const cards = within(popularSection as HTMLElement)
+      .getAllByRole('button')
+      .filter((button) => /Parlor Palm|Spider Plant|Boston Fern|Prayer Plant/.test(button.textContent ?? ''));
+    const cardNames = cards.map((card) => card.textContent ?? '');
+
+    expect(cardNames[0]).toContain('Parlor Palm');
+    expect(cardNames[1]).toContain('Spider Plant');
+    expect(cardNames[2]).toContain('Boston Fern');
+    expect(cardNames[3]).toContain('Prayer Plant');
+  });
 });
