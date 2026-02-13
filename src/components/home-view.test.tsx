@@ -39,6 +39,24 @@ describe('HomeView', () => {
     });
   });
 
+  it('uses desktop cat-face background focal lock classes', () => {
+    const { container } = render(<HomeView onSelectPlant={vi.fn()} />);
+    const heroBackground = container.querySelector('img.object-cover');
+
+    expect(heroBackground).toBeTruthy();
+    expect(heroBackground?.className).toContain('lg:object-[82%_4%]');
+    expect(heroBackground?.className).toContain('xl:object-[80%_2%]');
+    expect(heroBackground?.className).toContain('2xl:object-[78%_2%]');
+    expect(heroBackground?.className).toContain('origin-top');
+    expect(heroBackground?.className).toContain('lg:-translate-y-[22%]');
+    expect(heroBackground?.className).toContain('xl:-translate-y-[20%]');
+    expect(heroBackground?.className).toContain('2xl:-translate-y-[18%]');
+    expect(heroBackground?.className).toContain('lg:scale-[1.24]');
+    expect(heroBackground?.className).toContain('xl:scale-[1.22]');
+    expect(heroBackground?.className).toContain('2xl:scale-[1.20]');
+    expect(heroBackground?.className).not.toContain('hidden lg:block object-cover');
+  });
+
   it('shows unknown status and evidence-incomplete label for uncited plants', async () => {
     const uncitedPlant: Plant = {
       id: 'uncited-safe',

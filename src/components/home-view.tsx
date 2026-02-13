@@ -132,7 +132,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   }, [error, filtered.length, isDataLoading, isOpen, isSearchLoading, query]);
 
   const shouldShowResults = isOpen && query.trim().length > 0;
-  const showInteractiveResults = shouldShowResults && !isSearchLoading && filtered.length > 0 && !isDataLoading && !error;
+  const showInteractiveResults =
+    shouldShowResults && !isSearchLoading && filtered.length > 0 && !isDataLoading && !error;
 
   const handleSelectPlant = useCallback(
     (plant: Plant) => {
@@ -141,7 +142,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
       setIsOpen(false);
       setActiveIndex(-1);
     },
-    [onSelectPlant],
+    [onSelectPlant]
   );
 
   const handleSearchInputKeyDown = useCallback(
@@ -173,12 +174,18 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
         handleSelectPlant(filtered[activeIndex]);
       }
     },
-    [activeIndex, filtered, handleSelectPlant, showInteractiveResults],
+    [activeIndex, filtered, handleSelectPlant, showInteractiveResults]
   );
 
   return (
     <div className="relative bg-slate-100 min-h-screen overflow-hidden text-slate-900">
-      <Image src="/cat_landing_page.png" alt="" fill priority className="object-cover lg:object-[0%_0%]" />
+      <Image
+        src="/cat_landing_page.png"
+        alt=""
+        fill
+        priority
+        className="object-cover lg:object-[82%_4%] 2xl:object-[78%_2%] xl:object-[80%_2%] lg:scale-[1.24] 2xl:scale-[1.20] xl:scale-[1.22] origin-top lg:-translate-y-[22%] 2xl:-translate-y-[18%] xl:-translate-y-[20%] pointer-events-none"
+      />
       <div
         className="absolute inset-0 bg-gradient-to-b from-slate-100/66 via-slate-100/32 to-transparent"
         aria-hidden="true"
@@ -239,7 +246,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               <h1 className="mt-4 font-semibold text-[2.5rem] sm:text-6xl lg:text-7xl text-balance leading-[1.05] tracking-tight">
                 Keep your cat safe.
               </h1>
-              <p className="mt-3.5 max-w-2xl text-slate-700 text-base sm:text-xl leading-relaxed text-pretty">
+              <p className="mt-3.5 max-w-2xl text-slate-700 text-base sm:text-xl text-pretty leading-relaxed">
                 Search by plant name, check toxicity fast, and browse safer alternatives before plants come home.
               </p>
 
@@ -265,22 +272,22 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               <div className="gap-2.5 sm:gap-3 grid sm:grid-cols-3 mt-5">
                 <article className="bg-emerald-50/55 p-3 sm:p-3.5 border border-emerald-100 rounded-2xl">
                   <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.14em]">Trust</p>
-                  <p className="mt-1 font-medium text-slate-800 text-sm sm:text-[15px]">Evidence required</p>
-                  <p className="mt-1 text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Evidence required</p>
+                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
                     Every plant entry carries source citations.
                   </p>
                 </article>
                 <article className="bg-amber-50/55 p-3 sm:p-3.5 border border-amber-100 rounded-2xl">
                   <p className="font-semibold text-[11px] text-amber-700 uppercase tracking-[0.14em]">Safety</p>
-                  <p className="mt-1 font-medium text-slate-800 text-sm sm:text-[15px]">Unknown stays unknown</p>
-                  <p className="mt-1 text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Unknown stays unknown</p>
+                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
                     Unverified records are clearly caution-labeled.
                   </p>
                 </article>
                 <article className="bg-sky-50/60 p-3 sm:p-3.5 border border-sky-100 rounded-2xl">
                   <p className="font-semibold text-[11px] text-sky-700 uppercase tracking-[0.14em]">Speed</p>
-                  <p className="mt-1 font-medium text-slate-800 text-sm sm:text-[15px]">Search-first flow</p>
-                  <p className="mt-1 text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Search-first flow</p>
+                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
                     Find answers in a few keystrokes.
                   </p>
                 </article>
@@ -307,7 +314,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               style={{ animationDelay: '80ms' }}
             >
               <h2 className="font-semibold text-slate-900 text-xl tracking-tight">Search the catalog</h2>
-              <p className="mt-1 text-slate-600 text-sm sm:text-[15px] leading-relaxed">
+              <p className="mt-1 text-slate-600 sm:text-[15px] text-sm leading-relaxed">
                 Find a plant by common name, scientific name, or alias.
               </p>
               <label htmlFor="home-plant-search" className="sr-only">
@@ -323,13 +330,13 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   aria-expanded={shouldShowResults}
                   aria-controls={showInteractiveResults ? listboxId : undefined}
                   aria-activedescendant={
-                    showInteractiveResults && activeIndex >= 0 ? `home-search-option-${filtered[activeIndex]?.id}` : undefined
+                    showInteractiveResults && activeIndex >= 0
+                      ? `home-search-option-${filtered[activeIndex]?.id}`
+                      : undefined
                   }
                   placeholder="Search plant name or alias..."
                   className={`w-full rounded-4xl border py-4 pr-5 pl-14 text-base sm:text-xl text-slate-900 outline-none transition-all duration-200 ${
-                    shouldShowResults
-                      ? 'border-slate-300 bg-white shadow-xl'
-                      : 'border-slate-200 bg-white/95 shadow-md'
+                    shouldShowResults ? 'border-slate-300 bg-white shadow-xl' : 'border-slate-200 bg-white/95 shadow-md'
                   } focus:border-slate-300 focus:ring-2 focus:ring-slate-300 focus:shadow-xl placeholder:text-slate-500/85`}
                   value={query}
                   onChange={(e) => {
@@ -361,7 +368,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         setIsOpen(true);
                         setActiveIndex(-1);
                       }}
-                      className="bg-white hover:bg-emerald-50 px-3 py-1.5 border border-slate-200 hover:border-emerald-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-700 hover:text-emerald-800 text-xs sm:text-[13px] transition-colors duration-200 cursor-pointer"
+                      className="bg-white hover:bg-emerald-50 px-3 py-1.5 border border-slate-200 hover:border-emerald-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-700 sm:text-[13px] hover:text-emerald-800 text-xs transition-colors duration-200 cursor-pointer"
                     >
                       {name}
                     </button>
@@ -448,11 +455,13 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                     <Leaf className={`h-5 w-5 ${color.text}`} />
                                   </span>
                                 )}
-                                <span className="min-w-0 flex-1">
-                                  <span className="truncate font-medium text-slate-900">{plant.common_name}</span>
-                                  <span className="truncate text-slate-500 text-sm italic">{plant.scientific_name}</span>
+                                <span className="flex-1 min-w-0">
+                                  <span className="font-medium text-slate-900 truncate">{plant.common_name}</span>
+                                  <span className="text-slate-500 text-sm truncate italic">
+                                    {plant.scientific_name}
+                                  </span>
                                   {isEvidenceIncomplete ? (
-                                    <span className="mt-1 block text-amber-700 text-xs">Evidence incomplete</span>
+                                    <span className="block mt-1 text-amber-700 text-xs">Evidence incomplete</span>
                                   ) : null}
                                 </span>
                                 <span
@@ -525,8 +534,12 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                           <Leaf className={`h-8 w-8 ${color.text}`} />
                         </div>
                       )}
-                      <span className="font-medium text-slate-900 text-sm sm:text-[15px] truncate">{plant.common_name}</span>
-                      <span className="mt-0.5 text-slate-500 text-[11px] sm:text-xs truncate italic">{plant.scientific_name}</span>
+                      <span className="font-medium text-slate-900 sm:text-[15px] text-sm truncate">
+                        {plant.common_name}
+                      </span>
+                      <span className="mt-0.5 text-[11px] text-slate-500 sm:text-xs truncate italic">
+                        {plant.scientific_name}
+                      </span>
                       <span
                         className={`mt-2 inline-flex self-start rounded-full border px-2 py-0.5 text-xs font-medium ${color.bg} ${color.text} ${color.border}`}
                       >
@@ -543,10 +556,10 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
             className="bg-white/82 shadow-sm backdrop-blur mx-auto mt-10 mb-2 px-5 py-4 border border-slate-200/80 rounded-2xl w-full max-w-4xl text-center animate-fade-up motion-reduce:animate-none"
             style={{ animationDelay: '240ms' }}
           >
-            <p className="text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+            <p className="text-slate-600 sm:text-[13px] text-xs leading-relaxed">
               Safety guidance is informational and should not replace professional veterinary advice.
             </p>
-            <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 text-xs sm:text-[13px]">
+            <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 sm:text-[13px] text-xs">
               <Cat className="w-3.5 h-3.5" />
               Built for cat owners who want safer plant choices.
             </p>
