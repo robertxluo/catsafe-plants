@@ -84,7 +84,9 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
     }
 
     const selectedIds = new Set(selected.map((plant) => plant.id));
-    const fallbacks = plants.filter((plant) => !selectedIds.has(plant.id)).slice(0, POPULAR_PLANT_ORDER.length - selected.length);
+    const fallbacks = plants
+      .filter((plant) => !selectedIds.has(plant.id))
+      .slice(0, POPULAR_PLANT_ORDER.length - selected.length);
     return [...selected, ...fallbacks];
   }, [plants]);
 
