@@ -207,7 +207,7 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                       type="button"
                       onClick={goToPreviousImage}
                       aria-label="Previous image"
-                      className="top-1/2 left-2 absolute flex justify-center items-center bg-white/85 hover:bg-white border border-gray-200 rounded-full w-10 h-10 text-gray-700 transition-colors -translate-y-1/2 cursor-pointer"
+                      className="top-1/2 left-2 z-10 absolute flex justify-center items-center bg-slate-900/45 hover:bg-slate-900/60 shadow-md border border-white/25 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-12 h-12 text-white transition-colors -translate-x-1/2 -translate-y-1/2 duration-200 cursor-pointer"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -218,28 +218,56 @@ export function DetailView({ plantId, onBack, onSelectPlant }: DetailViewProps) 
                       type="button"
                       onClick={goToNextImage}
                       aria-label="Next image"
-                      className="top-1/2 right-2 absolute flex justify-center items-center bg-white/85 hover:bg-white border border-gray-200 rounded-full w-10 h-10 text-gray-700 transition-colors -translate-y-1/2 cursor-pointer"
+                      className="top-1/2 right-2 z-10 absolute flex justify-center items-center bg-slate-900/45 hover:bg-slate-900/60 shadow-md border border-white/25 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-12 h-12 text-white transition-colors -translate-y-1/2 translate-x-1/2 duration-200 cursor-pointer"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
                   ) : null}
+
+                  {hasMultipleImages ? (
+                    <div className="bottom-3 left-1/2 absolute flex items-center gap-1.5 bg-black/25 px-2.5 py-1.5 border border-white/30 rounded-full -translate-x-1/2">
+                      {galleryImages.map((_, index) => (
+                        <button
+                          key={`gallery-dot-${index}`}
+                          type="button"
+                          aria-label={`Go to image ${index + 1}`}
+                          aria-current={index === activeImageIndex ? 'true' : undefined}
+                          onClick={() => setActiveImageIndex(index)}
+                          className={`rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 transition-all cursor-pointer ${
+                            index === activeImageIndex
+                              ? 'bg-white w-2.5 h-2.5 scale-110'
+                              : 'bg-white/70 hover:bg-white w-2 h-2'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 {hasMultipleImages ? (
-                  <div className="flex justify-center items-center gap-2">
-                    {galleryImages.map((_, index) => (
+                  <div className="gap-2.5 grid grid-cols-4 sm:grid-cols-5">
+                    {galleryImages.map((imageUrl, index) => (
                       <button
-                        key={`gallery-dot-${index}`}
+                        key={`gallery-thumbnail-${index}`}
                         type="button"
-                        aria-label={`Go to image ${index + 1}`}
+                        aria-label={`View thumbnail image ${index + 1}`}
                         aria-current={index === activeImageIndex ? 'true' : undefined}
                         onClick={() => setActiveImageIndex(index)}
-                        className={`rounded-full transition-all cursor-pointer ${
+                        className={`group relative border rounded-xl overflow-hidden aspect-square focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 transition-all duration-200 cursor-pointer ${
                           index === activeImageIndex
-                            ? 'bg-emerald-600 w-2.5 h-2.5 scale-110'
-                            : 'bg-gray-300 hover:bg-gray-400 w-2 h-2'
+                            ? 'border-emerald-500 ring-2 ring-emerald-300/70'
+                            : 'border-slate-200 hover:border-emerald-300'
                         }`}
-                      />
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={`${plant.common_name} thumbnail ${index + 1}`}
+                          width={120}
+                          height={120}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
+                          unoptimized
+                        />
+                      </button>
                     ))}
                   </div>
                 ) : null}
