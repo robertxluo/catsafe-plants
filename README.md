@@ -11,6 +11,7 @@ CatSafe Plants helps cat owners quickly verify whether common houseplants are sa
 - Required Node version: `22.x`
 - Runtime is pinned in:
   - `package.json` (`engines.node`)
+  - `.nvmrc`
 
 ## Local Setup
 1. Install Node `22.x`.
@@ -31,6 +32,7 @@ CatSafe Plants helps cat owners quickly verify whether common houseplants are sa
 - `npm run test:run` -> run Vitest in CI mode
 - `npm run lint` -> run ESLint
 - `npm run audit:citations` -> verify citation completeness + URL health
+- `npm run smoke:deploy -- --base-url=<url>` -> browser smoke check for deploy URLs
 
 ## Netlify Deployment Setup (SSR/Hybrid)
 1. Connect repository to Netlify.
@@ -42,6 +44,12 @@ CatSafe Plants helps cat owners quickly verify whether common houseplants are sa
 4. Confirm branch strategy:
    - `main` -> Production
    - Pull requests -> Deploy Preview
+
+## Deployment Status
+- As of `2026-02-22`, the product owner confirmed:
+  - Repository is linked to Netlify.
+  - At least one Netlify deployment completed successfully.
+- Production URL: `https://catsafe.robertluo.dev/`
 
 ## Required Environment Variables By Context
 
@@ -59,14 +67,16 @@ Run this sequence before production publish:
 2. `npm run test:run`
 3. `npm run lint`
 4. `npm run build`
-5. Open the Netlify deploy preview URL and spot-check:
-   - Home search
+5. `npm run smoke:deploy -- --base-url=<netlify-preview-url>`
+6. Open the Netlify deploy preview URL and spot-check:
+   - Home search happy path + empty state
    - Detail evidence + alternatives
    - Directory filters + pagination
 
 After production deploy:
-1. Spot-check the same critical path on production:
-   - Home search
+1. `npm run smoke:deploy -- --base-url=https://catsafe.robertluo.dev/`
+2. Spot-check the same critical path on production:
+   - Home search happy path + empty state
    - Detail evidence + alternatives
    - Directory filters + pagination
 

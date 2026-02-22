@@ -51,6 +51,7 @@
 - Start production server locally: `npm run start`
 - Lint: `npm run lint`
 - Citation release audit (network required): `npm run audit:citations`
+- Deploy smoke check (network required): `npm run smoke:deploy -- --base-url=<url>`
 - MVP top-50 seed SQL (run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
 - Required Node runtime baseline: `22.x` (`package.json#engines`)
 
@@ -89,6 +90,13 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
   - Primary deployment platform for SSR/Hybrid Next.js runtime.
   - Deploy previews enabled on pull requests.
   - Production deploys from `main`.
+
+## Deployment Status
+- Status date: `2026-02-22`
+- Product owner confirmed:
+  - Repository is linked to Netlify.
+  - Netlify deployment has completed successfully.
+- Canonical production URL: `https://catsafe.robertluo.dev/`
 
 ## Data Sources & Constraints
 
@@ -137,7 +145,8 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
   2. `npm run test:run`
   3. `npm run lint`
   4. `npm run build`
-  5. Manual browser spot-check on Netlify preview or production URL.
+  5. `npm run smoke:deploy -- --base-url=<netlify-preview-or-production-url>`
+  6. Manual browser spot-check on Netlify preview or production URL.
 
 ### Safety/Trust Constraints
 - This product is safety-adjacent; avoid unverified medical certainty language.
@@ -157,6 +166,7 @@ MVP is done when all conditions below are met:
 - UI is responsive and includes loading, empty, and error states for all MVP flows.
 - Performance is acceptable for image-heavy pages (lazy loading and list/detail payload split).
 - Lint/build checks pass using repo commands.
+- Deploy smoke check passes for preview and production URLs.
 
 ## Notes for Post-MVP
 - Implement hidden `/admin` with allowlist auth and `404` behavior for unauthorized access.
