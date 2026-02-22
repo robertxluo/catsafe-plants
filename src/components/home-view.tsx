@@ -5,7 +5,6 @@ import {
   Search,
   Leaf,
   ShieldCheck,
-  Cat,
   LoaderCircle,
   AlertCircle,
   ArrowRight,
@@ -218,7 +217,14 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
           <div className="flex justify-between items-center gap-2 sm:gap-3 bg-white/86 shadow-sm backdrop-blur px-3 sm:px-4 py-2 border border-white/70 rounded-full">
             <div className="flex items-center gap-2 min-w-0">
               <div className="flex justify-center items-center bg-green-100 rounded-full w-8 sm:w-9 h-8 sm:h-9 text-green-800 shrink-0">
-                <Cat className="w-4 sm:w-5 h-4 sm:h-5" />
+                <Image
+                  src="/icon.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="w-4 sm:w-5 h-4 sm:h-5"
+                  aria-hidden="true"
+                />
               </div>
               <span className="font-semibold text-xs sm:text-base truncate tracking-tight">CatSafe Plants</span>
             </div>
@@ -582,7 +588,14 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               Safety guidance is informational and should not replace professional veterinary advice.
             </p>
             <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 sm:text-[13px] text-xs">
-              <Cat className="w-3.5 h-3.5" />
+              <Image
+                src="/icon.svg"
+                alt=""
+                width={14}
+                height={14}
+                className="w-3.5 h-3.5"
+                aria-hidden="true"
+              />
               For cat owners, by a cat lover.
             </p>
           </footer>

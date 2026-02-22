@@ -13,9 +13,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://catsafe.robertluo.dev'),
   title: 'CatSafe Plants - Is Your Houseplant Safe for Cats?',
   description:
     'Search any houseplant to instantly check if it is safe for your cat. Get toxicity info, symptoms, and safe alternatives.',
+  icons: {
+    icon: ['/favicon.ico', '/icon-192.png', '/icon-512.png'],
+    apple: '/apple-icon.png',
+    shortcut: '/favicon.ico',
+  },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'CatSafe Plants - Is Your Houseplant Safe for Cats?',
+    description:
+      'Search any houseplant to instantly check if it is safe for your cat. Get toxicity info, symptoms, and safe alternatives.',
+    url: 'https://catsafe.robertluo.dev/',
+    siteName: 'CatSafe Plants',
+    type: 'website',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'CatSafe Plants',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CatSafe Plants - Is Your Houseplant Safe for Cats?',
+    description:
+      'Search any houseplant to instantly check if it is safe for your cat. Get toxicity info, symptoms, and safe alternatives.',
+    images: ['/logo.png'],
+  },
 };
 
 export default function RootLayout({
