@@ -52,6 +52,7 @@
 - Lint: `npm run lint`
 - Citation release audit (network required): `npm run audit:citations`
 - MVP top-50 seed SQL (run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
+- Required Node runtime baseline: `22.x` (`package.json#engines`)
 
 ## Environment Variables
 Current required variables (already used by code):
@@ -67,14 +68,27 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
 - `CLOUDINARY_API_SECRET`
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only; never exposed to client)
 
+### Netlify Context Variable Strategy (Required)
+- **Production context**
+  - `NEXT_PUBLIC_SUPABASE_URL` -> production Supabase project URL
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` -> production Supabase publishable key
+- **Deploy Preview context**
+  - `NEXT_PUBLIC_SUPABASE_URL` -> preview Supabase project URL
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` -> preview Supabase publishable key
+- **Branch Deploy context** (optional, if used)
+  - Use preview Supabase values unless a branch-specific dataset is explicitly required.
+- **Do not commit secrets or environment files with credentials.**
+
 ## Services / Accounts
 - **Supabase**
   - PostgreSQL database host.
   - Auth provider for future admin allowlist.
 - **Cloudinary**
   - Hosted plant image storage/delivery.
-- **Deployment platform**
-  - TBD (Vercel is the default recommendation for this Next.js stack unless changed).
+- **Netlify**
+  - Primary deployment platform for SSR/Hybrid Next.js runtime.
+  - Deploy previews enabled on pull requests.
+  - Production deploys from `main`.
 
 ## Data Sources & Constraints
 
@@ -123,6 +137,7 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
   2. `npm run test:run`
   3. `npm run lint`
   4. `npm run build`
+  5. Manual browser spot-check on Netlify preview or production URL.
 
 ### Safety/Trust Constraints
 - This product is safety-adjacent; avoid unverified medical certainty language.

@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CatSafe Plants
 
-## Getting Started
+CatSafe Plants helps cat owners quickly verify whether common houseplants are safe for cats, view source-backed evidence, and discover safer alternatives.
 
-First, run the development server:
+## Canonical Project Docs
+- Project brief and technical constraints: `docs/PROJECT.md`
+- Atomic launch backlog: `docs/TASKS.md`
+- Product requirements: `docs/PRD.md`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Runtime Policy
+- Required Node version: `22.x`
+- Runtime is pinned in:
+  - `package.json` (`engines.node`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Setup
+1. Install Node `22.x`.
+2. Install dependencies:
+   - `npm install`
+3. Create `.env.local` with:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+4. Start the app:
+   - `npm run dev`
+5. Open:
+   - `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Repo Commands
+- `npm run dev` -> start local dev server
+- `npm run build` -> create production build
+- `npm run start` -> run built app
+- `npm run test:run` -> run Vitest in CI mode
+- `npm run lint` -> run ESLint
+- `npm run audit:citations` -> verify citation completeness + URL health
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Netlify Deployment Setup (SSR/Hybrid)
+1. Connect repository to Netlify.
+2. Verify build settings in the Netlify dashboard:
+   - Build command: `npm run build`
+   - Publish directory: `.next`
+3. Confirm plugin:
+   - `@netlify/plugin-nextjs`
+4. Confirm branch strategy:
+   - `main` -> Production
+   - Pull requests -> Deploy Preview
 
-## Learn More
+## Required Environment Variables By Context
 
-To learn more about Next.js, take a look at the following resources:
+| Context | `NEXT_PUBLIC_SUPABASE_URL` | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+| --- | --- | --- |
+| Production | Production Supabase URL | Production Supabase publishable key |
+| Deploy Preview | Preview Supabase URL | Preview Supabase publishable key |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Optional:
+- `CITATION_AUDIT_TIMEOUT_MS` (defaults to `10000`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Release Checklist
+Run this sequence before production publish:
+1. `npm run audit:citations`
+2. `npm run test:run`
+3. `npm run lint`
+4. `npm run build`
+5. Open the Netlify deploy preview URL and spot-check:
+   - Home search
+   - Detail evidence + alternatives
+   - Directory filters + pagination
 
-## Deploy on Vercel
+After production deploy:
+1. Spot-check the same critical path on production:
+   - Home search
+   - Detail evidence + alternatives
+   - Directory filters + pagination
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Rollback / Incident Basics
+If production smoke fails:
+1. Roll back to the last known-good Netlify deploy from the Netlify dashboard.
+2. Re-run smoke checks on the rolled-back deploy URL.
+3. Validate Production env variables were not changed unintentionally.
+4. Open a follow-up task in `docs/TASKS.md` with exact failure details.

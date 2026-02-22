@@ -302,3 +302,132 @@
 
 **Deferred optimization note**
 - Do not implement in current slice: refactor detail data loading to query a single plant by id (plus only its alternative ids) instead of loading the full plants dataset client-side.
+
+## T-21 - Establish Netlify deployment baseline in repo
+**Goal**
+- Codify Netlify build/runtime behavior so deploys are deterministic.
+
+**Acceptance criteria**
+- Add `netlify.toml` with `command = "npm run build"` and `publish = ".next"`.
+- Pin Node runtime to `22.x` in both `.nvmrc` and `netlify.toml`.
+- Add `engines.node` to `package.json`.
+- Update `docs/PROJECT.md` deployment section from Vercel-default to Netlify.
+
+**Out of scope**
+- Domain cutover.
+- CDN/security hardening.
+
+**Verification steps**
+- Manual:
+  - Netlify preview build succeeds from clean clone.
+  - `npm run build` succeeds locally with Node `22.x`.
+- Tests:
+  - Run `npm run build`.
+
+## T-22 - Configure environment strategy for production vs previews
+**Goal**
+- Keep preview deploys isolated from production data.
+
+**Acceptance criteria**
+- Document exact Netlify env vars per context in `docs/PROJECT.md`.
+- Production context uses production Supabase `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Deploy Preview context uses preview Supabase `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Add a short context verification checklist to `docs/release/mvp-qa-2026-02-11.md`.
+
+**Out of scope**
+- Secret rotation automation.
+- Supabase schema migration tooling.
+
+**Verification steps**
+- Manual:
+  - Production deploy reads production data.
+  - Deploy preview reads preview data only.
+- Tests:
+  - Run `npm run smoke:deploy -- --base-url=<deploy-preview-url>`.
+
+## T-23 - Fix remote image host allowlist for real dataset hosts
+**Goal**
+- Prevent runtime image failures and dev-mode client exceptions.
+
+**Acceptance criteria**
+- Update `next.config.ts` remote image hosts to include both `www.aspca.org` and `upload.wikimedia.org`.
+- Validate image rendering across `/`, `/plants`, and `/plants/[id]` with seeded data.
+- Keep graceful placeholders when image URL is missing/invalid.
+
+**Out of scope**
+- Cloudinary migration.
+- Image optimization strategy redesign.
+
+**Verification steps**
+- Manual:
+  - Browser smoke confirms no client-side exception page on home/directory/detail.
+- Tests:
+  - Run `npm run test:run`.
+  - Run `npm run build`.
+
+## T-24 - Add Netlify-focused CI gate
+**Goal**
+- Block unsafe merges before Netlify deploy.
+
+**Acceptance criteria**
+- Add `.github/workflows/ci.yml`.
+- CI runs `npm ci`, `npm run test:run`, `npm run lint`, and `npm run build` on Node `22`.
+- PR and push workflows execute automatically.
+
+**Out of scope**
+- Automated production deploy from CI.
+- Visual regression system.
+
+**Verification steps**
+- Manual:
+  - Push a branch or open a PR and confirm workflow executes.
+- Tests:
+  - Confirm CI job logs include test, lint, and build steps.
+
+## T-25 - Add deploy smoke test + release checklist for Netlify
+**Goal**
+- Make post-deploy verification fast and repeatable.
+
+**Acceptance criteria**
+- Add a smoke command (Playwright) that validates:
+  - Home search happy path.
+  - Home empty state.
+  - Detail evidence/alternatives visibility.
+  - Directory filter + pagination flow.
+  - No browser `pageerror`/`console.error` in the smoke flow.
+- Document pre-deploy and post-deploy command sequence in `README.md`.
+- Required release sequence includes `npm run audit:citations`, tests, lint, build, and smoke.
+
+**Out of scope**
+- Full E2E matrix.
+- Performance lab benchmarking.
+
+**Verification steps**
+- Manual:
+  - Run `npm run smoke:deploy -- --base-url=<netlify-preview-url>`.
+  - Run `npm run smoke:deploy -- --base-url=<netlify-production-url>`.
+- Tests:
+  - Run `npm run test:run`.
+
+## T-26 - Replace scaffold README with Netlify operator runbook
+**Goal**
+- Ensure any engineer can deploy/operate without chat context.
+
+**Acceptance criteria**
+- Rewrite `README.md` with:
+  - Local setup.
+  - Node version policy.
+  - Netlify setup steps.
+  - Required env vars by context.
+  - Rollback and incident basics.
+- Link canonical docs: `docs/PROJECT.md` and `docs/TASKS.md`.
+
+**Out of scope**
+- Marketing docs.
+- Deep architecture docs.
+
+**Verification steps**
+- Manual:
+  - Fresh setup and deploy from README steps only.
+- Tests:
+  - Confirm documented commands exist and run successfully.
