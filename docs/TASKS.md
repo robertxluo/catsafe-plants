@@ -309,7 +309,7 @@
 
 **Acceptance criteria**
 - Add `netlify.toml` with `command = "npm run build"` and `publish = ".next"`.
-- Pin Node runtime to `22.x` in both `.nvmrc` and `netlify.toml`.
+- Pin Node runtime to `24.x` in both `.nvmrc` and `netlify.toml`.
 - Add `engines.node` to `package.json`.
 - Update `docs/PROJECT.md` deployment section from Vercel-default to Netlify.
 
@@ -320,7 +320,7 @@
 **Verification steps**
 - Manual:
   - Netlify preview build succeeds from clean clone.
-  - `npm run build` succeeds locally with Node `22.x`.
+  - `npm run build` succeeds locally with Node `24.x`.
 - Tests:
   - Run `npm run build`.
 
@@ -371,7 +371,7 @@
 
 **Acceptance criteria**
 - Add `.github/workflows/ci.yml`.
-- CI runs `npm ci`, `npm run test:run`, `npm run lint`, and `npm run build` on Node `22`.
+- CI runs `npm ci`, `npm run test:run`, `npm run lint`, and `npm run build` on Node `24`.
 - PR and push workflows execute automatically.
 
 **Out of scope**

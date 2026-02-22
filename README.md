@@ -8,13 +8,13 @@ CatSafe Plants helps cat owners quickly verify whether common houseplants are sa
 - Product requirements: `docs/PRD.md`
 
 ## Runtime Policy
-- Required Node version: `22.x`
+- Required Node version: `24.x`
 - Runtime is pinned in:
   - `package.json` (`engines.node`)
   - `.nvmrc`
 
 ## Local Setup
-1. Install Node `22.x`.
+1. Install Node `24.x`.
 2. Install dependencies:
    - `npm install`
 3. Create `.env.local` with:

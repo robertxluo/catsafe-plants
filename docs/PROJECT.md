@@ -53,7 +53,7 @@
 - Citation release audit (network required): `npm run audit:citations`
 - Deploy smoke check (network required): `npm run smoke:deploy -- --base-url=<url>`
 - MVP top-50 seed SQL (run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
-- Required Node runtime baseline: `22.x` (`package.json#engines`)
+- Required Node runtime baseline: `24.x` (`package.json#engines`)
 
 ## Environment Variables
 Current required variables (already used by code):
