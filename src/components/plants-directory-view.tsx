@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, Leaf, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
-import Image from 'next/image';
+import { AlertCircle, ArrowLeft, ArrowRight, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
-import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
+import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
+import { SiteHeader } from '@/src/components/ui/site-header';
+import { SafetyBadge } from '@/src/components/ui/safety-badge';
+import { PlantImage } from '@/src/components/ui/plant-image';
 
 const PAGE_SIZE = 20;
 type SafetyFilter = 'all' | 'safe_only' | 'toxic_only';
 const FLOWER_COLOR_OPTIONS: FlowerColor[] = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'];
-const navButtonClass =
-  'inline-flex items-center justify-center min-h-9 sm:min-h-10 cursor-pointer rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
 const PILL_BASE_CLASS =
   'inline-flex items-center justify-center gap-2 min-h-9 sm:min-h-10 px-3 sm:px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
 const PILL_INACTIVE_CLASS = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50';
@@ -200,47 +200,12 @@ export function PlantsDirectoryView() {
       />
 
       <div className="z-10 relative flex flex-col min-h-screen">
-        <header className="mx-auto px-4 sm:px-6 pt-5 sm:pt-7 w-full max-w-6xl">
-          <div className="flex justify-between items-center gap-2 sm:gap-3 bg-white/86 shadow-sm backdrop-blur px-3 sm:px-4 py-2 border border-white/70 rounded-full">
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              className="inline-flex justify-center items-center gap-2 bg-white/95 hover:bg-slate-50 px-3.5 sm:px-4.5 py-2 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 font-medium text-slate-700 text-xs sm:text-sm active:scale-[0.97] transition-all duration-200 cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-              <span className="font-semibold truncate tracking-tight">Back</span>
-            </button>
-
-            <nav aria-label="Primary" className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                aria-current={pathname === '/' ? 'page' : undefined}
-                className={`${navButtonClass} ${
-                  pathname === '/'
-                    ? 'bg-green-100 text-green-900 shadow-sm'
-                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
-                }`}
-              >
-                Home
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push('/plants')}
-                aria-label="Plant Directory"
-                aria-current={pathname.startsWith('/plants') ? 'page' : undefined}
-                className={`${navButtonClass} ${
-                  pathname.startsWith('/plants')
-                    ? 'bg-green-100 text-green-900 shadow-sm'
-                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
-                }`}
-              >
-                <span className="sm:hidden">Directory</span>
-                <span className="hidden sm:inline">Plant Directory</span>
-              </button>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader
+          pathname={pathname}
+          onGoHome={() => router.push('/')}
+          onGoDirectory={() => router.push('/plants')}
+          onGoBack={() => router.push('/')}
+        />
 
         <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-9 pb-8 sm:pb-10 w-full max-w-6xl">
           <header className="flex sm:flex-row flex-col sm:justify-between sm:items-end gap-3 mb-6">
@@ -469,11 +434,10 @@ export function PlantsDirectoryView() {
                 <>
                   <section
                     aria-label="Plant directory results"
-                    className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                    className="gap-3 sm:gap-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                   >
                     {visiblePlants.map((plant, index) => {
                       const displaySafetyStatus = getDisplaySafetyStatus(plant);
-                      const color = getStatusColor(displaySafetyStatus);
                       const isEvidenceIncomplete = hasIncompleteEvidence(plant);
                       return (
                         <button
@@ -481,42 +445,31 @@ export function PlantsDirectoryView() {
                           type="button"
                           onClick={() => router.push(`/plants/${plant.id}`)}
                           aria-label={`Open details for ${plant.common_name}`}
-                          className="group bg-white/85 hover:bg-white shadow-sm hover:shadow-md backdrop-blur p-3.5 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                          className="group flex flex-col bg-white/85 hover:bg-white shadow-sm hover:shadow-md backdrop-blur p-2.5 sm:p-3.5 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all duration-200 cursor-pointer"
                         >
-                          {plant.primary_image_url ? (
-                            <Image
-                              src={plant.primary_image_url}
-                              alt={`${plant.common_name} photo`}
-                              width={480}
-                              height={360}
-                              loading={index < 2 ? 'eager' : 'lazy'}
-                              fetchPriority={index < 2 ? 'high' : 'auto'}
-                              sizes="(min-width: 1024px) 24vw, (min-width: 640px) 48vw, 100vw"
-                              className="mb-3 rounded-xl w-full object-cover aspect-[4/3] group-hover:scale-[1.01] transition-transform duration-200"
-                              unoptimized
-                            />
-                          ) : (
-                            <div
-                              className={`w-full aspect-[4/3] rounded-xl flex items-center justify-center mb-3 ${color.bg}`}
-                              data-testid={`directory-placeholder-${plant.id}`}
-                              aria-hidden="true"
-                            >
-                              <Leaf className={`w-8 h-8 ${color.text} opacity-70`} />
-                            </div>
-                          )}
-                          <div className="font-semibold text-[15px] text-slate-900 sm:text-base tracking-tight">
+                          <PlantImage
+                            src={plant.primary_image_url}
+                            alt={`${plant.common_name} photo`}
+                            status={displaySafetyStatus}
+                            width={480}
+                            height={360}
+                            loading={index < 8 ? 'eager' : 'lazy'}
+                            fetchPriority={index < 2 ? 'high' : 'auto'}
+                            sizes="(min-width: 1280px) 21vw, (min-width: 1024px) 30vw, (min-width: 640px) 48vw, 50vw"
+                            className="mb-2 sm:mb-3 rounded-xl w-full aspect-[4/3]"
+                            imageClassName="h-full w-full object-cover group-hover:scale-[1.01] transition-transform duration-200"
+                            placeholderTestId={`directory-placeholder-${plant.id}`}
+                          />
+                          <div className="min-h-10 font-semibold text-sm sm:text-base text-slate-900 tracking-tight leading-tight">
                             {plant.common_name}
                           </div>
-                          <div className="mt-0.5 text-slate-600 text-xs sm:text-sm italic">{plant.scientific_name}</div>
+                          <div className="mt-0.5 text-slate-600 text-[11px] sm:text-sm italic truncate">
+                            {plant.scientific_name}
+                          </div>
                           {isEvidenceIncomplete ? (
-                            <div className="mt-2 text-amber-700 text-xs">Evidence incomplete</div>
+                            <div className="mt-1.5 text-amber-700 text-[11px] sm:text-xs">Evidence incomplete</div>
                           ) : null}
-                          <span
-                            className={`mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${color.bg} ${color.text} ${color.border}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                            {getStatusLabel(displaySafetyStatus)}
-                          </span>
+                          <SafetyBadge status={displaySafetyStatus} className="self-start mt-2.5" compact />
                         </button>
                       );
                     })}

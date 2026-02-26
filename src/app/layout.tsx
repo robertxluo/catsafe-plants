@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/logo.png',
+        url: '/homepage-catsafe.png',
         width: 1200,
         height: 630,
         alt: 'CatSafe Plants',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: 'CatSafe Plants - Is Your Houseplant Safe for Cats?',
     description:
       'Search any houseplant to instantly check if it is safe for your cat. Get toxicity info, symptoms, and safe alternatives.',
-    images: ['/logo.png'],
+    images: ['/homepage-catsafe.png'],
   },
 };
 

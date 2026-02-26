@@ -14,21 +14,21 @@ import {
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
-import { getDisplaySafetyStatus, getStatusColor, getStatusLabel, hasIncompleteEvidence } from '@/src/lib/plants';
+import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
+import { SiteHeader } from '@/src/components/ui/site-header';
+import { SafetyBadge } from '@/src/components/ui/safety-badge';
+import { PlantImage } from '@/src/components/ui/plant-image';
 
 interface HomeViewProps {
   onSelectPlant: (id: string) => void;
 }
 
-const navButtonClass =
-  'cursor-pointer rounded-full px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
 const POPULAR_PLANT_ORDER = ['Parlor Palm', 'Spider Plant', 'Boston Fern', 'Prayer Plant'] as const;
 
 export function HomeView({ onSelectPlant }: HomeViewProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const thumbnailClassName = 'h-10 w-10 shrink-0 rounded-lg border border-slate-200';
   const listboxId = 'home-search-results-listbox';
 
   const [plants, setPlants] = useState<Plant[]>([]);
@@ -213,52 +213,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
       />
 
       <div className="z-10 relative flex flex-col min-h-screen">
-        <header className="mx-auto px-4 sm:px-6 pt-5 sm:pt-7 w-full max-w-6xl">
-          <div className="flex justify-between items-center gap-2 sm:gap-3 bg-white/86 shadow-sm backdrop-blur px-3 sm:px-4 py-2 border border-white/70 rounded-full">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex justify-center items-center bg-green-100 rounded-full w-8 sm:w-9 h-8 sm:h-9 text-green-800 shrink-0">
-                <Image
-                  src="/icon.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="w-4 sm:w-5 h-4 sm:h-5"
-                  aria-hidden="true"
-                />
-              </div>
-              <span className="font-semibold text-xs sm:text-base truncate tracking-tight">CatSafe Plants</span>
-            </div>
-
-            <nav aria-label="Primary" className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                aria-current={pathname === '/' ? 'page' : undefined}
-                className={`${navButtonClass} ${
-                  pathname === '/'
-                    ? 'bg-green-100 text-green-900 shadow-sm'
-                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
-                }`}
-              >
-                Home
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push('/plants')}
-                aria-label="Plant Directory"
-                aria-current={pathname.startsWith('/plants') ? 'page' : undefined}
-                className={`${navButtonClass} ${
-                  pathname.startsWith('/plants')
-                    ? 'bg-green-100 text-green-900 shadow-sm'
-                    : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
-                }`}
-              >
-                <span className="sm:hidden">Directory</span>
-                <span className="hidden sm:inline">Plant Directory</span>
-              </button>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader pathname={pathname} onGoHome={() => router.push('/')} onGoDirectory={() => router.push('/plants')} />
 
         <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8 sm:pb-10 w-full max-w-6xl">
           <section className="lg:items-start gap-5 sm:gap-6 grid lg:grid-cols-[1.03fr_0.97fr]">
@@ -447,7 +402,6 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                     >
                       {filtered.map((plant, index) => {
                         const displaySafetyStatus = getDisplaySafetyStatus(plant);
-                        const color = getStatusColor(displaySafetyStatus);
                         const isEvidenceIncomplete = hasIncompleteEvidence(plant);
                         const isActiveOption = activeIndex === index;
                         return (
@@ -466,23 +420,16 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                               onClick={() => handleSelectPlant(plant)}
                             >
                               <span className="flex items-center gap-3">
-                                {plant.primary_image_url ? (
-                                  <Image
-                                    src={plant.primary_image_url}
-                                    alt={`${plant.common_name} photo`}
-                                    width={40}
-                                    height={40}
-                                    className={`${thumbnailClassName} object-cover`}
-                                    unoptimized
-                                  />
-                                ) : (
-                                  <span
-                                    className={`${thumbnailClassName} flex items-center justify-center ${color.bg}`}
-                                    aria-hidden="true"
-                                  >
-                                    <Leaf className={`h-5 w-5 ${color.text}`} />
-                                  </span>
-                                )}
+                                <PlantImage
+                                  src={plant.primary_image_url}
+                                  alt={`${plant.common_name} photo`}
+                                  status={displaySafetyStatus}
+                                  width={40}
+                                  height={40}
+                                  loading="lazy"
+                                  className="h-10 w-10 shrink-0 rounded-lg border border-slate-200"
+                                  imageClassName="h-full w-full object-cover"
+                                />
                                 <span className="flex-1 min-w-0">
                                   <span className="block font-medium text-slate-900 truncate">{plant.common_name}</span>
                                   <span className="block text-slate-500 text-sm truncate italic">
@@ -492,12 +439,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                     <span className="block mt-1 text-amber-700 text-xs">Evidence incomplete</span>
                                   ) : null}
                                 </span>
-                                <span
-                                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium shadow-sm ${color.bg} ${color.text} ${color.border}`}
-                                >
-                                  <span className={`h-1.5 w-1.5 rounded-full ${color.dot}`} />
-                                  {getStatusLabel(displaySafetyStatus)}
-                                </span>
+                                <SafetyBadge status={displaySafetyStatus} />
                               </span>
                             </button>
                           </li>
@@ -537,7 +479,6 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               <div className="gap-3 sm:gap-4 grid grid-cols-2 lg:grid-cols-4">
                 {popularPlants.map((plant) => {
                   const displaySafetyStatus = getDisplaySafetyStatus(plant);
-                  const color = getStatusColor(displaySafetyStatus);
                   return (
                     <button
                       key={plant.id}
@@ -545,34 +486,23 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                       onClick={() => onSelectPlant(plant.id)}
                       className="group flex flex-col bg-white/85 hover:bg-white hover:shadow-md p-3 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all duration-200 cursor-pointer"
                     >
-                      {plant.primary_image_url ? (
-                        <Image
-                          src={plant.primary_image_url}
-                          alt={`${plant.common_name} photo`}
-                          width={160}
-                          height={120}
-                          className="mb-2 rounded-xl w-full h-24 sm:h-28 object-cover group-hover:scale-[1.01] transition-transform duration-200"
-                          unoptimized
-                        />
-                      ) : (
-                        <div
-                          className={`mb-2 flex h-24 w-full items-center justify-center rounded-xl sm:h-28 ${color.bg}`}
-                          aria-hidden="true"
-                        >
-                          <Leaf className={`h-8 w-8 ${color.text}`} />
-                        </div>
-                      )}
+                      <PlantImage
+                        src={plant.primary_image_url}
+                        alt={`${plant.common_name} photo`}
+                        status={displaySafetyStatus}
+                        width={160}
+                        height={120}
+                        loading="lazy"
+                        className="mb-2 rounded-xl w-full h-24 sm:h-28"
+                        imageClassName="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-200"
+                      />
                       <span className="font-medium text-slate-900 sm:text-[15px] text-sm truncate">
                         {plant.common_name}
                       </span>
                       <span className="mt-0.5 text-[11px] text-slate-500 sm:text-xs truncate italic">
                         {plant.scientific_name}
                       </span>
-                      <span
-                        className={`mt-2 inline-flex self-start rounded-full border px-2 py-0.5 text-xs font-medium ${color.bg} ${color.text} ${color.border}`}
-                      >
-                        {getStatusLabel(displaySafetyStatus)}
-                      </span>
+                      <SafetyBadge status={displaySafetyStatus} className="self-start mt-2" compact />
                     </button>
                   );
                 })}

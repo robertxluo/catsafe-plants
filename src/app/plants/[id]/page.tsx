@@ -12,6 +12,7 @@ export default function PlantDetailPage() {
     <DetailView
       plantId={plantId ?? ''}
       onBack={() => router.push('/')}
+      onGoDirectory={() => router.push('/plants')}
       onSelectPlant={(id) => router.push(`/plants/${id}`)}
     />
   );
