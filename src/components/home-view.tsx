@@ -1,16 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
-import {
-  Search,
-  Leaf,
-  ShieldCheck,
-  LoaderCircle,
-  AlertCircle,
-  ArrowRight,
-  Stethoscope,
-  Sparkles,
-} from 'lucide-react';
+import { Search, Leaf, ShieldCheck, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
@@ -195,275 +186,327 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   );
 
   return (
-    <div className="relative bg-slate-100 min-h-screen overflow-hidden text-slate-900">
+    <div className="relative min-h-screen overflow-hidden home-editorial-shell">
       <Image
         src="/cat_landing_page.png"
         alt=""
         fill
         priority
-        className="object-cover lg:object-[82%_4%] 2xl:object-[78%_2%] xl:object-[80%_2%] lg:scale-[1.24] 2xl:scale-[1.20] xl:scale-[1.22] origin-top lg:-translate-y-[22%] 2xl:-translate-y-[18%] xl:-translate-y-[20%] pointer-events-none"
+        className="object-cover lg:object-[82%_4%] 2xl:object-[78%_2%] xl:object-[80%_2%] lg:scale-[1.24] 2xl:scale-[1.20] xl:scale-[1.22] origin-top lg:-translate-y-[22%] 2xl:-translate-y-[18%] xl:-translate-y-[20%] animate-slow-drift motion-reduce:animate-none pointer-events-none"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-b from-slate-100/66 via-slate-100/32 to-transparent"
+        className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/40 to-slate-100/86"
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-r from-emerald-100/16 via-transparent to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-emerald-100/25 via-transparent to-slate-100/80"
         aria-hidden="true"
       />
+      <div className="-top-20 -left-16 absolute bg-emerald-100/60 blur-3xl rounded-full w-72 h-72" aria-hidden="true" />
+      <div
+        className="-right-16 -bottom-20 absolute bg-slate-200/55 blur-3xl rounded-full w-72 h-72"
+        aria-hidden="true"
+      />
+      <p
+        className="hidden xl:block top-36 right-0 absolute font-semibold text-emerald-200/65 text-xs uppercase tracking-[0.52em] rotate-90 select-none"
+        aria-hidden="true"
+      ></p>
 
       <div className="z-10 relative flex flex-col min-h-screen">
-        <SiteHeader pathname={pathname} onGoHome={() => router.push('/')} onGoDirectory={() => router.push('/plants')} />
+        <SiteHeader
+          pathname={pathname}
+          onGoHome={() => router.push('/')}
+          onGoDirectory={() => router.push('/plants')}
+        />
 
-        <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-8 sm:pb-10 w-full max-w-6xl">
-          <section className="lg:items-start gap-5 sm:gap-6 grid lg:grid-cols-[1.03fr_0.97fr]">
-            <div className="bg-white/82 shadow-lg backdrop-blur p-5 sm:p-8 border border-white/85 rounded-[2rem] animate-fade-up motion-reduce:animate-none">
-              <span className="inline-flex items-center gap-1.5 bg-emerald-100/90 px-3 py-1 rounded-full font-medium text-[11px] text-emerald-700">
-                <ShieldCheck className="w-3 h-3" />
-                Source-backed plant safety
-              </span>
-              <h1 className="mt-4 font-semibold text-[2.5rem] sm:text-6xl lg:text-6xl text-balance leading-[1.05] tracking-tight">
-                Keep your cat safe.
-              </h1>
-              <p className="mt-3.5 max-w-2xl text-slate-700 text-base sm:text-xl text-pretty leading-relaxed">
-                Search by plant name, check toxicity fast, and browse safer alternatives before plants come home.
-              </p>
+        <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-11 pb-8 sm:pb-10 w-full max-w-6xl">
+          <section className="lg:items-start gap-5 sm:gap-6 grid lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <div className="relative bg-white/82 shadow-xl backdrop-blur p-5 sm:p-8 border border-white/90 rounded-[2rem] overflow-hidden animate-fade-up motion-reduce:animate-none">
+              <div
+                className="-top-20 -right-12 absolute bg-emerald-100/55 blur-3xl rounded-full w-48 h-48"
+                aria-hidden="true"
+              />
+              <div className="relative">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-100/90 px-3 py-1 rounded-full font-medium text-[11px] text-emerald-700">
+                    <ShieldCheck className="w-3 h-3" />
+                    Source-backed plant safety
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 bg-slate-100/90 px-3 py-1 rounded-full font-medium text-[11px] text-slate-600">
+                    <Sparkles className="w-3 h-3" />
+                    {isDataLoading ? 'Loading catalog' : `${plants.length}+ entries reviewed`}
+                  </span>
+                </div>
 
-              <div className="flex flex-wrap items-center gap-2 mt-5">
-                <span className="inline-flex items-center gap-1.5 bg-emerald-100/80 px-2.5 py-1 rounded-full font-medium text-[10px] text-emerald-700 sm:text-[11px]">
-                  <ShieldCheck className="w-3 h-3" />
-                  Toxicity checker
-                </span>
-                <span className="inline-flex items-center gap-1.5 bg-violet-100/80 px-2.5 py-1 rounded-full font-medium text-[10px] text-violet-700 sm:text-[11px]">
-                  <Leaf className="w-3 h-3" />
-                  Safe alternatives
-                </span>
-                <span className="inline-flex items-center gap-1.5 bg-amber-100/80 px-2.5 py-1 rounded-full font-medium text-[10px] text-amber-700 sm:text-[11px]">
-                  <Stethoscope className="w-3 h-3" />
-                  Vet-sourced data
-                </span>
-                <span className="inline-flex items-center gap-1.5 bg-sky-100/80 px-2.5 py-1 rounded-full font-medium text-[10px] text-sky-700 sm:text-[11px]">
-                  <Sparkles className="w-3 h-3" />
-                  50+ plants cataloged
-                </span>
-              </div>
-
-              <div className="gap-2.5 sm:gap-3 grid sm:grid-cols-3 mt-5">
-                <article className="bg-emerald-50/55 p-3 sm:p-3.5 border border-emerald-100 rounded-2xl">
-                  <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.14em]">Trust</p>
-                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Evidence required</p>
-                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-                    Every plant entry carries source citations.
-                  </p>
-                </article>
-                <article className="bg-amber-50/55 p-3 sm:p-3.5 border border-amber-100 rounded-2xl">
-                  <p className="font-semibold text-[11px] text-amber-700 uppercase tracking-[0.14em]">Safety</p>
-                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Unknown stays unknown</p>
-                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-                    Unverified records are clearly caution-labeled.
-                  </p>
-                </article>
-                <article className="bg-sky-50/60 p-3 sm:p-3.5 border border-sky-100 rounded-2xl">
-                  <p className="font-semibold text-[11px] text-sky-700 uppercase tracking-[0.14em]">Speed</p>
-                  <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Search-first flow</p>
-                  <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-                    Find answers in a few keystrokes.
-                  </p>
-                </article>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 mt-7">
-                <button
-                  type="button"
-                  onClick={() => router.push('/plants')}
-                  className="inline-flex items-center gap-2 bg-white/80 hover:bg-green-50 shadow-sm hover:shadow-md px-6 py-3 border border-green-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-green-800 hover:text-green-900 text-sm sm:text-base active:scale-[0.97] transition-all duration-200 cursor-pointer"
-                >
-                  Browse all {isDataLoading ? 'plants' : `${plants.length} plants`}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                  Designed for fast checks before purchases, gifts, or new plant arrivals.
+                <h1 className="mt-4 font-semibold text-[2.5rem] sm:text-6xl lg:text-6xl text-balance leading-[1.05] tracking-tight">
+                  Keep your cat safe.
+                </h1>
+                <p className="mt-3.5 max-w-2xl text-slate-700 text-base sm:text-xl text-pretty leading-relaxed">
+                  Search by plant name, check toxicity fast, and browse safer alternatives before plants come home.
                 </p>
+
+                <div className="mt-5 max-w-2xl grid gap-2 sm:grid-cols-2">
+                  <span className="inline-flex justify-start items-center gap-2 bg-slate-50/90 px-3 py-2 border border-slate-200 rounded-2xl font-medium text-[11px] text-slate-700 sm:text-xs leading-none">
+                    <span className="inline-flex justify-center items-center bg-white border border-slate-200 rounded-full w-5 h-5 shrink-0">
+                      <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                    </span>
+                    Toxicity checker
+                  </span>
+                  <span className="inline-flex justify-start items-center gap-2 bg-slate-50/90 px-3 py-2 border border-slate-200 rounded-2xl font-medium text-[11px] text-slate-700 sm:text-xs leading-none">
+                    <span className="inline-flex justify-center items-center bg-white border border-slate-200 rounded-full w-5 h-5 shrink-0">
+                      <Leaf className="w-3 h-3 text-emerald-700" />
+                    </span>
+                    Safe alternatives
+                  </span>
+                  <span className="inline-flex justify-start items-center gap-2 bg-slate-50/90 px-3 py-2 border border-slate-200 rounded-2xl font-medium text-[11px] text-slate-700 sm:text-xs leading-none">
+                    <span className="inline-flex justify-center items-center bg-white border border-slate-200 rounded-full w-5 h-5 shrink-0">
+                      <Stethoscope className="w-3 h-3 text-emerald-700" />
+                    </span>
+                    Vet-sourced data
+                  </span>
+                  <span className="inline-flex justify-start items-center gap-2 bg-slate-50/90 px-3 py-2 border border-slate-200 rounded-2xl font-medium text-[11px] text-slate-700 sm:text-xs leading-none">
+                    <span className="inline-flex justify-center items-center bg-white border border-slate-200 rounded-full w-5 h-5 shrink-0">
+                      <Sparkles className="w-3 h-3 text-emerald-700" />
+                    </span>
+                    Search-first flow
+                  </span>
+                </div>
+
+                <div className="gap-2.5 sm:gap-3 grid sm:grid-cols-3 mt-5">
+                  <article className="bg-emerald-50/60 p-3 sm:p-3.5 border border-emerald-100 rounded-2xl">
+                    <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.14em]">Trust</p>
+                    <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Evidence required</p>
+                    <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
+                      Every plant entry carries source citations.
+                    </p>
+                  </article>
+                  <article className="bg-amber-50/60 p-3 sm:p-3.5 border border-amber-100 rounded-2xl">
+                    <p className="font-semibold text-[11px] text-amber-700 uppercase tracking-[0.14em]">Safety</p>
+                    <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Unknown stays unknown</p>
+                    <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
+                      Unverified records are clearly caution-labeled.
+                    </p>
+                  </article>
+                  <article className="bg-sky-50/60 p-3 sm:p-3.5 border border-sky-100 rounded-2xl">
+                    <p className="font-semibold text-[11px] text-sky-700 uppercase tracking-[0.14em]">Speed</p>
+                    <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Lookup in seconds</p>
+                    <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
+                      Answers appear quickly as you type.
+                    </p>
+                  </article>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 mt-7">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/plants')}
+                    className="inline-flex items-center gap-2 bg-white/85 hover:bg-green-50 shadow-sm hover:shadow-md px-6 py-3 border border-green-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-green-800 hover:text-green-900 text-sm sm:text-base active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                  >
+                    Browse all {isDataLoading ? 'plants' : `${plants.length} plants`}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    Designed for fast checks before purchases, gifts, or new plant arrivals.
+                  </p>
+                </div>
               </div>
             </div>
 
             <section
               ref={containerRef}
-              className="bg-white/91 shadow-xl backdrop-blur p-5 sm:p-6 border border-white/90 rounded-[2rem] text-left animate-fade-up motion-reduce:animate-none"
+              className="relative bg-white/92 shadow-xl backdrop-blur p-5 sm:p-6 border border-white/90 rounded-[2rem] overflow-hidden text-left animate-fade-up-soft motion-reduce:animate-none"
               style={{ animationDelay: '80ms' }}
             >
-              <h2 className="font-semibold text-slate-900 text-xl tracking-tight">Search the catalog</h2>
-              <p className="mt-1 text-slate-600 sm:text-[15px] text-sm leading-relaxed">
-                Find a plant by common name, scientific name, or alias.
-              </p>
-              <label htmlFor="home-plant-search" className="sr-only">
-                Search plants by name
-              </label>
-              <div className="relative mt-4">
-                <Search className="top-1/2 left-5 absolute w-6 h-6 text-slate-500 -translate-y-1/2 pointer-events-none" />
-                <input
-                  id="home-plant-search"
-                  type="text"
-                  role="combobox"
-                  aria-label="Search plants by name"
-                  aria-expanded={shouldShowResults}
-                  aria-controls={showInteractiveResults ? listboxId : undefined}
-                  aria-activedescendant={
-                    showInteractiveResults && activeIndex >= 0
-                      ? `home-search-option-${filtered[activeIndex]?.id}`
-                      : undefined
-                  }
-                  placeholder="Search plant name or alias..."
-                  className={`w-full rounded-4xl border py-4 pr-5 pl-14 text-base sm:text-xl text-slate-900 outline-none transition-all duration-200 ${
-                    shouldShowResults ? 'border-slate-300 bg-white shadow-xl' : 'border-slate-200 bg-white/95 shadow-md'
-                  } focus:border-slate-300 focus:ring-2 focus:ring-slate-300 focus:shadow-xl placeholder:text-slate-500/85`}
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setIsOpen(true);
-                    setActiveIndex(-1);
-                  }}
-                  onFocus={() => {
-                    if (query.trim().length > 0) {
-                      setIsOpen(true);
-                    }
-                  }}
-                  onKeyDown={handleSearchInputKeyDown}
-                />
-              </div>
-              <p className="flex items-center gap-1.5 mt-3 text-slate-700 text-xs sm:text-sm leading-relaxed">
-                <ShieldCheck className="w-3 h-3 text-emerald-700 shrink-0" />
-                Informational only. For urgent concerns, contact your veterinarian.
-              </p>
-
-              {!isDataLoading && !error && quickSuggestions.length > 0 ? (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {quickSuggestions.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => {
-                        setQuery(name);
-                        setIsOpen(true);
-                        setActiveIndex(-1);
-                      }}
-                      className="bg-white hover:bg-emerald-50 px-3 py-1.5 border border-slate-200 hover:border-emerald-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-700 sm:text-[13px] hover:text-emerald-800 text-xs transition-colors duration-200 cursor-pointer"
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
               <div
-                className={`mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-all duration-300 ease-in-out ${
-                  isOpen
-                    ? isSearchPanelExpanded
-                      ? 'h-80 opacity-100'
-                      : 'h-32 opacity-100'
-                    : 'h-0 opacity-0 border-none'
-                } ${shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'}`}
-              >
-                {isDataLoading ? (
-                  <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
-                    <LoaderCircle className="w-4 h-4 animate-spin" />
-                    Loading plants...
+                className="-top-16 -left-10 absolute bg-emerald-100/45 blur-2xl rounded-full w-36 h-36"
+                aria-hidden="true"
+              />
+              <div className="relative">
+                <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.2em]">Field lookup</p>
+                <h2 className="mt-2 font-semibold text-slate-900 text-2xl tracking-tight">Search the catalog</h2>
+                <p className="mt-1 text-slate-600 sm:text-[15px] text-sm leading-relaxed">
+                  Find a plant by common name, scientific name, or alias.
+                </p>
+
+                <label htmlFor="home-plant-search" className="sr-only">
+                  Search plants by name
+                </label>
+                <div className="relative mt-4">
+                  <Search className="top-1/2 left-5 absolute w-6 h-6 text-slate-500 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    id="home-plant-search"
+                    type="text"
+                    role="combobox"
+                    aria-label="Search plants by name"
+                    aria-expanded={shouldShowResults}
+                    aria-controls={showInteractiveResults ? listboxId : undefined}
+                    aria-activedescendant={
+                      showInteractiveResults && activeIndex >= 0
+                        ? `home-search-option-${filtered[activeIndex]?.id}`
+                        : undefined
+                    }
+                    placeholder="Search plant name or alias..."
+                    className={`w-full rounded-4xl border py-4 pr-5 pl-14 text-base sm:text-xl text-slate-900 outline-none transition-all duration-200 ${
+                      shouldShowResults
+                        ? 'border-slate-300 bg-white shadow-xl'
+                        : 'border-slate-200 bg-white/95 shadow-md'
+                    } focus:border-slate-300 focus:ring-2 focus:ring-slate-300 focus:shadow-xl placeholder:text-slate-500/85`}
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setIsOpen(true);
+                      setActiveIndex(-1);
+                    }}
+                    onFocus={() => {
+                      if (query.trim().length > 0) {
+                        setIsOpen(true);
+                      }
+                    }}
+                    onKeyDown={handleSearchInputKeyDown}
+                  />
+                </div>
+
+                <p className="flex items-center gap-1.5 mt-3 text-slate-700 text-xs sm:text-sm leading-relaxed">
+                  <ShieldCheck className="w-3 h-3 text-emerald-700 shrink-0" />
+                  Informational only. For urgent concerns, contact your veterinarian.
+                </p>
+
+                {!isDataLoading && !error && quickSuggestions.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {quickSuggestions.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => {
+                          setQuery(name);
+                          setIsOpen(true);
+                          setActiveIndex(-1);
+                        }}
+                        className="bg-white hover:bg-emerald-50 px-3 py-1.5 border border-slate-200 hover:border-emerald-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-700 sm:text-[13px] hover:text-emerald-800 text-xs transition-colors duration-200 cursor-pointer"
+                      >
+                        {name}
+                      </button>
+                    ))}
                   </div>
-                ) : error ? (
-                  <div className="flex flex-col justify-center items-center px-4 h-full text-center">
-                    <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
-                      <AlertCircle className="w-4 h-4" />
-                      {error}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void fetchPlants()}
-                      className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-3 px-3 py-2 border border-rose-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 text-rose-700 text-xs transition-colors cursor-pointer"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                ) : shouldShowResults ? (
-                  isSearchLoading ? (
+                ) : null}
+
+                <div
+                  className={`mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-all duration-300 ease-in-out ${
+                    isOpen
+                      ? isSearchPanelExpanded
+                        ? 'h-80 opacity-100'
+                        : 'h-32 opacity-100'
+                      : 'h-0 opacity-0 border-none'
+                  } ${shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'}`}
+                >
+                  {isDataLoading ? (
                     <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
                       <LoaderCircle className="w-4 h-4 animate-spin" />
-                      Searching...
+                      Loading plants...
                     </div>
-                  ) : filtered.length === 0 ? (
-                    <div className="flex justify-center items-center px-4 h-full text-slate-600 text-sm text-center">
-                      No plants found matching &quot;{query}&quot;
+                  ) : error ? (
+                    <div className="flex flex-col justify-center items-center px-4 h-full text-center">
+                      <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
+                        <AlertCircle className="w-4 h-4" />
+                        {error}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => void fetchPlants()}
+                        className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-3 px-3 py-2 border border-rose-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 text-rose-700 text-xs transition-colors cursor-pointer"
+                      >
+                        Retry
+                      </button>
                     </div>
-                  ) : (
-                    <ul
-                      id={listboxId}
-                      role="listbox"
-                      aria-label="Plant search results"
-                      className="h-full overflow-y-auto"
-                    >
-                      {filtered.map((plant, index) => {
-                        const displaySafetyStatus = getDisplaySafetyStatus(plant);
-                        const isEvidenceIncomplete = hasIncompleteEvidence(plant);
-                        const isActiveOption = activeIndex === index;
-                        return (
-                          <li
-                            key={plant.id}
-                            id={`home-search-option-${plant.id}`}
-                            role="option"
-                            aria-selected={isActiveOption}
-                          >
-                            <button
-                              type="button"
-                              className={`w-full min-h-[5.25rem] cursor-pointer px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset ${
-                                isActiveOption ? 'bg-emerald-50/60' : 'hover:bg-emerald-50/45'
-                              }`}
-                              onMouseEnter={() => setActiveIndex(index)}
-                              onClick={() => handleSelectPlant(plant)}
+                  ) : shouldShowResults ? (
+                    isSearchLoading ? (
+                      <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
+                        <LoaderCircle className="w-4 h-4 animate-spin" />
+                        Searching...
+                      </div>
+                    ) : filtered.length === 0 ? (
+                      <div className="flex justify-center items-center px-4 h-full text-slate-600 text-sm text-center">
+                        No plants found matching &quot;{query}&quot;
+                      </div>
+                    ) : (
+                      <ul
+                        id={listboxId}
+                        role="listbox"
+                        aria-label="Plant search results"
+                        className="h-full overflow-y-auto"
+                      >
+                        {filtered.map((plant, index) => {
+                          const displaySafetyStatus = getDisplaySafetyStatus(plant);
+                          const isEvidenceIncomplete = hasIncompleteEvidence(plant);
+                          const isActiveOption = activeIndex === index;
+                          return (
+                            <li
+                              key={plant.id}
+                              id={`home-search-option-${plant.id}`}
+                              role="option"
+                              aria-selected={isActiveOption}
                             >
-                              <span className="flex items-center gap-3">
-                                <PlantImage
-                                  src={plant.primary_image_url}
-                                  alt={`${plant.common_name} photo`}
-                                  status={displaySafetyStatus}
-                                  width={40}
-                                  height={40}
-                                  loading="lazy"
-                                  className="h-10 w-10 shrink-0 rounded-lg border border-slate-200"
-                                  imageClassName="h-full w-full object-cover"
-                                />
-                                <span className="flex-1 min-w-0">
-                                  <span className="block font-medium text-slate-900 truncate">{plant.common_name}</span>
-                                  <span className="block text-slate-500 text-sm truncate italic">
-                                    {plant.scientific_name}
+                              <button
+                                type="button"
+                                className={`w-full min-h-[5.25rem] cursor-pointer px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset ${
+                                  isActiveOption ? 'bg-emerald-50/60' : 'hover:bg-emerald-50/45'
+                                }`}
+                                onMouseEnter={() => setActiveIndex(index)}
+                                onClick={() => handleSelectPlant(plant)}
+                              >
+                                <span className="flex items-center gap-3">
+                                  <PlantImage
+                                    src={plant.primary_image_url}
+                                    alt={`${plant.common_name} photo`}
+                                    status={displaySafetyStatus}
+                                    width={40}
+                                    height={40}
+                                    loading="lazy"
+                                    className="border border-slate-200 rounded-lg w-10 h-10 shrink-0"
+                                    imageClassName="h-full w-full object-cover"
+                                  />
+                                  <span className="flex-1 min-w-0">
+                                    <span className="block font-medium text-slate-900 truncate">
+                                      {plant.common_name}
+                                    </span>
+                                    <span className="block text-slate-500 text-sm truncate italic">
+                                      {plant.scientific_name}
+                                    </span>
+                                    {isEvidenceIncomplete ? (
+                                      <span className="block mt-1 text-amber-700 text-xs">Evidence incomplete</span>
+                                    ) : null}
                                   </span>
-                                  {isEvidenceIncomplete ? (
-                                    <span className="block mt-1 text-amber-700 text-xs">Evidence incomplete</span>
-                                  ) : null}
+                                  <SafetyBadge status={displaySafetyStatus} />
                                 </span>
-                                <SafetyBadge status={displaySafetyStatus} />
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )
-                ) : (
-                  <div className="flex flex-col justify-center items-center px-8 h-full text-slate-600 text-sm text-center leading-relaxed">
-                    Start typing to search by common name, scientific name, or alias.
-                  </div>
-                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )
+                  ) : (
+                    <div className="flex flex-col justify-center items-center px-8 h-full text-slate-600 text-sm text-center leading-relaxed">
+                      Start typing to search by common name, scientific name, or alias.
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           </section>
 
           {!isDataLoading && !error && plants.length > 0 && (
             <section
-              className="bg-white/76 shadow-sm backdrop-blur mt-12 sm:mt-14 p-4 sm:p-5 border border-white/85 rounded-3xl animate-fade-up motion-reduce:animate-none"
+              className="bg-white/78 shadow-lg backdrop-blur mt-12 sm:mt-14 p-4 sm:p-6 border border-white/85 rounded-[2rem] animate-fade-up-soft motion-reduce:animate-none"
               style={{ animationDelay: '160ms' }}
             >
               <div className="flex justify-between items-end gap-3 mb-4">
                 <div>
-                  <h2 className="font-semibold text-slate-800 text-lg sm:text-xl tracking-tight">Popular plants</h2>
+                  <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.18em]">
+                    Starter Picks
+                  </p>
+                  <h2 className="mt-1 font-semibold text-slate-800 text-lg sm:text-xl tracking-tight">
+                    Popular plants
+                  </h2>
                   <p className="mt-1 text-slate-600 text-xs sm:text-sm">Open any card to jump straight to details.</p>
                 </div>
                 <button
@@ -477,14 +520,14 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               </div>
 
               <div className="gap-3 sm:gap-4 grid grid-cols-2 lg:grid-cols-4">
-                {popularPlants.map((plant) => {
+                {popularPlants.map((plant, index) => {
                   const displaySafetyStatus = getDisplaySafetyStatus(plant);
                   return (
                     <button
                       key={plant.id}
                       type="button"
                       onClick={() => onSelectPlant(plant.id)}
-                      className="group flex flex-col bg-white/85 hover:bg-white hover:shadow-md p-3 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                      className="group flex flex-col bg-white/90 hover:bg-white hover:shadow-lg p-3 border border-slate-200 hover:border-green-200 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.97] transition-all hover:-translate-y-0.5 duration-200 cursor-pointer"
                     >
                       <PlantImage
                         src={plant.primary_image_url}
@@ -492,9 +535,9 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         status={displaySafetyStatus}
                         width={160}
                         height={120}
-                        loading="lazy"
+                        loading={index === 0 ? 'eager' : 'lazy'}
                         className="mb-2 rounded-xl w-full h-24 sm:h-28"
-                        imageClassName="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-200"
+                        imageClassName="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       />
                       <span className="font-medium text-slate-900 sm:text-[15px] text-sm truncate">
                         {plant.common_name}
@@ -511,21 +554,14 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
           )}
 
           <footer
-            className="bg-white/82 shadow-sm backdrop-blur mx-auto mt-10 mb-2 px-5 py-4 border border-slate-200/80 rounded-2xl w-full max-w-4xl text-center animate-fade-up motion-reduce:animate-none"
+            className="bg-white/82 shadow-sm backdrop-blur mx-auto mt-10 mb-2 px-5 py-4 border border-slate-200/80 rounded-2xl w-full max-w-4xl text-center animate-fade-up-soft motion-reduce:animate-none"
             style={{ animationDelay: '240ms' }}
           >
             <p className="text-slate-600 sm:text-[13px] text-xs leading-relaxed">
               Safety guidance is informational and should not replace professional veterinary advice.
             </p>
             <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 sm:text-[13px] text-xs">
-              <Image
-                src="/icon.svg"
-                alt=""
-                width={14}
-                height={14}
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-              />
+              <Image src="/icon.svg" alt="" width={14} height={14} className="w-3.5 h-3.5" aria-hidden="true" />
               For cat owners, by a cat lover.
             </p>
           </footer>

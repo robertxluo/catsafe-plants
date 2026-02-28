@@ -279,13 +279,13 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 3 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(20);
     });
+    expect(screen.getAllByText(/page 1 of 3/i).length).toBeGreaterThan(0);
 
     const previousButtons = screen.getAllByRole('button', { name: /previous/i });
     const nextButtons = screen.getAllByRole('button', { name: /next/i });
 
-    expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(20);
     expect(previousButtons[0].hasAttribute('disabled')).toBe(true);
     expect(nextButtons[0].hasAttribute('disabled')).toBe(false);
 
@@ -300,7 +300,7 @@ describe('PlantsDirectoryView', () => {
     const { rerender } = render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 2 of 3 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/page 2 of 3/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getAllByRole('button', { name: /previous/i })[0]);
@@ -313,7 +313,7 @@ describe('PlantsDirectoryView', () => {
     rerender(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 3 of 3 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/page 3 of 3/i).length).toBeGreaterThan(0);
     });
 
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(5);
@@ -327,7 +327,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 3 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/page 1 of 3/i).length).toBeGreaterThan(0);
     });
   });
 
@@ -355,7 +355,7 @@ describe('PlantsDirectoryView', () => {
     fireEvent.click(screen.getByRole('button', { name: /retry/i }));
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(3);
     });
 
     expect(mockedLoadPlants).toHaveBeenCalledTimes(2);
@@ -367,7 +367,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(9);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -381,7 +381,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(10);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^yellow$/i }));
@@ -395,7 +395,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(4);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
@@ -411,7 +411,7 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(4);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^toxic only$/i }));
@@ -431,12 +431,12 @@ describe('PlantsDirectoryView', () => {
     render(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/viewing 3 of 3 pages/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/page 3 of 3/i).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
 
-    expect(screen.getAllByText(/viewing 1 of 1 pages/i).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('navigation', { name: /pagination footer/i })).toBeNull();
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
   });
 
