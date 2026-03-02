@@ -246,7 +246,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   Search by plant name, check toxicity fast, and browse safer alternatives before plants come home.
                 </p>
 
-                <div className="mt-5 max-w-2xl grid gap-2 sm:grid-cols-2">
+                <div className="gap-2 grid sm:grid-cols-2 mt-5 max-w-2xl">
                   <span className="inline-flex justify-start items-center gap-2 bg-slate-50/90 px-3 py-2 border border-slate-200 rounded-2xl font-medium text-[11px] text-slate-700 sm:text-xs leading-none">
                     <span className="inline-flex justify-center items-center bg-white border border-slate-200 rounded-full w-5 h-5 shrink-0">
                       <ShieldCheck className="w-3 h-3 text-emerald-700" />
@@ -347,11 +347,11 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         : undefined
                     }
                     placeholder="Search plant name or alias..."
-                    className={`w-full rounded-4xl border py-4 pr-5 pl-14 text-base sm:text-xl text-slate-900 outline-none transition-all duration-200 ${
+                    className={`w-full focus:border-emerald-300 rounded-4xl border py-4 pr-5 pl-14 text-base sm:text-xl text-slate-900 outline-none transition-all duration-200 ${
                       shouldShowResults
                         ? 'border-slate-300 bg-white shadow-xl'
                         : 'border-slate-200 bg-white/95 shadow-md'
-                    } focus:border-slate-300 focus:ring-2 focus:ring-slate-300 focus:shadow-xl placeholder:text-slate-500/85`}
+                    } focus:border-emerald-300 focus:ring-2 focus:ring-emerald-300 focus:shadow-xl placeholder:text-slate-500/85`}
                     value={query}
                     onChange={(event) => {
                       setQuery(event.target.value);
