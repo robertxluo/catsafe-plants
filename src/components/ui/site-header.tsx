@@ -7,12 +7,23 @@ interface SiteHeaderProps {
   onGoDirectory: () => void;
   onGoBack?: () => void;
   backLabel?: string;
+  activeNav?: 'home' | 'directory' | 'none';
 }
 
 const navButtonClass =
   'inline-flex items-center justify-center min-h-9 sm:min-h-10 cursor-pointer rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97]';
 
-export function SiteHeader({ pathname, onGoHome, onGoDirectory, onGoBack, backLabel = 'Back' }: SiteHeaderProps) {
+export function SiteHeader({
+  pathname,
+  onGoHome,
+  onGoDirectory,
+  onGoBack,
+  backLabel = 'Back',
+  activeNav,
+}: SiteHeaderProps) {
+  const resolvedActiveNav =
+    activeNav ?? (pathname === '/' ? 'home' : pathname === '/plants' ? 'directory' : 'none');
+
   return (
     <header className="mx-auto px-4 sm:px-6 pt-5 sm:pt-7 w-full max-w-6xl">
       <div className="flex justify-between items-center gap-2 sm:gap-3 bg-white/86 shadow-sm backdrop-blur px-3 sm:px-4 py-2 border border-white/70 rounded-full">
@@ -45,9 +56,9 @@ export function SiteHeader({ pathname, onGoHome, onGoDirectory, onGoBack, backLa
           <button
             type="button"
             onClick={onGoHome}
-            aria-current={pathname === '/' ? 'page' : undefined}
+            aria-current={resolvedActiveNav === 'home' ? 'page' : undefined}
             className={`${navButtonClass} ${
-              pathname === '/'
+              resolvedActiveNav === 'home'
                 ? 'bg-green-100 text-green-900 shadow-sm'
                 : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
             }`}
@@ -58,9 +69,9 @@ export function SiteHeader({ pathname, onGoHome, onGoDirectory, onGoBack, backLa
             type="button"
             onClick={onGoDirectory}
             aria-label="Plant Directory"
-            aria-current={pathname.startsWith('/plants') ? 'page' : undefined}
+            aria-current={resolvedActiveNav === 'directory' ? 'page' : undefined}
             className={`${navButtonClass} ${
-              pathname.startsWith('/plants')
+              resolvedActiveNav === 'directory'
                 ? 'bg-green-100 text-green-900 shadow-sm'
                 : 'text-slate-600 hover:bg-green-50 hover:text-green-800 hover:shadow-sm'
             }`}

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PlantsDirectoryView } from '@/src/components/plants-directory-view';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -273,6 +273,27 @@ describe('PlantsDirectoryView', () => {
     expect(screen.getByRole('button', { name: /^home$/i }).getAttribute('aria-current')).toBeNull();
   });
 
+  it('opens plant details with a returnTo back-reference to the directory root by default', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    fireEvent.click(await screen.findByRole('button', { name: /open details for plant 1/i }));
+
+    expect(mockPush).toHaveBeenCalledWith('/plants/plant-1?returnTo=%2Fplants');
+  });
+
+  it('preserves active directory query state in the detail returnTo link', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(45));
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ page: '2', q: 'plant' }));
+
+    render(<PlantsDirectoryView />);
+
+    fireEvent.click(await screen.findByRole('button', { name: /open details for plant 21/i }));
+
+    expect(mockPush).toHaveBeenCalledWith('/plants/plant-21?returnTo=%2Fplants%3Fq%3Dplant%26page%3D2');
+  });
+
   it('renders 20 plants per page with pagination controls and page indicator', async () => {
     mockedLoadPlants.mockResolvedValue(makePlants(45));
 
@@ -438,6 +459,65 @@ describe('PlantsDirectoryView', () => {
 
     expect(screen.queryByRole('navigation', { name: /pagination footer/i })).toBeNull();
     expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(15);
+  });
+
+  it('renders a desktop remainder card when the last xl row has leftover slots', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(20));
+
+    render(<PlantsDirectoryView />);
+
+    const remainderCard = await screen.findByTestId('directory-remainder-card');
+    expect(remainderCard.textContent).toContain('Need a specific plant?');
+    expect(remainderCard.textContent).toContain(
+      'Search by common name, scientific name, or alias to jump straight to a match.'
+    );
+    expect(remainderCard.className).toContain('hidden xl:flex');
+  });
+
+  it('does not render a remainder card when the xl row is already complete', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(18));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(18);
+    });
+
+    expect(screen.queryByTestId('directory-remainder-card')).toBeNull();
+  });
+
+  it('does not render a remainder card when too few plants are visible to reach a third row', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(5);
+    });
+
+    expect(screen.queryByTestId('directory-remainder-card')).toBeNull();
+  });
+
+  it('shows the active-filter remainder variant with a clear-all action when refinements are active', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(20));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /open details for/i })).toHaveLength(20);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /^safe only$/i }));
+
+    const remainderCard = await screen.findByTestId('directory-remainder-card');
+    expect(remainderCard.textContent).toContain('Want broader results?');
+    expect(remainderCard.textContent).toContain('Clear the current search or filters to reopen the full catalog.');
+
+    fireEvent.click(within(remainderCard).getByRole('button', { name: /clear all/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/want broader results\?/i)).toBeNull();
+    });
   });
 
   it('labels uncited plants as evidence incomplete and displays unknown safety', async () => {

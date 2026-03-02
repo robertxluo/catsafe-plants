@@ -316,6 +316,66 @@ describe('DetailView', () => {
     expect(screen.queryByRole('button', { name: /next image/i })).toBeNull();
   });
 
+  it('uses onGoHome for the Home nav instead of onBack', async () => {
+    const onBack = vi.fn();
+    const onGoHome = vi.fn();
+
+    render(<DetailView plantId="lilium" onBack={onBack} onGoHome={onGoHome} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: /lily/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /^home$/i }));
+    expect(onGoHome).toHaveBeenCalledTimes(1);
+    expect(onBack).not.toHaveBeenCalled();
+  });
+
+  it('renders the provided back label in the loading state', () => {
+    let resolvePlants!: (value: Plant[]) => void;
+    mockedLoadPlants.mockReturnValueOnce(
+      new Promise<Plant[]>((resolve) => {
+        resolvePlants = resolve;
+      })
+    );
+
+    render(
+      <DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} backLabel="Back to Directory" />
+    );
+
+    expect(screen.getByRole('button', { name: /back to directory/i })).toBeTruthy();
+    resolvePlants(mockPlants);
+  });
+
+  it('renders the provided back label in the error state', async () => {
+    mockedLoadPlants.mockRejectedValueOnce(new Error('Unable to load plant data. Please try again.'));
+
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} backLabel="Back to Directory" />);
+
+    expect(await screen.findByText(/unable to load plant data\. please try again\./i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /back to directory/i })).toBeTruthy();
+  });
+
+  it('renders the provided back label in the not-found state', async () => {
+    render(<DetailView plantId="not-real" onBack={vi.fn()} onSelectPlant={vi.fn()} backLabel="Back to Directory" />);
+
+    expect(await screen.findByText(/plant not found\./i)).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /back to directory/i }).length).toBeGreaterThan(0);
+  });
+
+  it('renders the provided back label in the success state', async () => {
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} backLabel="Back to Directory" />);
+
+    expect(await screen.findByRole('heading', { name: /lily/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /back to directory/i })).toBeTruthy();
+  });
+
+  it('keeps both top-level nav pills inactive on detail pages', async () => {
+    render(<DetailView plantId="lilium" onBack={vi.fn()} onSelectPlant={vi.fn()} />);
+
+    expect(await screen.findByRole('heading', { name: /lily/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^home$/i }).getAttribute('aria-current')).toBeNull();
+    expect(screen.getByRole('button', { name: /plant directory/i }).getAttribute('aria-current')).toBeNull();
+  });
+
   it('shows configuration/load error state and can retry successfully', async () => {
     mockedLoadPlants
       .mockRejectedValueOnce(

@@ -6,6 +6,7 @@ import { AlertCircle, ArrowLeft, ArrowRight, LoaderCircle, Search } from 'lucide
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
+import { buildPlantDetailHref } from '@/src/lib/plant-detail-navigation';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
 import { PlantImage } from '@/src/components/ui/plant-image';
@@ -72,6 +73,7 @@ export function PlantsDirectoryView() {
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
 
   const requestedPage = parsePageParam(searchParams.get('page'));
+  const searchParamsString = searchParams.toString();
   const committedQuery = searchParams.get('q')?.trim() ?? '';
   const normalizedCommittedQuery = committedQuery.toLowerCase();
   const [searchInput, setSearchInput] = useState(committedQuery);
@@ -217,6 +219,9 @@ export function PlantsDirectoryView() {
   const resultCountLabel = `${filteredPlants.length} plant${filteredPlants.length === 1 ? '' : 's'}`;
   const resultsStatusLabel =
     committedQuery.length > 0 ? `${resultCountLabel} matching "${committedQuery}"` : resultCountLabel;
+  const currentDirectoryUrl = searchParamsString.length > 0 ? `${pathname}?${searchParamsString}` : pathname;
+  const gridRemainder = visiblePlants.length % 3;
+  const showRemainderCard = filteredPlants.length > 0 && visiblePlants.length > 6 && gridRemainder !== 0;
 
   return (
     <div className="relative min-h-screen overflow-hidden home-editorial-shell">
@@ -243,6 +248,7 @@ export function PlantsDirectoryView() {
           onGoHome={() => router.push('/')}
           onGoDirectory={() => router.push('/plants')}
           onGoBack={() => router.push('/')}
+          activeNav="directory"
         />
 
         <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-9 pb-8 sm:pb-10 w-full max-w-6xl">
@@ -463,7 +469,7 @@ export function PlantsDirectoryView() {
                         <button
                           key={plant.id}
                           type="button"
-                          onClick={() => router.push(`/plants/${plant.id}`)}
+                          onClick={() => router.push(buildPlantDetailHref(plant.id, currentDirectoryUrl))}
                           aria-label={`Open details for ${plant.common_name}`}
                           className="group flex flex-col bg-white/92 hover:bg-white shadow-sm hover:shadow-md backdrop-blur p-3 border border-slate-200 hover:border-green-200 rounded-[1.45rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 h-full overflow-hidden text-left active:scale-[0.97] transition-all hover:-translate-y-0.5 duration-200 cursor-pointer"
                         >
@@ -475,6 +481,7 @@ export function PlantsDirectoryView() {
                             height={360}
                             loading={index < 6 ? 'eager' : 'lazy'}
                             fetchPriority={index < 2 ? 'high' : 'auto'}
+                            priority={index < 2}
                             sizes="(min-width: 1280px) 30vw, (min-width: 640px) 46vw, 94vw"
                             className="mb-3 rounded-[1.1rem] w-full aspect-[4/3]"
                             imageClassName="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
@@ -499,6 +506,36 @@ export function PlantsDirectoryView() {
                         </button>
                       );
                     })}
+                    {showRemainderCard ? (
+                      <article
+                        data-testid="directory-remainder-card"
+                        className={`hidden xl:flex h-full flex-col justify-between rounded-[1.45rem] border border-slate-200 bg-white/92 p-5 shadow-sm backdrop-blur ${
+                          gridRemainder === 1 ? 'xl:col-span-2' : ''
+                        }`}
+                      >
+                        <div>
+                          <p className="font-semibold text-emerald-700 text-[11px] uppercase tracking-[0.16em]">
+                            {hasActiveFilters ? 'Want broader results?' : 'Need a specific plant?'}
+                          </p>
+                          <p className="mt-2 max-w-sm text-slate-600 text-sm leading-relaxed">
+                            {hasActiveFilters
+                              ? 'Clear the current search or filters to reopen the full catalog.'
+                              : 'Search by common name, scientific name, or alias to jump straight to a match.'}
+                          </p>
+                        </div>
+                        {hasActiveFilters ? (
+                          <div className="mt-4">
+                            <button
+                              type="button"
+                              onClick={clearRefinements}
+                              className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 text-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 cursor-pointer"
+                            >
+                              Clear all
+                            </button>
+                          </div>
+                        ) : null}
+                      </article>
+                    ) : null}
                   </section>
 
                   {totalPages > 1 ? (

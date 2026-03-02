@@ -25,7 +25,9 @@ interface DetailViewProps {
   plantId: string;
   onBack: () => void;
   onSelectPlant: (id: string) => void;
+  onGoHome?: () => void;
   onGoDirectory?: () => void;
+  backLabel?: string;
 }
 
 function StatusIcon({ status }: { status: SafetyStatus }) {
@@ -41,13 +43,21 @@ function StatusIcon({ status }: { status: SafetyStatus }) {
   }
 }
 
-export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: DetailViewProps) {
+export function DetailView({
+  plantId,
+  onBack,
+  onSelectPlant,
+  onGoHome,
+  onGoDirectory,
+  backLabel = 'Back',
+}: DetailViewProps) {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const goDirectory = onGoDirectory ?? onBack;
+  const goHome = onGoHome ?? (() => {});
 
   const fetchPlants = useCallback(async () => {
     try {
@@ -96,10 +106,11 @@ export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: De
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
-            onGoHome={onBack}
+            onGoHome={goHome}
             onGoDirectory={goDirectory}
             onGoBack={onBack}
-            backLabel="Back to Search"
+            backLabel={backLabel}
+            activeNav="none"
           />
           <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
             <div className="inline-flex items-center gap-2 rounded-2xl border border-white bg-white/95 px-4 py-3 text-slate-600 text-sm shadow-sm backdrop-blur">
@@ -121,10 +132,11 @@ export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: De
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
-            onGoHome={onBack}
+            onGoHome={goHome}
             onGoDirectory={goDirectory}
             onGoBack={onBack}
-            backLabel="Back to Search"
+            backLabel={backLabel}
+            activeNav="none"
           />
           <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
             <div role="alert" className="w-full max-w-md rounded-3xl border border-rose-200 bg-white/95 p-6 text-center shadow-xl backdrop-blur">
@@ -155,10 +167,11 @@ export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: De
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
-            onGoHome={onBack}
+            onGoHome={goHome}
             onGoDirectory={goDirectory}
             onGoBack={onBack}
-            backLabel="Back to Search"
+            backLabel={backLabel}
+            activeNav="none"
           />
           <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
             <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white/95 p-8 text-center shadow-xl backdrop-blur">
@@ -170,7 +183,7 @@ export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: De
                   onClick={onBack}
                   className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-emerald-700 text-sm transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
-                  Back to Search
+                  {backLabel}
                 </button>
                 <button
                   type="button"
@@ -233,10 +246,11 @@ export function DetailView({ plantId, onBack, onSelectPlant, onGoDirectory }: De
       <div className="relative z-10 flex min-h-screen flex-col">
         <SiteHeader
           pathname={pathname}
-          onGoHome={onBack}
+          onGoHome={goHome}
           onGoDirectory={goDirectory}
           onGoBack={onBack}
-          backLabel="Back to Search"
+          backLabel={backLabel}
+          activeNav="none"
         />
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">

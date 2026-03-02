@@ -217,6 +217,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
           pathname={pathname}
           onGoHome={() => router.push('/')}
           onGoDirectory={() => router.push('/plants')}
+          activeNav="home"
         />
 
         <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-11 pb-8 sm:pb-10 w-full max-w-6xl">
@@ -461,7 +462,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                     status={displaySafetyStatus}
                                     width={40}
                                     height={40}
-                                    loading="lazy"
+                                    loading={index === 0 ? 'eager' : 'lazy'}
                                     className="border border-slate-200 rounded-lg w-10 h-10 shrink-0"
                                     imageClassName="h-full w-full object-cover"
                                   />
@@ -535,7 +536,9 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         status={displaySafetyStatus}
                         width={160}
                         height={120}
-                        loading={index === 0 ? 'eager' : 'lazy'}
+                        loading={index < 4 ? 'eager' : 'lazy'}
+                        fetchPriority={index < 2 ? 'high' : 'auto'}
+                        priority={index < 2}
                         className="mb-2 rounded-xl w-full h-24 sm:h-28"
                         imageClassName="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       />
