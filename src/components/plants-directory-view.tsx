@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, LoaderCircle, Search } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -71,12 +71,16 @@ export function PlantsDirectoryView() {
   const [error, setError] = useState<string | null>(null);
   const [safetyFilter, setSafetyFilter] = useState<SafetyFilter>('all');
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
+  const [isPhoneViewport, setIsPhoneViewport] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const resultsAnchorRef = useRef<HTMLDivElement>(null);
 
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
   const committedQuery = searchParams.get('q')?.trim() ?? '';
   const normalizedCommittedQuery = committedQuery.toLowerCase();
   const [searchInput, setSearchInput] = useState(committedQuery);
+  const previousCommittedQueryRef = useRef(committedQuery);
 
   const fetchPlants = useCallback(async () => {
     try {
@@ -96,6 +100,16 @@ export function PlantsDirectoryView() {
     void fetchPlants();
   }, [fetchPlants]);
 
+  useEffect(() => {
+    function handleResize() {
+      setIsPhoneViewport(window.innerWidth < 768);
+    }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const pushWithUpdatedParams = useCallback(
     (updateParams: (params: URLSearchParams) => void) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -109,6 +123,12 @@ export function PlantsDirectoryView() {
   useEffect(() => {
     setSearchInput(committedQuery);
   }, [committedQuery]);
+
+  useEffect(() => {
+    if (!isPhoneViewport) {
+      setIsMobileFiltersOpen(false);
+    }
+  }, [isPhoneViewport]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -134,6 +154,7 @@ export function PlantsDirectoryView() {
     setSafetyFilter('all');
     setFlowerColorFilter('all');
     setSearchInput('');
+    setIsMobileFiltersOpen(false);
 
     if (committedQuery.length > 0) {
       pushWithUpdatedParams((params) => {
@@ -206,6 +227,23 @@ export function PlantsDirectoryView() {
     return refinements;
   }, [committedQuery, flowerColorFilter, safetyFilter]);
 
+  useEffect(() => {
+    if (!isPhoneViewport) {
+      previousCommittedQueryRef.current = committedQuery;
+      return;
+    }
+
+    if (previousCommittedQueryRef.current === committedQuery) {
+      return;
+    }
+
+    previousCommittedQueryRef.current = committedQuery;
+    setIsMobileFiltersOpen(false);
+    window.requestAnimationFrame(() => {
+      resultsAnchorRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
+  }, [committedQuery, isPhoneViewport]);
+
   function pushPage(nextPage: number) {
     pushWithUpdatedParams((params) => {
       if (nextPage <= 1) {
@@ -222,6 +260,107 @@ export function PlantsDirectoryView() {
   const currentDirectoryUrl = searchParamsString.length > 0 ? `${pathname}?${searchParamsString}` : pathname;
   const gridRemainder = visiblePlants.length % 3;
   const showRemainderCard = filteredPlants.length > 0 && visiblePlants.length > 6 && gridRemainder !== 0;
+  const activeRefinementCount = activeRefinements.length;
+
+  const filterControls = (
+    <div className="gap-4 grid lg:grid-cols-2">
+      <fieldset>
+        <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">Safety</legend>
+        <div className="gap-2 grid grid-cols-3" role="group" aria-label="Safety filter options">
+          <button
+            type="button"
+            aria-pressed={safetyFilter === 'all'}
+            onClick={() => setSafetyFilter('all')}
+            className={`${PILL_BASE_CLASS} ${
+              safetyFilter === 'all' ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm' : PILL_INACTIVE_CLASS
+            }`}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            aria-pressed={safetyFilter === 'safe_only'}
+            onClick={() => setSafetyFilter('safe_only')}
+            className={`${PILL_BASE_CLASS} ${
+              safetyFilter === 'safe_only'
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm'
+                : PILL_INACTIVE_CLASS
+            }`}
+          >
+            Safe only
+          </button>
+          <button
+            type="button"
+            aria-pressed={safetyFilter === 'toxic_only'}
+            onClick={() => setSafetyFilter('toxic_only')}
+            className={`${PILL_BASE_CLASS} ${
+              safetyFilter === 'toxic_only'
+                ? 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm'
+                : PILL_INACTIVE_CLASS
+            }`}
+          >
+            Toxic only
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
+          Flower color
+        </legend>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Flower color filter options">
+          <button
+            type="button"
+            aria-pressed={flowerColorFilter === 'all'}
+            onClick={() => setFlowerColorFilter('all')}
+            className={`${PILL_BASE_CLASS} ${
+              flowerColorFilter === 'all'
+                ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
+                : PILL_INACTIVE_CLASS
+            }`}
+          >
+            All
+          </button>
+          {FLOWER_COLOR_OPTIONS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={flowerColorFilter === option}
+              onClick={() => setFlowerColorFilter(option)}
+              className={`${PILL_BASE_CLASS} capitalize ${
+                flowerColorFilter === option ? FLOWER_COLOR_STYLES[option].active : PILL_INACTIVE_CLASS
+              }`}
+            >
+              <span className={`h-2.5 w-2.5 rounded-full ${FLOWER_COLOR_STYLES[option].dot}`} aria-hidden="true" />
+              {option}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  );
+
+  const refinementSummary = hasActiveFilters ? (
+    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-slate-200/80 border-t">
+      {activeRefinements.map((refinement) => (
+        <span
+          key={refinement.label}
+          className={`inline-flex items-center rounded-full border px-3 py-1.5 font-medium text-xs ${
+            refinement.tone
+          } ${refinement.capitalize ? 'capitalize' : ''}`}
+        >
+          {refinement.label}
+        </span>
+      ))}
+      <button
+        type="button"
+        onClick={clearRefinements}
+        className="inline-flex items-center bg-white hover:bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-9 font-medium text-slate-700 text-xs transition-colors cursor-pointer"
+      >
+        Clear all
+      </button>
+    </div>
+  ) : null;
 
   return (
     <div className="relative min-h-screen overflow-hidden home-editorial-shell">
@@ -322,121 +461,63 @@ export function PlantsDirectoryView() {
                       aria-describedby="directory-search-hint"
                       value={searchInput}
                       onChange={(event) => setSearchInput(event.target.value)}
+                      onFocus={() => {
+                        if (isPhoneViewport) {
+                          setIsMobileFiltersOpen(false);
+                        }
+                      }}
                       placeholder="Search by plant name, scientific name, or alias..."
-                      className="bg-white shadow-sm pr-4 pl-10 border border-slate-200 focus:border-emerald-300 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-full min-h-11 text-slate-800 placeholder:text-slate-400 text-sm sm:text-base transition-colors"
+                      enterKeyHint="search"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      className="bg-white shadow-sm pr-4 pl-10 border border-slate-200 focus:border-emerald-300 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-full min-h-12 text-base text-slate-800 placeholder:text-slate-400 transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-slate-200/80 border-t">
-                  <div className="gap-4 grid lg:grid-cols-2">
-                    <fieldset>
-                      <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
-                        Safety
-                      </legend>
-                      <div className="gap-2 grid grid-cols-3" role="group" aria-label="Safety filter options">
+                  {isPhoneViewport ? (
+                    <>
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
+                            Refine results
+                          </p>
+                          <p className="mt-1 text-slate-600 text-sm">
+                            {activeRefinementCount > 0 ? `${activeRefinementCount} active filters` : 'Open filters only when you need them.'}
+                          </p>
+                        </div>
                         <button
                           type="button"
-                          aria-pressed={safetyFilter === 'all'}
-                          onClick={() => setSafetyFilter('all')}
-                          className={`${PILL_BASE_CLASS} ${
-                            safetyFilter === 'all'
-                              ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
-                              : PILL_INACTIVE_CLASS
-                          }`}
+                          aria-expanded={isMobileFiltersOpen}
+                          aria-controls="directory-mobile-filters"
+                          onClick={() => setIsMobileFiltersOpen((current) => !current)}
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 text-sm transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
-                          All
-                        </button>
-                        <button
-                          type="button"
-                          aria-pressed={safetyFilter === 'safe_only'}
-                          onClick={() => setSafetyFilter('safe_only')}
-                          className={`${PILL_BASE_CLASS} ${
-                            safetyFilter === 'safe_only'
-                              ? 'border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm'
-                              : PILL_INACTIVE_CLASS
-                          }`}
-                        >
-                          Safe only
-                        </button>
-                        <button
-                          type="button"
-                          aria-pressed={safetyFilter === 'toxic_only'}
-                          onClick={() => setSafetyFilter('toxic_only')}
-                          className={`${PILL_BASE_CLASS} ${
-                            safetyFilter === 'toxic_only'
-                              ? 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm'
-                              : PILL_INACTIVE_CLASS
-                          }`}
-                        >
-                          Toxic only
+                          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+                          {isMobileFiltersOpen ? 'Hide filters' : 'Refine results'}
                         </button>
                       </div>
-                    </fieldset>
 
-                    <fieldset>
-                      <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
-                        Flower color
-                      </legend>
-                      <div className="flex flex-wrap gap-2" role="group" aria-label="Flower color filter options">
-                        <button
-                          type="button"
-                          aria-pressed={flowerColorFilter === 'all'}
-                          onClick={() => setFlowerColorFilter('all')}
-                          className={`${PILL_BASE_CLASS} ${
-                            flowerColorFilter === 'all'
-                              ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
-                              : PILL_INACTIVE_CLASS
-                          }`}
-                        >
-                          All
-                        </button>
-                        {FLOWER_COLOR_OPTIONS.map((option) => (
-                          <button
-                            key={option}
-                            type="button"
-                            aria-pressed={flowerColorFilter === option}
-                            onClick={() => setFlowerColorFilter(option)}
-                            className={`${PILL_BASE_CLASS} capitalize ${
-                              flowerColorFilter === option ? FLOWER_COLOR_STYLES[option].active : PILL_INACTIVE_CLASS
-                            }`}
-                          >
-                            <span
-                              className={`h-2.5 w-2.5 rounded-full ${FLOWER_COLOR_STYLES[option].dot}`}
-                              aria-hidden="true"
-                            />
-                            {option}
-                          </button>
-                        ))}
-                      </div>
-                    </fieldset>
-                  </div>
+                      {isMobileFiltersOpen ? (
+                        <div id="directory-mobile-filters" className="mt-4">
+                          {filterControls}
+                        </div>
+                      ) : null}
 
-                  {hasActiveFilters ? (
-                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-slate-200/80 border-t">
-                      {activeRefinements.map((refinement) => (
-                        <span
-                          key={refinement.label}
-                          className={`inline-flex items-center rounded-full border px-3 py-1.5 font-medium text-xs ${
-                            refinement.tone
-                          } ${refinement.capitalize ? 'capitalize' : ''}`}
-                        >
-                          {refinement.label}
-                        </span>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={clearRefinements}
-                        className="inline-flex items-center bg-white hover:bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-9 font-medium text-slate-700 text-xs transition-colors cursor-pointer"
-                      >
-                        Clear all
-                      </button>
-                    </div>
-                  ) : null}
+                      {refinementSummary}
+                    </>
+                  ) : (
+                    <>
+                      {filterControls}
+                      {refinementSummary}
+                    </>
+                  )}
                 </div>
               </section>
 
-              <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-1 mb-5 text-sm">
+              <div ref={resultsAnchorRef} className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-1 mb-5 text-sm">
                 <p className="font-medium text-slate-700">{resultsStatusLabel}</p>
                 {totalPages > 1 ? (
                   <p className="text-slate-500">

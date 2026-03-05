@@ -15,12 +15,24 @@ vi.mock('@/src/lib/load-plants', () => ({
 
 const mockedLoadPlants = vi.mocked(loadPlants);
 
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  window.dispatchEvent(new Event('resize'));
+}
+
 describe('HomeView', () => {
   beforeEach(() => {
+    setViewportWidth(1280);
     mockedLoadPlants.mockResolvedValue([]);
   });
 
   afterEach(() => {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
     cleanup();
   });
 
@@ -112,6 +124,61 @@ describe('HomeView', () => {
 
     const input = screen.getByLabelText(/search plants by name/i) as HTMLInputElement;
     expect(input.value).toBe('Prayer Plant');
+  });
+
+  it('opens and closes dedicated mobile search mode on phones', async () => {
+    setViewportWidth(375);
+    mockedLoadPlants.mockResolvedValueOnce([]);
+
+    render(<HomeView onSelectPlant={vi.fn()} />);
+
+    const input = await screen.findByLabelText(/search plants by name/i);
+    fireEvent.focus(input);
+
+    await waitFor(() => {
+      expect(input.closest('section')?.getAttribute('data-mobile-search-mode')).toBe('open');
+    });
+    expect(document.body.style.overflow).toBe('hidden');
+
+    fireEvent.click(screen.getByRole('button', { name: /close search/i }));
+
+    await waitFor(() => {
+      expect(input.closest('section')?.getAttribute('data-mobile-search-mode')).toBe('closed');
+    });
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('shows the mobile search panel immediately on focus and swaps to results while typing', async () => {
+    setViewportWidth(390);
+
+    const hibiscus: Plant = {
+      id: 'hibiscus',
+      common_name: 'Hibiscus',
+      scientific_name: 'Hibiscus rosa-sinensis',
+      aka_names: ['Rose Mallow'],
+      flower_colors: ['pink'],
+      primary_image_url: null,
+      photo_urls: [],
+      safety_status: 'non_toxic',
+      symptoms: null,
+      toxic_parts: null,
+      alternatives: [],
+      citations: [{ source_name: 'ASPCA', source_url: 'https://example.com' }],
+    };
+
+    mockedLoadPlants.mockResolvedValueOnce([hibiscus]);
+
+    render(<HomeView onSelectPlant={vi.fn()} />);
+
+    const input = await screen.findByLabelText(/search plants by name/i);
+    fireEvent.focus(input);
+
+    expect(screen.getByText(/start typing to search by common name, scientific name, or alias\./i)).toBeTruthy();
+
+    fireEvent.change(input, { target: { value: 'hibiscus' } });
+
+    expect(await screen.findByRole('listbox', { name: /plant search results/i })).toBeTruthy();
+    expect(screen.getByRole('option', { name: /hibiscus/i })).toBeTruthy();
   });
 
   it('supports keyboard navigation and enter-select in search results', async () => {

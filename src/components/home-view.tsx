@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
-import { Search, Leaf, ShieldCheck, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles } from 'lucide-react';
+import { Search, Leaf, ShieldCheck, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles, X } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
@@ -29,6 +29,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [isPhoneViewport, setIsPhoneViewport] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filtered: Plant[] = useMemo(() => {
@@ -99,13 +100,28 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   }, [fetchPlants]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsPhoneViewport(window.innerWidth < 768);
+    }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -138,26 +154,49 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
     });
   }, [error, filtered.length, isDataLoading, isOpen, isSearchLoading, query]);
 
+  const isMobileSearchModeOpen = isPhoneViewport && isOpen;
   const shouldShowResults = isOpen && query.trim().length > 0;
-  const isSearchPanelExpanded = isDataLoading || Boolean(error) || shouldShowResults;
+  const isSearchPanelExpanded = isDataLoading || Boolean(error) || shouldShowResults || isMobileSearchModeOpen;
   const showInteractiveResults =
     shouldShowResults && !isSearchLoading && filtered.length > 0 && !isDataLoading && !error;
+  const showQuickSuggestions =
+    !isDataLoading && !error && quickSuggestions.length > 0 && (!isMobileSearchModeOpen || query.trim().length === 0);
+
+  const closeSearch = useCallback(() => {
+    setIsOpen(false);
+    setActiveIndex(-1);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileSearchModeOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isMobileSearchModeOpen]);
 
   const handleSelectPlant = useCallback(
     (plant: Plant) => {
       onSelectPlant(plant.id);
       setQuery('');
-      setIsOpen(false);
-      setActiveIndex(-1);
+      closeSearch();
     },
-    [onSelectPlant]
+    [closeSearch, onSelectPlant]
   );
 
   const handleSearchInputKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Escape') {
-        setIsOpen(false);
-        setActiveIndex(-1);
+        closeSearch();
         return;
       }
 
@@ -182,7 +221,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
         handleSelectPlant(filtered[activeIndex]);
       }
     },
-    [activeIndex, filtered, handleSelectPlant, showInteractiveResults]
+    [activeIndex, closeSearch, filtered, handleSelectPlant, showInteractiveResults]
   );
 
   return (
@@ -219,10 +258,18 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
           onGoDirectory={() => router.push('/plants')}
           activeNav="home"
         />
+        {isMobileSearchModeOpen ? (
+          <button
+            type="button"
+            aria-label="Close search"
+            onClick={closeSearch}
+            className="md:hidden fixed inset-0 z-40 bg-slate-900/15 backdrop-blur-sm"
+          />
+        ) : null}
 
         <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-11 pb-8 sm:pb-10 w-full max-w-6xl">
           <section className="lg:items-start gap-5 sm:gap-6 grid lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-            <div className="relative bg-white/82 shadow-xl backdrop-blur p-5 sm:p-8 border border-white/90 rounded-[2rem] overflow-hidden animate-fade-up motion-reduce:animate-none">
+            <div className="order-2 lg:order-1 relative bg-white/82 shadow-xl backdrop-blur p-5 sm:p-8 border border-white/90 rounded-[2rem] overflow-hidden animate-fade-up motion-reduce:animate-none">
               <div
                 className="-top-20 -right-12 absolute bg-emerald-100/55 blur-3xl rounded-full w-48 h-48"
                 aria-hidden="true"
@@ -315,28 +362,53 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
 
             <section
               ref={containerRef}
-              className="relative bg-white/92 shadow-xl backdrop-blur p-5 sm:p-6 border border-white/90 rounded-[2rem] overflow-hidden text-left animate-fade-up-soft motion-reduce:animate-none"
+              data-mobile-search-mode={isMobileSearchModeOpen ? 'open' : 'closed'}
+              className={`order-1 lg:order-2 overflow-hidden border border-white/90 text-left ${
+                isMobileSearchModeOpen
+                  ? 'fixed inset-x-4 top-4 bottom-4 z-50 flex flex-col rounded-[2rem] bg-white/95 p-4 shadow-xl backdrop-blur'
+                  : 'relative rounded-[2rem] bg-white/92 p-5 shadow-xl backdrop-blur sm:p-6 animate-fade-up-soft motion-reduce:animate-none'
+              }`}
               style={{ animationDelay: '80ms' }}
             >
               <div
                 className="-top-16 -left-10 absolute bg-emerald-100/45 blur-2xl rounded-full w-36 h-36"
                 aria-hidden="true"
               />
-              <div className="relative">
-                <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.2em]">Field lookup</p>
-                <h2 className="mt-2 font-semibold text-slate-900 text-2xl tracking-tight">Search the catalog</h2>
-                <p className="mt-1 text-slate-600 sm:text-[15px] text-sm leading-relaxed">
-                  Find a plant by common name, scientific name, or alias.
-                </p>
+              <div className={`relative ${isMobileSearchModeOpen ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
+                {isMobileSearchModeOpen ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.2em]">
+                        Quick mobile search
+                      </p>
+                      <p className="mt-1 text-slate-600 text-sm leading-relaxed">Search and scan results without leaving the page.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={closeSearch}
+                      className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-slate-600 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                    >
+                      <X className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="font-semibold text-[11px] text-emerald-700 uppercase tracking-[0.2em]">Field lookup</p>
+                    <h2 className="mt-2 font-semibold text-slate-900 text-2xl tracking-tight">Search the catalog</h2>
+                    <p className="mt-1 text-slate-600 sm:text-[15px] text-sm leading-relaxed">
+                      Find a plant by common name, scientific name, or alias.
+                    </p>
+                  </>
+                )}
 
                 <label htmlFor="home-plant-search" className="sr-only">
                   Search plants by name
                 </label>
-                <div className="relative mt-4">
+                <div className={`relative ${isMobileSearchModeOpen ? 'mt-3' : 'mt-4'}`}>
                   <Search className="top-1/2 left-5 absolute w-6 h-6 text-slate-500 -translate-y-1/2 pointer-events-none" />
                   <input
                     id="home-plant-search"
-                    type="text"
+                    type="search"
                     role="combobox"
                     aria-label="Search plants by name"
                     aria-expanded={shouldShowResults}
@@ -352,6 +424,10 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         ? 'border-slate-300 bg-white shadow-xl'
                         : 'border-slate-200 bg-white/95 shadow-md'
                     } focus:border-emerald-300 focus:ring-2 focus:ring-emerald-300 focus:shadow-xl placeholder:text-slate-500/85`}
+                    enterKeyHint="search"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={query}
                     onChange={(event) => {
                       setQuery(event.target.value);
@@ -359,7 +435,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                       setActiveIndex(-1);
                     }}
                     onFocus={() => {
-                      if (query.trim().length > 0) {
+                      if (isPhoneViewport || query.trim().length > 0) {
                         setIsOpen(true);
                       }
                     }}
@@ -367,13 +443,13 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   />
                 </div>
 
-                <p className="flex items-center gap-1.5 mt-3 text-slate-700 text-xs sm:text-sm leading-relaxed">
+                <p className={`flex items-center gap-1.5 text-slate-700 text-xs sm:text-sm leading-relaxed ${isMobileSearchModeOpen ? 'mt-2.5' : 'mt-3'}`}>
                   <ShieldCheck className="w-3 h-3 text-emerald-700 shrink-0" />
                   Informational only. For urgent concerns, contact your veterinarian.
                 </p>
 
-                {!isDataLoading && !error && quickSuggestions.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 mt-3">
+                {showQuickSuggestions ? (
+                  <div className={`flex flex-wrap gap-2 ${isMobileSearchModeOpen ? 'mt-2.5' : 'mt-3'}`}>
                     {quickSuggestions.map((name) => (
                       <button
                         key={name}
@@ -392,13 +468,19 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                 ) : null}
 
                 <div
-                  className={`mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-all duration-300 ease-in-out ${
-                    isOpen
-                      ? isSearchPanelExpanded
-                        ? 'h-80 opacity-100'
-                        : 'h-32 opacity-100'
-                      : 'h-0 opacity-0 border-none'
-                  } ${shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'}`}
+                  className={
+                    isMobileSearchModeOpen
+                      ? `mt-3 flex min-h-0 flex-1 overflow-hidden rounded-[1.75rem] border bg-white/95 ${
+                          shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'
+                        }`
+                      : `mt-4 overflow-hidden rounded-2xl border bg-white/95 transition-all duration-300 ease-in-out ${
+                          isOpen
+                            ? isSearchPanelExpanded
+                              ? 'h-80 opacity-100'
+                              : 'h-32 opacity-100'
+                            : 'h-0 opacity-0 border-none'
+                        } ${shouldShowResults ? 'border-slate-300 shadow-md' : 'border-slate-200'}`
+                  }
                 >
                   {isDataLoading ? (
                     <div className="flex justify-center items-center gap-2 px-4 h-full text-slate-500 text-sm">
@@ -434,7 +516,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         id={listboxId}
                         role="listbox"
                         aria-label="Plant search results"
-                        className="h-full overflow-y-auto"
+                        className="h-full overflow-y-auto overscroll-contain"
                       >
                         {filtered.map((plant, index) => {
                           const displaySafetyStatus = getDisplaySafetyStatus(plant);

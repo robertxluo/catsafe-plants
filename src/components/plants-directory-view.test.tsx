@@ -22,6 +22,16 @@ vi.mock('@/src/lib/load-plants', () => ({
 
 const mockedLoadPlants = vi.mocked(loadPlants);
 const flowerColors = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'] as const;
+const scrollIntoViewMock = vi.fn();
+
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  window.dispatchEvent(new Event('resize'));
+}
 
 function makePlants(count: number): Plant[] {
   return Array.from({ length: count }, (_, index) => ({
@@ -208,10 +218,16 @@ describe('PlantsDirectoryView', () => {
   });
 
   beforeEach(() => {
+    setViewportWidth(1280);
     mockPush.mockReset();
     mockUsePathname.mockReset();
     mockUseSearchParams.mockReset();
     mockedLoadPlants.mockReset();
+    scrollIntoViewMock.mockReset();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoViewMock,
+    });
 
     mockUsePathname.mockReturnValue('/plants');
     mockUseSearchParams.mockReturnValue(makeSearchParams());
@@ -558,6 +574,36 @@ describe('PlantsDirectoryView', () => {
     });
   });
 
+  it('keeps desktop filters visible without the mobile refine toggle', async () => {
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /^safe only$/i })).toBeTruthy();
+    });
+
+    expect(screen.queryByRole('button', { name: /refine results/i })).toBeNull();
+  });
+
+  it('collapses mobile filters behind a Refine results toggle', async () => {
+    setViewportWidth(375);
+    mockedLoadPlants.mockResolvedValue(makePlants(5));
+
+    render(<PlantsDirectoryView />);
+
+    const refineToggle = await screen.findByRole('button', { name: /refine results/i });
+    expect(refineToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('button', { name: /^safe only$/i })).toBeNull();
+
+    fireEvent.click(refineToggle);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /hide filters/i }).getAttribute('aria-expanded')).toBe('true');
+    });
+    expect(screen.getByRole('button', { name: /^safe only$/i })).toBeTruthy();
+  });
+
   it('initializes search input and results from q in URL', async () => {
     mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
     mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus' }));
@@ -626,6 +672,36 @@ describe('PlantsDirectoryView', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/plants?q=hibiscus');
     });
+  });
+
+  it('scrolls results into view and re-collapses mobile filters after a committed search change', async () => {
+    setViewportWidth(390);
+    mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
+
+    const { rerender } = render(<PlantsDirectoryView />);
+
+    const refineToggle = await screen.findByRole('button', { name: /refine results/i });
+    fireEvent.click(refineToggle);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /hide filters/i })).toBeTruthy();
+    });
+
+    const input = screen.getByRole('searchbox', { name: /search plant directory/i });
+    fireEvent.change(input, { target: { value: 'hibiscus' } });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/plants?q=hibiscus');
+    });
+
+    mockUseSearchParams.mockReturnValue(makeSearchParams({ q: 'hibiscus' }));
+    rerender(<PlantsDirectoryView />);
+
+    await waitFor(() => {
+      expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('button', { name: /refine results/i })).toBeTruthy();
+    });
+    expect(screen.queryByRole('button', { name: /hide filters/i })).toBeNull();
   });
 
   it('clears q from URL after debounce when search input is emptied', async () => {

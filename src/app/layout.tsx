@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -48,6 +48,12 @@ export const metadata: Metadata = {
       'Search any houseplant to instantly check if it is safe for your cat. Get toxicity info, symptoms, and safe alternatives.',
     images: ['/homepage-catsafe.png'],
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({
