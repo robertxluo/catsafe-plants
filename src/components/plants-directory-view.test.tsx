@@ -22,7 +22,6 @@ vi.mock('@/src/lib/load-plants', () => ({
 
 const mockedLoadPlants = vi.mocked(loadPlants);
 const flowerColors = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'] as const;
-const scrollIntoViewMock = vi.fn();
 
 function setViewportWidth(width: number) {
   Object.defineProperty(window, 'innerWidth', {
@@ -223,11 +222,6 @@ describe('PlantsDirectoryView', () => {
     mockUsePathname.mockReset();
     mockUseSearchParams.mockReset();
     mockedLoadPlants.mockReset();
-    scrollIntoViewMock.mockReset();
-    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
-      configurable: true,
-      value: scrollIntoViewMock,
-    });
 
     mockUsePathname.mockReturnValue('/plants');
     mockUseSearchParams.mockReturnValue(makeSearchParams());
@@ -674,7 +668,7 @@ describe('PlantsDirectoryView', () => {
     });
   });
 
-  it('scrolls results into view and re-collapses mobile filters after a committed search change', async () => {
+  it('re-collapses mobile filters after a committed search change without auto-scrolling the page', async () => {
     setViewportWidth(390);
     mockedLoadPlants.mockResolvedValue(makeSearchablePlants());
 
@@ -698,7 +692,6 @@ describe('PlantsDirectoryView', () => {
     rerender(<PlantsDirectoryView />);
 
     await waitFor(() => {
-      expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('button', { name: /refine results/i })).toBeTruthy();
     });
     expect(screen.queryByRole('button', { name: /hide filters/i })).toBeNull();

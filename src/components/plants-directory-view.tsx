@@ -73,7 +73,6 @@ export function PlantsDirectoryView() {
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
   const [isPhoneViewport, setIsPhoneViewport] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const resultsAnchorRef = useRef<HTMLDivElement>(null);
 
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
@@ -239,9 +238,6 @@ export function PlantsDirectoryView() {
 
     previousCommittedQueryRef.current = committedQuery;
     setIsMobileFiltersOpen(false);
-    window.requestAnimationFrame(() => {
-      resultsAnchorRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    });
   }, [committedQuery, isPhoneViewport]);
 
   function pushPage(nextPage: number) {
@@ -517,7 +513,7 @@ export function PlantsDirectoryView() {
                 </div>
               </section>
 
-              <div ref={resultsAnchorRef} className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-1 mb-5 text-sm">
+              <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-1 mb-5 text-sm">
                 <p className="font-medium text-slate-700">{resultsStatusLabel}</p>
                 {totalPages > 1 ? (
                   <p className="text-slate-500">
