@@ -24,32 +24,24 @@ Seed the launch catalog with a mixed safety profile of the most commonly sold an
 ## Enrichment Rules
 - Aliases (aka_names) are sourced from ASPCA A-Z entries tied to the same scientific key; when exact scientific matches are sparse, genus-level ASPCA matches are used.
 - Small manual alias fallbacks are applied for unique plants with sparse ASPCA variants to keep directory search quality high.
-- Images follow an ASPCA-first, stable-public fallback quality chain:
-  - prefer ASPCA original image path (`/sites/default/files/...`) when the same image also exists as `styles/medium_image_300x200`,
-  - keep ASPCA listing thumbnail as a secondary `photo_urls` entry when needed,
-  - if an ASPCA social-card image does not expose a live listing thumbnail, pair it with a stable Wikimedia Commons image that clearly resembles the same flower,
-  - if a record has a placeholder/missing image on its own ASPCA page, use same-scientific ASPCA alias pages first,
-  - if still unresolved, use approved closest ASPCA-relative indoor substitute and document it below.
+- Images follow a dynamic source quality chain:
+  - We exclusively use high-quality Wikimedia Commons and Unsplash URLs (3 per plant) to avoid placeholder issues or broken internal links from ASPCA records.
+  - Using direct CDNs like `images.unsplash.com` provides verified high-quality media for public testing and development.
 - Toxic detail fields map from ASPCA record content:
   - Clinical Signs -> symptoms
   - Toxic Principles -> toxic_parts (except Unknown, which stays NULL).
 
-## Image Fallback Substitutions (Approved)
-- `majesty-palm` -> reused ASPCA palm imagery from `areca-palm` + `parlor-palm` pages because the target page image is placeholder-only.
-- `nerve-plant` -> reused ASPCA ornamental foliage imagery from `polka-dot-plant` + `prayer-plant` pages because the target page image is placeholder-only.
-- `baby-rubber-plant` -> replaced placeholder image with ASPCA alias-page image assets (`american-rubber-plant`, `blunt-leaf-peperomia`).
-- `emerald-ripple-peperomia` -> replaced placeholder image with ASPCA alias-page image assets (`metallic-peperomia`, `silver-heart`).
-- `rose`, `sunflower`, and `common-snapdragon` -> kept ASPCA primary images, but used stable Wikimedia Commons gallery images because the ASPCA social-card assets did not expose live `plant_listing_180x120` variants.
+## Image Replacements and Sync
+- The initial ASPCA-first imagery proved unreliable, often referencing missing resources or low-quality thumbnails. 
+- All seed records were updated to use three high-quality `upload.wikimedia.org` or `images.unsplash.com` images per plant.
+- `rose` uses high-quality raw assets from Unsplash.
 - `rose` and `peony` -> used small manual alias fallbacks to keep search quality acceptable because the matching ASPCA entries did not expose additional common names.
 
 ## Current Completeness Snapshot
 - Records: 58
 - Records with non-empty aka_names: 58/58
-- Records with non-placeholder HTTPS primary image: 58/58
-- Records with `primary_image_url` using ASPCA original path (not `styles/medium_image_300x200`): 58/58
-- Records with 2+ HTTPS image URLs: 58/58
-- Records requiring closest ASPCA-relative fallback: 2/58 (`majesty-palm`, `nerve-plant`)
-- Records using stable public gallery fallbacks outside ASPCA thumbnails: 3/58 (`rose`, `sunflower`, `common-snapdragon`)
+- Records with non-placeholder HTTPS primary image (Wikimedia or Unsplash): 58/58
+- Records with 3+ HTTPS high-quality image URLs: 58/58
 
 ## Final Ranked Seed List
 The canonical machine-readable list is stored in docs/data/top50-seed-summary.json.
