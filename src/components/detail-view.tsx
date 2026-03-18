@@ -108,7 +108,7 @@ export function DetailView({
     // Get explicit alternatives from the plant's data
     const explicitPlants = plant.alternatives
       .map((id) => plantsById.get(id))
-      .filter((item): item is Plant => item !== undefined);
+      .filter((item): item is Plant => item !== undefined && item.id !== plant.id);
 
     // Get all safe plants to use as padding
     const explicitIds = new Set(explicitPlants.map((p) => p.id));
@@ -586,11 +586,15 @@ export function DetailView({
                 </p>
               </section>
 
-              {isToxic && alternatives.length > 0 ? (
+              {alternatives.length > 0 ? (
                 <section>
                   <div className="mb-3">
-                    <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Safer swap</p>
-                    <h2 className="font-display mt-1 text-2xl font-semibold tracking-tight text-slate-900">Safe alternatives</h2>
+                    <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">
+                      {isToxic ? 'Safer swap' : 'More options'}
+                    </p>
+                    <h2 className="font-display mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+                      {isToxic ? 'Safe alternatives' : 'Other safe plants'}
+                    </h2>
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {alternatives.map((alt) => {
