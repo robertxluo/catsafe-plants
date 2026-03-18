@@ -1,8 +1,12 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SiteFooter } from '@/src/components/ui/site-footer';
 import { Skeleton, SkeletonDetailContent } from '@/src/components/ui/skeleton';
 
 export default function PlantDetailLoading() {
+  const router = useRouter();
   return (
     <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
@@ -13,9 +17,9 @@ export default function PlantDetailLoading() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <SiteHeader
           pathname="/plants"
-          onGoHome={() => {}}
-          onGoDirectory={() => {}}
-          onGoBack={() => {}}
+          onGoHome={() => router.push('/')}
+          onGoDirectory={() => router.push('/plants')}
+          onGoBack={() => router.back()}
           backLabel="Back"
           activeNav="none"
         />

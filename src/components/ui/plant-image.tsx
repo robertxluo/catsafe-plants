@@ -37,7 +37,7 @@ export function PlantImage({
   fetchPriority,
   sizes,
   priority,
-  unoptimized = true,
+  unoptimized = false,
 }: PlantImageProps) {
   const [failed, setFailed] = useState(false);
   const color = getStatusColor(status);
