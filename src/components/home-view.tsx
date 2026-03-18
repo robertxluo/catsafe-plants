@@ -302,28 +302,28 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
           <section
             ref={containerRef}
             data-mobile-search-mode={isMobileSearchModeOpen ? 'open' : 'closed'}
-            className={`w-full max-w-2xl mt-8 sm:mt-8 animate-fade-up-soft motion-reduce:animate-none ${
+            className={`w-full max-w-2xl mt-4 sm:mt-8 animate-fade-up-soft motion-reduce:animate-none ${
               isMobileSearchModeOpen
-                ? 'botanical-card-strong fixed inset-x-4 bottom-4 top-4 z-50 flex flex-col rounded-[2.5rem] p-4 text-left'
-                : 'text-left relative z-20'
+                ? 'botanical-card-strong bg-stone-50/98 backdrop-blur-xl fixed inset-0 sm:inset-x-4 sm:bottom-4 sm:top-8 z-50 flex flex-col rounded-none sm:rounded-[2.5rem] px-4 pt-10 pb-4 sm:p-5 text-left shadow-2xl'
+                : 'text-left relative z-20 px-2 sm:px-0'
             }`}
             style={{ animationDelay: '80ms' }}
           >
             <div className={`relative ${isMobileSearchModeOpen ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
               {isMobileSearchModeOpen ? (
-                <div className="flex justify-between items-center gap-3">
+                <div className="flex justify-between items-center gap-3 shrink-0">
                   <div>
                     <p className="font-semibold text-[11px] text-emerald-700 editorial-kicker">Quick mobile search</p>
                     <p className="mt-1 text-slate-600 text-sm leading-relaxed">
-                      Search and scan results without leaving the page.
+                      Search and scan results instantly.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={closeSearch}
-                    className="inline-flex justify-center items-center bg-white hover:bg-stone-50 px-3 py-2 border border-stone-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 text-slate-600 transition-colors duration-200"
+                    className="inline-flex justify-center items-center bg-white hover:bg-stone-50 p-2 sm:px-3 sm:py-2 border border-stone-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-10 min-w-10 text-slate-600 transition-colors duration-200 shrink-0"
                   >
-                    <X className="w-4 h-4" aria-hidden="true" />
+                    <X className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
               ) : null}
@@ -331,8 +331,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               <label htmlFor="home-plant-search" className="sr-only">
                 Search plants by name
               </label>
-              <div className={`relative group ${isMobileSearchModeOpen ? 'mt-3' : ''}`}>
-                <Search className="top-1/2 left-6 absolute w-8 h-8 text-emerald-800/80 group-hover:text-emerald-800 transition-colors -translate-y-1/2 pointer-events-none" />
+              <div className={`relative group ${isMobileSearchModeOpen ? 'mt-4 shrink-0' : ''}`}>
+                <Search className="top-1/2 left-5 sm:left-6 absolute w-6 h-6 sm:w-8 sm:h-8 text-emerald-800/80 group-hover:text-emerald-800 transition-colors -translate-y-1/2 pointer-events-none" />
                 <input
                   id="home-plant-search"
                   type="search"
@@ -346,7 +346,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                       : undefined
                   }
                   placeholder="Search plant name or alias..."
-                  className={`w-full rounded-[2.5rem] border py-7 pl-16 pr-8 text-[1.35rem] text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-400/20 sm:text-2xl shadow-xl shadow-emerald-900/5 hover:shadow-2xl hover:shadow-emerald-900/10 ${
+                  className={`w-full rounded-[2rem] sm:rounded-[2.5rem] border py-4 sm:py-7 pl-14 sm:pl-16 pr-6 sm:pr-8 text-lg sm:text-[1.35rem] md:text-2xl text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-400/20 shadow-xl shadow-emerald-900/5 hover:shadow-2xl hover:shadow-emerald-900/10 ${
                     shouldShowResults || isOpen
                       ? 'border-emerald-400 bg-white shadow-2xl'
                       : 'border-stone-300 bg-white/98 hover:border-emerald-400 hover:bg-white'
@@ -372,7 +372,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
 
               {showQuickSuggestions ? (
                 <div
-                  className={`flex items-center justify-center flex-wrap gap-2 sm:gap-3 ${isMobileSearchModeOpen ? 'mt-3' : 'mt-5'}`}
+                  className={`flex items-center justify-center flex-wrap gap-2 sm:gap-3 shrink-0 ${isMobileSearchModeOpen ? 'mt-4' : 'mt-4 sm:mt-5'}`}
                 >
                   <span className="hidden sm:inline-block mr-1 font-medium text-[10px] text-slate-500 uppercase tracking-widest">
                     Try:
@@ -386,7 +386,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         setIsOpen(true);
                         setActiveIndex(-1);
                       }}
-                      className="inline-flex items-center bg-white/95 hover:bg-white shadow-sm hover:shadow-md px-4 py-1.5 border border-stone-200 hover:border-emerald-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-800 font-medium sm:text-[14px] hover:text-emerald-900 text-xs transition-all duration-200 cursor-pointer"
+                      className="inline-flex items-center bg-white/95 hover:bg-white shadow-sm hover:shadow-md px-3 sm:px-4 py-1.5 border border-stone-200 hover:border-emerald-300 rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-slate-800 font-medium text-[13px] sm:text-[14px] hover:text-emerald-900 transition-all duration-200 cursor-pointer"
                     >
                       {name}
                     </button>
@@ -397,10 +397,10 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               <div
                 className={
                   isMobileSearchModeOpen
-                    ? `mt-3 flex min-h-0 justify-center flex-1 overflow-hidden rounded-[2rem] border bg-white/98 ${
-                        shouldShowResults ? 'border-stone-300 shadow-lg' : 'border-stone-200'
+                    ? `mt-4 flex min-h-0 justify-center flex-1 overflow-hidden rounded-3xl sm:rounded-4xl border bg-white/98 ${
+                        shouldShowResults ? 'border-stone-300 shadow-inner' : 'border-stone-200'
                       }`
-                    : `mt-4 overflow-hidden rounded-[2rem] border bg-white/98 transition-all duration-300 ease-in-out absolute left-0 right-0 top-full shadow-2xl shadow-stone-900/10 z-50 ${
+                    : `mt-2 sm:mt-4 overflow-hidden rounded-3xl sm:rounded-4xl border bg-white/98 transition-all duration-300 ease-in-out absolute left-0 right-0 top-full shadow-2xl shadow-stone-900/10 z-50 ${
                         isOpen
                           ? isSearchPanelExpanded
                             ? 'h-88 opacity-100 border-stone-300'
@@ -458,13 +458,13 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                           >
                             <button
                               type="button"
-                              className={`min-h-24 w-full cursor-pointer px-6 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset border-b border-stone-100 last:border-b-0 ${
+                              className={`min-h-20 sm:min-h-24 w-full cursor-pointer px-4 sm:px-6 py-3 sm:py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset border-b border-stone-100 last:border-b-0 ${
                                 isActiveOption ? 'bg-emerald-50/70' : 'hover:bg-stone-50/80'
                               }`}
                               onMouseEnter={() => setActiveIndex(index)}
                               onClick={() => handleSelectPlant(plant)}
                             >
-                              <span className="flex items-center gap-4">
+                              <span className="flex items-center gap-3 sm:gap-4">
                                 <PlantImage
                                   src={plant.primary_image_url}
                                   alt={`${plant.common_name} photo`}
@@ -472,21 +472,21 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                   width={48}
                                   height={48}
                                   loading={index === 0 ? 'eager' : 'lazy'}
-                                  className="border border-stone-200 rounded-lg w-12 h-12 shrink-0"
+                                  className="border border-stone-200 rounded-lg w-10 h-10 sm:w-12 sm:h-12 shrink-0"
                                   imageClassName="h-full w-full object-cover"
                                 />
                                 <span className="flex-1 min-w-0">
-                                  <span className="block font-medium text-slate-900 sm:text-[1.15rem] truncate">
+                                  <span className="block font-medium text-slate-900 text-base sm:text-[1.15rem] truncate leading-tight">
                                     {plant.common_name}
                                   </span>
-                                  <span className="block text-slate-500 text-sm truncate italic">
+                                  <span className="block text-slate-500 text-xs sm:text-sm truncate italic mt-0.5">
                                     {plant.scientific_name}
                                   </span>
                                   {isEvidenceIncomplete ? (
-                                    <span className="block mt-1 text-amber-700 text-xs">Evidence incomplete</span>
+                                    <span className="block mt-1 text-amber-700 text-[10px] sm:text-xs">Evidence incomplete</span>
                                   ) : null}
                                 </span>
-                                <SafetyBadge status={displaySafetyStatus} />
+                                <SafetyBadge status={displaySafetyStatus} className="scale-[0.85] sm:scale-100 transform origin-right shrink-0" />
                               </span>
                             </button>
                           </li>
