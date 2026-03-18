@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
@@ -99,8 +99,10 @@ export function PlantsDirectoryView() {
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
   const committedQuery = searchParams.get('q')?.trim() ?? '';
-  const normalizedCommittedQuery = committedQuery.toLowerCase();
   const [searchInput, setSearchInput] = useState(committedQuery);
+  const deferredSearchInput = useDeferredValue(searchInput);
+  const activeSearchQuery = deferredSearchInput.trim();
+  const normalizedDeferredQuery = activeSearchQuery.toLowerCase();
   const previousCommittedQueryRef = useRef(committedQuery);
 
   const fetchPlants = useCallback(async () => {
@@ -173,7 +175,7 @@ export function PlantsDirectoryView() {
         }
         params.delete('page');
       });
-    }, 200);
+    }, 400);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -197,11 +199,11 @@ export function PlantsDirectoryView() {
   const filteredPlants = useMemo(() => {
     return plants.filter((plant) => {
       const matchesSearch =
-        normalizedCommittedQuery.length === 0
+        normalizedDeferredQuery.length === 0
           ? true
-          : plant.common_name.toLowerCase().includes(normalizedCommittedQuery) ||
-            plant.scientific_name.toLowerCase().includes(normalizedCommittedQuery) ||
-            plant.aka_names.some((alias) => alias.toLowerCase().includes(normalizedCommittedQuery));
+          : plant.common_name.toLowerCase().includes(normalizedDeferredQuery) ||
+            plant.scientific_name.toLowerCase().includes(normalizedDeferredQuery) ||
+            plant.aka_names.some((alias) => alias.toLowerCase().includes(normalizedDeferredQuery));
       const displaySafetyStatus = getDisplaySafetyStatus(plant);
       const matchesSafety =
         safetyFilter === 'all'
@@ -212,7 +214,7 @@ export function PlantsDirectoryView() {
       const matchesFlowerColor = flowerColorFilter === 'all' ? true : plant.flower_colors.includes(flowerColorFilter);
       return matchesSearch && matchesSafety && matchesFlowerColor;
     });
-  }, [flowerColorFilter, normalizedCommittedQuery, plants, safetyFilter]);
+  }, [flowerColorFilter, normalizedDeferredQuery, plants, safetyFilter]);
 
   const sortedFilteredPlants = useMemo(
     () => [...filteredPlants].sort(comparePlantsForDirectory),
@@ -226,13 +228,13 @@ export function PlantsDirectoryView() {
     const start = (currentPage - 1) * PAGE_SIZE;
     return sortedFilteredPlants.slice(start, start + PAGE_SIZE);
   }, [currentPage, sortedFilteredPlants]);
-  const hasActiveFilters = safetyFilter !== 'all' || flowerColorFilter !== 'all' || committedQuery.length > 0;
+  const hasActiveFilters = safetyFilter !== 'all' || flowerColorFilter !== 'all' || activeSearchQuery.length > 0;
   const activeRefinements = useMemo(() => {
     const refinements: Array<{ label: string; tone: string; capitalize?: boolean }> = [];
 
-    if (committedQuery.length > 0) {
+    if (activeSearchQuery.length > 0) {
       refinements.push({
-        label: `Search: "${committedQuery}"`,
+        label: `Search: "${activeSearchQuery}"`,
         tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
       });
     }
@@ -260,7 +262,7 @@ export function PlantsDirectoryView() {
     }
 
     return refinements;
-  }, [committedQuery, flowerColorFilter, safetyFilter]);
+  }, [activeSearchQuery, flowerColorFilter, safetyFilter]);
 
   useEffect(() => {
     if (!isPhoneViewport) {
@@ -288,7 +290,7 @@ export function PlantsDirectoryView() {
 
   const resultCountLabel = `${filteredPlants.length} plant${filteredPlants.length === 1 ? '' : 's'}`;
   const resultsStatusLabel =
-    committedQuery.length > 0 ? `${resultCountLabel} matching "${committedQuery}"` : resultCountLabel;
+    activeSearchQuery.length > 0 ? `${resultCountLabel} matching "${activeSearchQuery}"` : resultCountLabel;
   const currentDirectoryUrl = searchParamsString.length > 0 ? `${pathname}?${searchParamsString}` : pathname;
   const gridRemainder = visiblePlants.length % 3;
   const showRemainderCard = filteredPlants.length > 0 && visiblePlants.length > 6 && gridRemainder !== 0;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, useDeferredValue, type KeyboardEvent } from 'react';
 import { Search, Leaf, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -28,7 +28,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const deferredQuery = useDeferredValue(query);
+  const isSearchLoading = query !== deferredQuery;
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
@@ -39,10 +40,10 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filtered: Plant[] = useMemo(() => {
-    if (query.trim().length === 0) {
+    if (deferredQuery.trim().length === 0) {
       return [];
     }
-    const q = query.toLowerCase();
+    const q = deferredQuery.toLowerCase();
     return plants.filter((p) => {
       return (
         p.common_name.toLowerCase().includes(q) ||
@@ -50,7 +51,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
         p.aka_names.some((a) => a.toLowerCase().includes(q))
       );
     });
-  }, [plants, query]);
+  }, [plants, deferredQuery]);
 
   const quickSuggestions = useMemo(() => {
     const seen = new Set<string>();
@@ -129,22 +130,6 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    if (!isOpen || query.trim().length === 0 || isDataLoading || error) {
-      setIsSearchLoading(false);
-      return;
-    }
-
-    setIsSearchLoading(true);
-    const timer = window.setTimeout(() => {
-      setIsSearchLoading(false);
-    }, 180);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [error, isDataLoading, isOpen, query]);
 
   useEffect(() => {
     if (!isOpen || query.trim().length === 0 || filtered.length === 0 || isDataLoading || error || isSearchLoading) {
