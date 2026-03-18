@@ -101,11 +101,26 @@ export function DetailView({
       return [];
     }
 
-    return plant.alternatives
+    // Get explicit alternatives from the plant's data
+    const explicitPlants = plant.alternatives
       .map((id) => plantsById.get(id))
-      .filter((item): item is Plant => item !== undefined)
-      .slice(0, 5);
-  }, [plant, plantsById]);
+      .filter((item): item is Plant => item !== undefined);
+
+    // Get all safe plants to use as padding
+    const explicitIds = new Set(explicitPlants.map((p) => p.id));
+    const randomSafePlants = plants.filter(
+      (p) => getDisplaySafetyStatus(p) === 'non_toxic' && p.id !== plant.id && !explicitIds.has(p.id)
+    );
+
+    // Shuffle the safe pool
+    const shuffledRandom = [...randomSafePlants].sort(() => 0.5 - Math.random());
+
+    // Combine explicit options with random padding, slice exactly 6
+    const combined = [...explicitPlants, ...shuffledRandom].slice(0, 6);
+
+    // Shuffle the final 6 so explicit ones don't just sit at the very front
+    return combined.sort(() => 0.5 - Math.random());
+  }, [plant, plants, plantsById]);
 
   const pathname = plantId ? `/plants/${plantId}` : '/plants';
 
