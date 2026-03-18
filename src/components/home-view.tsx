@@ -17,6 +17,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
+import { SiteFooter } from '@/src/components/ui/site-footer';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
 import { PlantImage } from '@/src/components/ui/plant-image';
@@ -667,19 +668,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
             </section>
           ) : null}
 
-          <footer
-            className="mx-auto mt-10 mb-2 px-5 py-4 rounded-[1.6rem] w-full max-w-4xl text-center animate-fade-up-soft motion-reduce:animate-none botanical-card"
-            style={{ animationDelay: '240ms' }}
-          >
-            <p className="text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-              Safety guidance is informational and should not replace professional veterinary advice.
-            </p>
-            <p className="inline-flex items-center gap-1.5 mt-2 text-slate-500 sm:text-[13px] text-xs">
-              <Image src="/icon.svg" alt="" width={14} height={14} className="w-3.5 h-3.5" aria-hidden="true" />
-              For cat owners, by a cat lover.
-            </p>
-          </footer>
         </main>
+        <SiteFooter />
       </div>
     </div>
   );

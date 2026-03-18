@@ -7,6 +7,7 @@ import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
 import { buildPlantDetailHref } from '@/src/lib/plant-detail-navigation';
+import { SiteFooter } from '@/src/components/ui/site-footer';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
 import { PlantImage } from '@/src/components/ui/plant-image';
@@ -745,6 +746,7 @@ export function PlantsDirectoryView() {
             </>
           ) : null}
         </main>
+        <SiteFooter />
 
         {/* Scroll to top button */}
         <button

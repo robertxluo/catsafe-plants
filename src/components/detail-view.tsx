@@ -19,6 +19,7 @@ import { getDisplaySafetyStatus, getStatusColor, hasIncompleteEvidence } from '@
 import { loadPlants } from '@/src/lib/load-plants';
 import { PlantImage } from '@/src/components/ui/plant-image';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
+import { SiteFooter } from '@/src/components/ui/site-footer';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SkeletonDetailContent, Skeleton } from '@/src/components/ui/skeleton';
 
@@ -144,6 +145,7 @@ export function DetailView({
             {/* Skeleton content */}
             <SkeletonDetailContent />
           </main>
+          <SiteFooter />
         </div>
       </div>
     );
@@ -179,6 +181,7 @@ export function DetailView({
               </button>
             </div>
           </main>
+          <SiteFooter />
         </div>
       </div>
     );
@@ -221,6 +224,7 @@ export function DetailView({
               </div>
             </div>
           </main>
+          <SiteFooter />
         </div>
       </div>
     );
@@ -544,6 +548,7 @@ export function DetailView({
             <ArrowUp className="h-5 w-5" />
           </button>
         </main>
+        <SiteFooter />
       </div>
     </div>
   );
