@@ -1,6 +1,6 @@
 'use client';
 
-import { type KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { type KeyboardEvent, type TouchEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   AlertTriangle,
@@ -60,6 +60,8 @@ export function DetailView({
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const goDirectory = onGoDirectory ?? onBack;
   const goHome = onGoHome ?? (() => {});
@@ -263,7 +265,7 @@ export function DetailView({
   const hasMultipleImages = galleryImages.length > 1;
   const isFirstImage = activeImageIndex === 0;
   const isLastImage = activeImageIndex === galleryImages.length - 1;
-  const visibleImage = galleryImages[activeImageIndex] ?? null;
+
   const galleryImageTotal = Math.max(galleryImages.length, 1);
 
   function goToPreviousImage() {
@@ -283,6 +285,30 @@ export function DetailView({
     if (event.key === 'ArrowRight' && !isLastImage) {
       event.preventDefault();
       goToNextImage();
+    }
+  }
+
+  function handleTouchStart(e: TouchEvent<HTMLDivElement>) {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }
+
+  function handleTouchMove(e: TouchEvent<HTMLDivElement>) {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }
+
+  function handleTouchEnd() {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && !isLastImage) {
+      goToNextImage();
+    }
+    if (isRightSwipe && !isFirstImage) {
+      goToPreviousImage();
     }
   }
 
@@ -341,24 +367,52 @@ export function DetailView({
           <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr] lg:gap-8 animate-fade-up-soft motion-reduce:animate-none" style={{ animationDelay: '80ms' }}>
             <aside className="space-y-4">
               <div
-                className="botanical-card-strong relative overflow-hidden rounded-[1.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 animate-scale-in motion-reduce:animate-none"
+                className="botanical-card-strong relative overflow-hidden touch-pan-y rounded-[1.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 animate-scale-in motion-reduce:animate-none"
                 tabIndex={0}
                 onKeyDown={handleCarouselKeyDown}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 aria-label={`${plant.common_name} image carousel`}
               >
-                <PlantImage
-                  src={visibleImage}
-                  alt={`${plant.common_name} photo ${activeImageIndex + 1} of ${galleryImageTotal}`}
-                  status={displaySafetyStatus}
-                  fallbackLabel={plant.common_name}
-                  width={900}
-                  height={900}
-                  loading="eager"
-                  fetchPriority="high"
-                  priority
-                  className="aspect-square w-full"
-                  imageClassName="h-full w-full object-cover"
-                />
+                {galleryImages.length > 0 ? (
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                  >
+                    {galleryImages.map((img, i) => (
+                      <div key={`gallery-slide-${i}`} className="w-full shrink-0">
+                        <PlantImage
+                          src={img}
+                          alt={`${plant.common_name} photo ${i + 1} of ${galleryImageTotal}`}
+                          status={displaySafetyStatus}
+                          fallbackLabel={plant.common_name}
+                          width={900}
+                          height={900}
+                          loading={i === 0 ? 'eager' : 'lazy'}
+                          fetchPriority={i === 0 ? 'high' : 'auto'}
+                          priority={i === 0}
+                          className="aspect-square w-full"
+                          imageClassName="h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <PlantImage
+                    src={null}
+                    alt={`${plant.common_name} photo`}
+                    status={displaySafetyStatus}
+                    fallbackLabel={plant.common_name}
+                    width={900}
+                    height={900}
+                    loading="eager"
+                    fetchPriority="high"
+                    priority
+                    className="aspect-square w-full"
+                    imageClassName="h-full w-full object-cover"
+                  />
+                )}
 
                 {hasMultipleImages && !isFirstImage ? (
                   <button
