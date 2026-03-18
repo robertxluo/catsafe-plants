@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, Geist_Mono } from 'next/font/google';
+import { DM_Sans, Geist_Mono, Newsreader } from 'next/font/google';
 import './globals.css';
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
+  subsets: ['latin'],
+});
+
+const newsreader = Newsreader({
+  variable: '--font-display-serif',
   subsets: ['latin'],
 });
 
@@ -63,7 +68,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${dmSans.variable} ${newsreader.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   );
 }

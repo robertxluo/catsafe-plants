@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -10,6 +10,7 @@ import { buildPlantDetailHref } from '@/src/lib/plant-detail-navigation';
 import { SiteHeader } from '@/src/components/ui/site-header';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
 import { PlantImage } from '@/src/components/ui/plant-image';
+import { Skeleton, SkeletonCard } from '@/src/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 type SafetyFilter = 'all' | 'safe_only' | 'toxic_only';
@@ -19,10 +20,10 @@ const DIRECTORY_PLANT_NAME_COLLATOR = new Intl.Collator(undefined, {
   numeric: true,
 });
 const PILL_BASE_CLASS =
-  'inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] sm:px-3.5 sm:text-sm';
-const PILL_INACTIVE_CLASS = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50';
+  'inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] sm:px-3.5 sm:text-sm';
+const PILL_INACTIVE_CLASS = 'border-stone-200 bg-white text-slate-700 hover:border-emerald-200 hover:bg-emerald-50/60';
 const PAGINATION_BUTTON_CLASS =
-  'inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-700 text-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-50';
 const FLOWER_COLOR_STYLES: Record<FlowerColor, { active: string; dot: string }> = {
   white: {
     active: 'border-slate-300 bg-slate-50 text-slate-900 shadow-sm',
@@ -91,6 +92,7 @@ export function PlantsDirectoryView() {
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
   const [isPhoneViewport, setIsPhoneViewport] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
@@ -125,6 +127,15 @@ export function PlantsDirectoryView() {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    function handleScroll() {
+      setShowScrollTop(window.scrollY > 400);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const pushWithUpdatedParams = useCallback(
@@ -282,16 +293,16 @@ export function PlantsDirectoryView() {
   const activeRefinementCount = activeRefinements.length;
 
   const filterControls = (
-    <div className="gap-4 grid lg:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-2">
       <fieldset>
-        <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">Safety</legend>
-        <div className="gap-2 grid grid-cols-3" role="group" aria-label="Safety filter options">
+        <legend className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">Safety</legend>
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label="Safety filter options">
           <button
             type="button"
             aria-pressed={safetyFilter === 'all'}
             onClick={() => setSafetyFilter('all')}
             className={`${PILL_BASE_CLASS} ${
-              safetyFilter === 'all' ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm' : PILL_INACTIVE_CLASS
+              safetyFilter === 'all' ? 'border-stone-400 bg-stone-100 text-slate-900 shadow-sm' : PILL_INACTIVE_CLASS
             }`}
           >
             All
@@ -324,7 +335,7 @@ export function PlantsDirectoryView() {
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
+        <legend className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">
           Flower color
         </legend>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Flower color filter options">
@@ -334,7 +345,7 @@ export function PlantsDirectoryView() {
             onClick={() => setFlowerColorFilter('all')}
             className={`${PILL_BASE_CLASS} ${
               flowerColorFilter === 'all'
-                ? 'border-slate-400 bg-slate-100 text-slate-900 shadow-sm'
+                ? 'border-stone-400 bg-stone-100 text-slate-900 shadow-sm'
                 : PILL_INACTIVE_CLASS
             }`}
           >
@@ -360,11 +371,11 @@ export function PlantsDirectoryView() {
   );
 
   const refinementSummary = hasActiveFilters ? (
-    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-slate-200/80 border-t">
+    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone-200/80 pt-4">
       {activeRefinements.map((refinement) => (
         <span
           key={refinement.label}
-          className={`inline-flex items-center rounded-full border px-3 py-1.5 font-medium text-xs ${
+          className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${
             refinement.tone
           } ${refinement.capitalize ? 'capitalize' : ''}`}
         >
@@ -374,7 +385,7 @@ export function PlantsDirectoryView() {
       <button
         type="button"
         onClick={clearRefinements}
-        className="inline-flex items-center bg-white hover:bg-slate-50 px-3 py-1.5 border border-slate-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 min-h-9 font-medium text-slate-700 text-xs transition-colors cursor-pointer"
+        className="inline-flex min-h-9 cursor-pointer items-center rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
       >
         Clear all
       </button>
@@ -382,128 +393,186 @@ export function PlantsDirectoryView() {
   ) : null;
 
   return (
-    <div className="relative min-h-screen overflow-hidden home-editorial-shell">
-      <div
-        className="absolute inset-0 bg-gradient-to-b from-slate-100/78 via-slate-100/90 to-slate-100"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-emerald-100/30 via-transparent to-slate-100/85"
-        aria-hidden="true"
-      />
-      <div
-        className="-top-20 -right-16 absolute bg-emerald-100/55 blur-3xl rounded-full w-72 h-72 pointer-events-none"
-        aria-hidden="true"
-      />
-      <div
-        className="-bottom-16 -left-16 absolute bg-slate-200/50 blur-3xl rounded-full w-72 h-72 pointer-events-none"
-        aria-hidden="true"
-      />
+    <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-stone-100/86 via-stone-100/70 to-stone-100/96" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/28 via-transparent to-amber-100/32" aria-hidden="true" />
+      <div className="absolute -right-16 -top-20 h-72 w-72 rounded-full bg-emerald-100/55 blur-3xl pointer-events-none" aria-hidden="true" />
+      <div className="absolute -bottom-16 -left-16 h-72 w-72 rounded-full bg-amber-100/45 blur-3xl pointer-events-none" aria-hidden="true" />
 
-      <div className="z-10 relative flex flex-col min-h-screen">
+      <div className="relative z-10 flex min-h-screen flex-col">
         <SiteHeader
           pathname={pathname}
           onGoHome={() => router.push('/')}
           onGoDirectory={() => router.push('/plants')}
-          onGoBack={() => router.push('/')}
           activeNav="directory"
         />
 
-        <main className="flex flex-col flex-1 mx-auto px-4 sm:px-6 pt-7 sm:pt-9 pb-8 sm:pb-10 w-full max-w-6xl">
-          <header className="mb-6">
-            <div className="max-w-2xl">
-              <p className="font-semibold text-emerald-700 text-xs uppercase tracking-[0.2em]">
-                Curated For Cat Safety
-              </p>
-              <h1 className="mt-1 font-semibold text-slate-900 text-3xl sm:text-4xl leading-tight tracking-tight">
-                Plant Directory
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
+          <header className="mb-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="max-w-3xl">
+              <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Curated for cat safety</p>
+              <h1 className="font-display mt-2 text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl">
+                Plant directory
               </h1>
-              <p className="mt-1.5 text-slate-700 text-sm sm:text-base">
-                Browse the plant catalog and check cat safety before you bring one home.
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base">
+                Browse the catalog, filter by risk and flower color, and move from search to confident decisions without guesswork.
               </p>
             </div>
+            {!isLoading && !error && plants.length > 0 ? (
+              <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4 lg:ml-auto">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Catalog snapshot</p>
+                <div className="mt-2 grid grid-cols-3 gap-3">
+                  <div>
+                    <p className="font-display text-2xl font-semibold text-slate-950">{plants.length}</p>
+                    <p className="text-xs text-slate-600">reviewed plants</p>
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl font-semibold text-slate-950">{filteredPlants.length}</p>
+                    <p className="text-xs text-slate-600">matching now</p>
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl font-semibold text-slate-950">{totalPages}</p>
+                    <p className="text-xs text-slate-600">result pages</p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </header>
 
           {isLoading ? (
-            <section className="flex flex-1 justify-center items-start pt-10">
-              <div className="inline-flex items-center gap-2 bg-white/95 shadow-sm backdrop-blur px-4 py-3 border border-white rounded-2xl text-slate-600 text-sm">
-                <LoaderCircle className="w-4 h-4 animate-spin" />
-                Loading plants...
+            <>
+              {/* Skeleton search bar area */}
+              <section className="botanical-card-strong mb-4 rounded-[1.9rem] p-4 sm:p-5 animate-fade-up-soft">
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,0.8fr)] lg:items-start">
+                  <div className="max-w-3xl">
+                    <Skeleton className="h-3 w-28 rounded-lg" />
+                    <Skeleton className="mt-3 h-8 w-64 rounded-xl" />
+                    <Skeleton className="mt-3 h-4 w-full max-w-md rounded-lg" />
+                    <Skeleton className="mt-4 h-12 w-full rounded-[1.5rem]" />
+                  </div>
+                  <div className="rounded-[1.5rem] border border-stone-200/90 bg-white/70 p-4">
+                    <Skeleton className="h-3 w-24 rounded-lg" />
+                    <Skeleton className="mt-3 h-4 w-full rounded-lg" />
+                    <Skeleton className="mt-1.5 h-4 w-3/4 rounded-lg" />
+                  </div>
+                </div>
+                <div className="mt-4 border-t border-stone-200/80 pt-4">
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div>
+                      <Skeleton className="mb-2 h-3 w-16 rounded-lg" />
+                      <div className="grid grid-cols-3 gap-2">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <Skeleton key={`saf-skel-${i}`} className="h-10 rounded-full" />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Skeleton className="mb-2 h-3 w-24 rounded-lg" />
+                      <div className="flex flex-wrap gap-2">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <Skeleton key={`clr-skel-${i}`} className="h-10 w-20 rounded-full" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Skeleton result count */}
+              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <Skeleton className="h-4 w-24 rounded-lg" />
+                  <Skeleton className="mt-1.5 h-3 w-56 rounded-lg" />
+                </div>
               </div>
-            </section>
+
+              {/* Skeleton card grid */}
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonCard key={`dir-skel-${i}`} />
+                ))}
+              </section>
+            </>
           ) : error ? (
-            <section className="flex flex-1 justify-center items-start pt-10">
-              <div
-                role="alert"
-                className="bg-white/95 shadow-xl backdrop-blur p-6 border border-rose-200 rounded-3xl w-full max-w-md text-center"
-              >
-                <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
-                  <AlertCircle className="w-4 h-4" />
+            <section className="flex flex-1 items-start justify-center pt-10">
+              <div role="alert" className="botanical-card-strong w-full max-w-md rounded-3xl border border-rose-200 p-6 text-center animate-scale-in">
+                <div className="inline-flex items-center gap-2 text-sm text-rose-700">
+                  <AlertCircle className="h-4 w-4" />
                   {error}
                 </div>
                 <button
                   type="button"
                   onClick={() => void fetchPlants()}
-                  className="block bg-rose-50 hover:bg-rose-100 mx-auto mt-4 px-3 py-2 border border-rose-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 text-rose-700 text-sm transition-colors cursor-pointer"
+                  className="mx-auto mt-4 block cursor-pointer rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
                 >
                   Retry
                 </button>
               </div>
             </section>
           ) : plants.length === 0 ? (
-            <section className="flex flex-1 justify-center items-start pt-10">
-              <div className="bg-white/95 shadow-sm backdrop-blur p-6 border border-slate-200 rounded-3xl w-full max-w-md text-center">
-                <p className="text-slate-600 text-sm">No plants available in the directory yet.</p>
+            <section className="flex flex-1 items-start justify-center pt-10">
+              <div className="botanical-card w-full max-w-md rounded-3xl p-6 text-center animate-scale-in">
+                <p className="text-sm text-slate-600">No plants available in the directory yet.</p>
               </div>
             </section>
           ) : null}
 
           {!isLoading && !error && plants.length > 0 ? (
             <>
-              <section className="bg-white/92 shadow-sm backdrop-blur mb-4 p-4 sm:p-5 border border-white/90 rounded-[1.7rem]">
-                <div className="max-w-3xl">
-                  <div className="font-semibold text-emerald-700 text-xs uppercase tracking-[0.18em]">
-                    Search plants
+              <section className="botanical-card-strong mb-4 rounded-[1.9rem] p-4 sm:p-5">
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,0.8fr)] lg:items-start">
+                  <div className="max-w-3xl">
+                    <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Search plants</p>
+                    <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                      Find a match fast
+                    </h2>
+                    <p id="directory-search-hint" className="mt-2 text-xs text-slate-600 sm:text-sm">
+                      Search by common name, scientific name, or alias, then refine only when you need a narrower result set.
+                    </p>
+                    <div className="relative mt-4">
+                      <Search
+                        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                        aria-hidden="true"
+                      />
+                      <input
+                        id="directory-search"
+                        type="search"
+                        aria-label="Search plant directory"
+                        aria-describedby="directory-search-hint"
+                        value={searchInput}
+                        onChange={(event) => setSearchInput(event.target.value)}
+                        onFocus={() => {
+                          if (isPhoneViewport) {
+                            setIsMobileFiltersOpen(false);
+                          }
+                        }}
+                        placeholder="Search by plant name, scientific name, or alias..."
+                        enterKeyHint="search"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        className="min-h-12 w-full rounded-[1.5rem] border border-stone-200 bg-white px-4 pl-11 text-base text-slate-800 shadow-sm transition-colors placeholder:text-slate-400 focus:border-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                      />
+                    </div>
                   </div>
-                  <p id="directory-search-hint" className="mt-1 text-slate-600 text-xs sm:text-sm">
-                    Find a plant by common name, scientific name, or alias.
-                  </p>
-                  <div className="relative mt-3">
-                    <Search
-                      className="top-1/2 left-3 absolute w-4 h-4 text-slate-400 -translate-y-1/2 pointer-events-none"
-                      aria-hidden="true"
-                    />
-                    <input
-                      id="directory-search"
-                      type="search"
-                      aria-label="Search plant directory"
-                      aria-describedby="directory-search-hint"
-                      value={searchInput}
-                      onChange={(event) => setSearchInput(event.target.value)}
-                      onFocus={() => {
-                        if (isPhoneViewport) {
-                          setIsMobileFiltersOpen(false);
-                        }
-                      }}
-                      placeholder="Search by plant name, scientific name, or alias..."
-                      enterKeyHint="search"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      className="bg-white shadow-sm pr-4 pl-10 border border-slate-200 focus:border-emerald-300 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 w-full min-h-12 text-base text-slate-800 placeholder:text-slate-400 transition-colors"
-                    />
+
+                  <div className="rounded-[1.5rem] border border-stone-200/90 bg-white/70 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Current view</p>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                      {hasActiveFilters
+                        ? `${activeRefinementCount} active refinement${activeRefinementCount === 1 ? '' : 's'} shaping the results.`
+                        : 'Showing the full reviewed catalog with no active refinements.'}
+                    </p>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-slate-200/80 border-t">
+                <div className="mt-4 border-t border-stone-200/80 pt-4">
                   {isPhoneViewport ? (
                     <>
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="font-semibold text-[11px] text-slate-600 uppercase tracking-[0.14em]">
-                            Refine results
-                          </p>
-                          <p className="mt-1 text-slate-600 text-sm">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">Refine results</p>
+                          <p className="mt-1 text-sm text-slate-600">
                             {activeRefinementCount > 0 ? `${activeRefinementCount} active filters` : 'Open filters only when you need them.'}
                           </p>
                         </div>
@@ -512,9 +581,9 @@ export function PlantsDirectoryView() {
                           aria-expanded={isMobileFiltersOpen}
                           aria-controls="directory-mobile-filters"
                           onClick={() => setIsMobileFiltersOpen((current) => !current)}
-                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 text-sm transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
-                          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+                          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                           {isMobileFiltersOpen ? 'Hide filters' : 'Refine results'}
                         </button>
                       </div>
@@ -536,32 +605,32 @@ export function PlantsDirectoryView() {
                 </div>
               </section>
 
-              <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-1 mb-5 text-sm">
-                <p className="font-medium text-slate-700">{resultsStatusLabel}</p>
+              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-700">{resultsStatusLabel}</p>
+                  <p className="text-xs text-slate-500">Tap a card for evidence, symptoms, and safe alternatives.</p>
+                </div>
                 {totalPages > 1 ? (
-                  <p className="text-slate-500">
+                  <p className="text-sm text-slate-500">
                     Page {currentPage} of {totalPages}
                   </p>
                 ) : null}
               </div>
 
               {filteredPlants.length === 0 ? (
-                <section className="bg-white/90 p-6 border border-slate-200 rounded-2xl text-center">
-                  <p className="text-slate-600 text-sm">No plants match your current search and filter selections.</p>
+                <section className="botanical-card rounded-[1.7rem] p-6 text-center">
+                  <p className="text-sm text-slate-600">No plants match your current search and filter selections.</p>
                   <button
                     type="button"
                     onClick={clearRefinements}
-                    className="bg-emerald-50 hover:bg-emerald-100 mt-4 px-3 py-2 border border-emerald-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-emerald-700 text-sm transition-colors cursor-pointer"
+                    className="mt-4 cursor-pointer rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                   >
                     Reset filters
                   </button>
                 </section>
               ) : (
                 <>
-                  <section
-                    aria-label="Plant directory results"
-                    className="gap-4 lg:gap-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
-                  >
+                  <section aria-label="Plant directory results" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
                     {visiblePlants.map((plant, index) => {
                       const displaySafetyStatus = getDisplaySafetyStatus(plant);
                       const isEvidenceIncomplete = hasIncompleteEvidence(plant);
@@ -571,7 +640,8 @@ export function PlantsDirectoryView() {
                           type="button"
                           onClick={() => router.push(buildPlantDetailHref(plant.id, currentDirectoryUrl))}
                           aria-label={`Open details for ${plant.common_name}`}
-                          className="group flex flex-col bg-white/92 hover:bg-white shadow-sm hover:shadow-md backdrop-blur p-3 border border-slate-200 hover:border-green-200 rounded-[1.45rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 h-full overflow-hidden text-left active:scale-[0.97] transition-all hover:-translate-y-0.5 duration-200 cursor-pointer"
+                          className="group botanical-card-strong flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] animate-fade-up-stagger motion-reduce:animate-none"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
                           <PlantImage
                             src={plant.primary_image_url}
@@ -583,41 +653,46 @@ export function PlantsDirectoryView() {
                             fetchPriority={index < 2 ? 'high' : 'auto'}
                             priority={index < 2}
                             sizes="(min-width: 1280px) 30vw, (min-width: 640px) 46vw, 94vw"
-                            className="mb-3 rounded-[1.1rem] w-full aspect-[4/3]"
+                            className="mb-3 aspect-[4/3] w-full rounded-[1.2rem]"
                             imageClassName="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                             placeholderTestId={`directory-placeholder-${plant.id}`}
                           />
-                          <div className="flex flex-col flex-1 px-1 pb-0.5">
-                            <div className="font-semibold text-slate-900 text-base sm:text-lg leading-tight tracking-tight">
-                              {plant.common_name}
+                          <div className="flex flex-1 flex-col px-1 pb-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="truncate text-base font-semibold leading-tight tracking-tight text-slate-900 sm:text-lg">
+                                  {plant.common_name}
+                                </div>
+                                <div className="mt-1 truncate text-xs italic text-slate-600 sm:text-sm">
+                                  {plant.scientific_name}
+                                </div>
+                              </div>
+                              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-emerald-700" />
                             </div>
-                            <div className="mt-1 text-slate-700 text-xs sm:text-sm truncate italic">
-                              {plant.scientific_name}
-                            </div>
-                            <div className="flex justify-between items-center gap-3 mt-auto pt-3">
+
+                            <div className="mt-4 flex items-center justify-between gap-3">
                               <SafetyBadge status={displaySafetyStatus} compact />
                               {isEvidenceIncomplete ? (
-                                <span className="font-medium text-[11px] text-amber-700 sm:text-xs">
-                                  Evidence incomplete
-                                </span>
+                                <span className="text-[11px] font-medium text-amber-700 sm:text-xs">Evidence incomplete</span>
                               ) : null}
                             </div>
                           </div>
                         </button>
                       );
                     })}
+
                     {showRemainderCard ? (
                       <article
                         data-testid="directory-remainder-card"
-                        className={`hidden xl:flex h-full flex-col justify-between rounded-[1.45rem] border border-slate-200 bg-white/92 p-5 shadow-sm backdrop-blur ${
+                        className={`botanical-card hidden h-full flex-col justify-between rounded-[1.6rem] p-5 xl:flex ${
                           gridRemainder === 1 ? 'xl:col-span-2' : ''
                         }`}
                       >
                         <div>
-                          <p className="font-semibold text-emerald-700 text-[11px] uppercase tracking-[0.16em]">
+                          <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">
                             {hasActiveFilters ? 'Want broader results?' : 'Need a specific plant?'}
                           </p>
-                          <p className="mt-2 max-w-sm text-slate-600 text-sm leading-relaxed">
+                          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600">
                             {hasActiveFilters
                               ? 'Clear the current search or filters to reopen the full catalog.'
                               : 'Search by common name, scientific name, or alias to jump straight to a match.'}
@@ -628,7 +703,7 @@ export function PlantsDirectoryView() {
                             <button
                               type="button"
                               onClick={clearRefinements}
-                              className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 text-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 cursor-pointer"
+                              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                             >
                               Clear all
                             </button>
@@ -639,21 +714,18 @@ export function PlantsDirectoryView() {
                   </section>
 
                   {totalPages > 1 ? (
-                    <nav
-                      className="bg-white/92 shadow-sm backdrop-blur mt-8 p-4 border border-slate-200 rounded-[1.7rem]"
-                      aria-label="Pagination footer"
-                    >
-                      <div className="items-center gap-2 sm:gap-4 grid grid-cols-[auto_1fr_auto]">
+                    <nav className="botanical-card mt-8 rounded-[1.7rem] p-4" aria-label="Pagination footer">
+                      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
                         <button
                           type="button"
                           onClick={() => pushPage(currentPage - 1)}
                           disabled={currentPage <= 1}
                           className={PAGINATION_BUTTON_CLASS}
                         >
-                          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                           <span>Previous</span>
                         </button>
-                        <p className="font-medium text-slate-700 text-sm text-center">
+                        <p className="text-center text-sm font-medium text-slate-700">
                           Page {currentPage} of {totalPages}
                         </p>
                         <button
@@ -663,7 +735,7 @@ export function PlantsDirectoryView() {
                           className={PAGINATION_BUTTON_CLASS}
                         >
                           <span>Next</span>
-                          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </div>
                     </nav>
@@ -673,6 +745,16 @@ export function PlantsDirectoryView() {
             </>
           ) : null}
         </main>
+
+        {/* Scroll to top button */}
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Scroll to top"
+          className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white/95 text-slate-600 shadow-lg backdrop-blur transition-all duration-300 hover:bg-emerald-50 hover:text-emerald-800 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${showScrollTop ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
       </div>
     </div>
   );

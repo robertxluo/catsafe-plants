@@ -4,11 +4,11 @@ import { type KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'r
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowUp,
   ChevronLeft,
   ChevronRight,
   FlaskConical,
   HelpCircle,
-  LoaderCircle,
   ShieldAlert,
   ShieldCheck,
   Stethoscope,
@@ -20,6 +20,7 @@ import { loadPlants } from '@/src/lib/load-plants';
 import { PlantImage } from '@/src/components/ui/plant-image';
 import { SafetyBadge } from '@/src/components/ui/safety-badge';
 import { SiteHeader } from '@/src/components/ui/site-header';
+import { SkeletonDetailContent, Skeleton } from '@/src/components/ui/skeleton';
 
 interface DetailViewProps {
   plantId: string;
@@ -33,13 +34,13 @@ interface DetailViewProps {
 function StatusIcon({ status }: { status: SafetyStatus }) {
   switch (status) {
     case 'non_toxic':
-      return <ShieldCheck className="w-5 h-5" />;
+      return <ShieldCheck className="h-5 w-5" />;
     case 'mildly_toxic':
-      return <AlertTriangle className="w-5 h-5" />;
+      return <AlertTriangle className="h-5 w-5" />;
     case 'highly_toxic':
-      return <ShieldAlert className="w-5 h-5" />;
+      return <ShieldAlert className="h-5 w-5" />;
     case 'unknown':
-      return <HelpCircle className="w-5 h-5" />;
+      return <HelpCircle className="h-5 w-5" />;
   }
 }
 
@@ -55,6 +56,7 @@ export function DetailView({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const goDirectory = onGoDirectory ?? onBack;
   const goHome = onGoHome ?? (() => {});
@@ -81,6 +83,15 @@ export function DetailView({
     setActiveImageIndex(0);
   }, [plantId]);
 
+  useEffect(() => {
+    function handleScroll() {
+      setShowScrollTop(window.scrollY > 400);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const plantsById = useMemo(() => new Map<string, Plant>(plants.map((item) => [item.id, item])), [plants]);
   const plant = plantsById.get(plantId);
 
@@ -99,10 +110,10 @@ export function DetailView({
 
   if (isLoading) {
     return (
-      <div className="home-editorial-shell relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/78 via-slate-100/90 to-slate-100" aria-hidden="true" />
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/30 via-transparent to-slate-100/85" aria-hidden="true" />
-        <div className="-top-20 -right-14 absolute bg-emerald-100/55 blur-3xl rounded-full w-64 h-64 pointer-events-none" aria-hidden="true" />
+      <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/32 via-transparent to-amber-100/26" aria-hidden="true" />
+        <div className="absolute -right-14 -top-20 h-64 w-64 rounded-full bg-emerald-100/55 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
@@ -112,11 +123,26 @@ export function DetailView({
             backLabel={backLabel}
             activeNav="none"
           />
-          <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-white bg-white/95 px-4 py-3 text-slate-600 text-sm shadow-sm backdrop-blur">
-              <LoaderCircle className="w-4 h-4 animate-spin" />
-              Loading plant details...
-            </div>
+          <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
+            {/* Skeleton header */}
+            <header className="mb-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end animate-fade-up motion-reduce:animate-none">
+              <div>
+                <Skeleton className="h-3 w-36 rounded-lg" />
+                <Skeleton className="mt-3 h-12 w-72 rounded-xl sm:h-14" />
+                <Skeleton className="mt-3 h-5 w-48 rounded-lg" />
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Skeleton className="h-7 w-28 rounded-full" />
+                </div>
+              </div>
+              <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4">
+                <Skeleton className="h-3 w-28 rounded-lg" />
+                <Skeleton className="mt-3 h-4 w-full rounded-lg" />
+                <Skeleton className="mt-1.5 h-4 w-3/4 rounded-lg" />
+              </div>
+            </header>
+
+            {/* Skeleton content */}
+            <SkeletonDetailContent />
           </main>
         </div>
       </div>
@@ -125,10 +151,10 @@ export function DetailView({
 
   if (error) {
     return (
-      <div className="home-editorial-shell relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/78 via-slate-100/90 to-slate-100" aria-hidden="true" />
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/30 via-transparent to-slate-100/85" aria-hidden="true" />
-        <div className="-top-20 -right-14 absolute bg-emerald-100/55 blur-3xl rounded-full w-64 h-64 pointer-events-none" aria-hidden="true" />
+      <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/32 via-transparent to-amber-100/26" aria-hidden="true" />
+        <div className="absolute -right-14 -top-20 h-64 w-64 rounded-full bg-emerald-100/55 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
@@ -139,15 +165,15 @@ export function DetailView({
             activeNav="none"
           />
           <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
-            <div role="alert" className="w-full max-w-md rounded-3xl border border-rose-200 bg-white/95 p-6 text-center shadow-xl backdrop-blur">
-              <div className="inline-flex items-center gap-2 text-rose-700 text-sm">
-                <AlertCircle className="w-4 h-4" />
+            <div role="alert" className="botanical-card-strong w-full max-w-md rounded-3xl border border-rose-200 p-6 text-center">
+              <div className="inline-flex items-center gap-2 text-sm text-rose-700">
+                <AlertCircle className="h-4 w-4" />
                 {error}
               </div>
               <button
                 type="button"
                 onClick={() => void fetchPlants()}
-                className="mx-auto mt-4 block cursor-pointer rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 text-sm transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
+                className="mx-auto mt-4 block cursor-pointer rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
               >
                 Retry
               </button>
@@ -160,10 +186,10 @@ export function DetailView({
 
   if (!plant) {
     return (
-      <div className="home-editorial-shell relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/78 via-slate-100/90 to-slate-100" aria-hidden="true" />
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/30 via-transparent to-slate-100/85" aria-hidden="true" />
-        <div className="-top-20 -right-14 absolute bg-emerald-100/55 blur-3xl rounded-full w-64 h-64 pointer-events-none" aria-hidden="true" />
+      <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/32 via-transparent to-amber-100/26" aria-hidden="true" />
+        <div className="absolute -right-14 -top-20 h-64 w-64 rounded-full bg-emerald-100/55 blur-3xl pointer-events-none" aria-hidden="true" />
         <div className="relative z-10 flex min-h-screen flex-col">
           <SiteHeader
             pathname={pathname}
@@ -174,21 +200,21 @@ export function DetailView({
             activeNav="none"
           />
           <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
-            <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white/95 p-8 text-center shadow-xl backdrop-blur">
-              <p className="text-slate-500 text-2xl">Plant not found.</p>
-              <p className="mt-2 text-slate-600 text-sm">Try searching the directory or return to home search.</p>
+            <div className="botanical-card-strong w-full max-w-lg rounded-3xl p-8 text-center">
+              <p className="font-display text-3xl text-slate-900">Plant not found.</p>
+              <p className="mt-2 text-sm text-slate-600">Try searching the directory or return to the homepage lookup.</p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                 <button
                   type="button"
                   onClick={onBack}
-                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-emerald-700 text-sm transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700 transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   {backLabel}
                 </button>
                 <button
                   type="button"
                   onClick={goDirectory}
-                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 text-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                  className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-slate-700 transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   Open Directory
                 </button>
@@ -234,13 +260,13 @@ export function DetailView({
   }
 
   return (
-    <div className="home-editorial-shell relative min-h-screen overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-100/78 via-slate-100/90 to-slate-100" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/30 via-transparent to-slate-100/85" aria-hidden="true" />
-      <div className="-top-20 -right-14 absolute bg-emerald-100/55 blur-3xl rounded-full w-64 h-64 pointer-events-none" aria-hidden="true" />
-      <div className="-bottom-20 -left-14 absolute bg-slate-200/55 blur-3xl rounded-full w-64 h-64 pointer-events-none" aria-hidden="true" />
-      <p className="top-36 right-0 absolute hidden xl:block font-semibold text-emerald-200/65 text-xs uppercase tracking-[0.46em] rotate-90 select-none" aria-hidden="true">
-        Species Brief
+    <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/32 via-transparent to-amber-100/26" aria-hidden="true" />
+      <div className="absolute -right-14 -top-20 h-64 w-64 rounded-full bg-emerald-100/55 blur-3xl pointer-events-none" aria-hidden="true" />
+      <div className="absolute -bottom-20 -left-14 h-64 w-64 rounded-full bg-amber-100/50 blur-3xl pointer-events-none" aria-hidden="true" />
+      <p className="absolute right-0 top-36 hidden rotate-90 select-none text-[11px] font-semibold uppercase tracking-[0.46em] text-emerald-300/80 xl:block" aria-hidden="true">
+        Species brief
       </p>
 
       <div className="relative z-10 flex min-h-screen flex-col">
@@ -253,17 +279,39 @@ export function DetailView({
           activeNav="none"
         />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
-          <header className="mb-6 sm:mb-8">
-            <p className="font-semibold text-emerald-700 text-xs uppercase tracking-[0.2em]">Plant Safety Profile</p>
-            <h1 className="mt-1 font-semibold text-slate-900 text-3xl sm:text-4xl tracking-tight">{plant.common_name}</h1>
-            <p className="mt-1 text-slate-600 text-sm sm:text-lg italic">{plant.scientific_name}</p>
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
+          <header className="mb-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div>
+              <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Plant safety profile</p>
+              <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                {plant.common_name}
+              </h1>
+              <p className="mt-2 text-base italic text-slate-600 sm:text-lg">{plant.scientific_name}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <SafetyBadge status={displaySafetyStatus} />
+                {isEvidenceIncomplete ? (
+                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
+                    Evidence incomplete
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Quick guidance</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                {displaySafetyStatus === 'non_toxic'
+                  ? 'Considered non-toxic to cats, but supervision around new plants is still wise.'
+                  : displaySafetyStatus === 'unknown'
+                    ? 'Reliable toxicity evidence is incomplete or unavailable. Treat with caution.'
+                    : 'This plant is associated with cat toxicity. Keep it out of reach or choose a safer substitute.'}
+              </p>
+            </div>
           </header>
 
-          <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr] lg:gap-8">
+          <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr] lg:gap-8 animate-fade-up-soft motion-reduce:animate-none" style={{ animationDelay: '80ms' }}>
             <aside className="space-y-4">
               <div
-                className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/88 shadow-sm backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                className="botanical-card-strong relative overflow-hidden rounded-[1.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 animate-scale-in motion-reduce:animate-none"
                 tabIndex={0}
                 onKeyDown={handleCarouselKeyDown}
                 aria-label={`${plant.common_name} image carousel`}
@@ -278,8 +326,8 @@ export function DetailView({
                   loading="eager"
                   fetchPriority="high"
                   priority
-                  className="w-full aspect-square"
-                  imageClassName="w-full h-full object-cover"
+                  className="aspect-square w-full"
+                  imageClassName="h-full w-full object-cover"
                 />
 
                 {hasMultipleImages && !isFirstImage ? (
@@ -289,7 +337,7 @@ export function DetailView({
                     aria-label="Previous image"
                     className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-slate-900/50 text-white shadow-md transition-colors hover:bg-slate-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="h-5 w-5" />
                   </button>
                 ) : null}
 
@@ -300,7 +348,7 @@ export function DetailView({
                     aria-label="Next image"
                     className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-slate-900/50 text-white shadow-md transition-colors hover:bg-slate-900/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                 ) : null}
 
@@ -313,8 +361,8 @@ export function DetailView({
                         aria-label={`Go to image ${index + 1}`}
                         aria-current={index === activeImageIndex ? 'true' : undefined}
                         onClick={() => setActiveImageIndex(index)}
-                        className={`cursor-pointer rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
-                          index === activeImageIndex ? 'bg-white w-2.5 h-2.5 scale-110' : 'bg-white/70 hover:bg-white w-2 h-2'
+                        className={`rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                          index === activeImageIndex ? 'h-2.5 w-2.5 scale-110 bg-white' : 'h-2 w-2 cursor-pointer bg-white/70 hover:bg-white'
                         }`}
                       />
                     ))}
@@ -331,10 +379,10 @@ export function DetailView({
                       aria-label={`View thumbnail image ${index + 1}`}
                       aria-current={index === activeImageIndex ? 'true' : undefined}
                       onClick={() => setActiveImageIndex(index)}
-                      className={`group relative aspect-square cursor-pointer overflow-hidden rounded-xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                      className={`group relative aspect-square cursor-pointer overflow-hidden rounded-[1rem] border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
                         index === activeImageIndex
                           ? 'border-emerald-500 ring-2 ring-emerald-300/70'
-                          : 'border-slate-200 hover:border-emerald-300'
+                          : 'border-stone-200 hover:border-emerald-300'
                       }`}
                     >
                       <Image
@@ -342,7 +390,7 @@ export function DetailView({
                         alt={`${plant.common_name} thumbnail ${index + 1}`}
                         width={120}
                         height={120}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                         loading="lazy"
                         unoptimized
                       />
@@ -352,11 +400,11 @@ export function DetailView({
               ) : null}
 
               {plant.aka_names.length > 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm backdrop-blur">
-                  <h2 className="mb-2 font-semibold text-slate-500 text-xs uppercase tracking-[0.14em]">Also known as</h2>
-                  <div className="flex flex-wrap gap-2">
+                <div className="botanical-card rounded-[1.5rem] p-4">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Also known as</h2>
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {plant.aka_names.map((name) => (
-                      <span key={name} className="bg-white px-2.5 py-1 border border-slate-200 rounded-lg text-slate-600 text-xs">
+                      <span key={name} className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-slate-600">
                         {name}
                       </span>
                     ))}
@@ -366,14 +414,17 @@ export function DetailView({
             </aside>
 
             <section className="space-y-4 sm:space-y-5">
-              <div className={`rounded-2xl border bg-white/92 p-5 shadow-sm backdrop-blur ${color.border}`}>
+              <div className={`botanical-card-strong rounded-[1.8rem] border p-5 ${color.border}`}>
                 <div className="flex items-start gap-3">
-                  <div className={`flex justify-center items-center rounded-full w-10 h-10 shrink-0 ${color.bg} ${color.text}`}>
+                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${color.bg} ${color.text}`}>
                     <StatusIcon status={displaySafetyStatus} />
                   </div>
                   <div className="min-w-0">
-                    <SafetyBadge status={displaySafetyStatus} />
-                    <p className="mt-2 text-slate-700 text-sm leading-relaxed">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Risk summary</p>
+                    <div className="mt-2">
+                      <SafetyBadge status={displaySafetyStatus} />
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
                       {displaySafetyStatus === 'non_toxic'
                         ? 'This plant is currently regarded as non-toxic to cats, but individual reactions can vary. Monitor your cat around any new plant.'
                         : displaySafetyStatus === 'unknown'
@@ -382,53 +433,49 @@ export function DetailView({
                             : 'Toxicity data is not yet available for this plant. Exercise caution.'
                           : 'This plant is reported to pose a risk to cats. Keep it out of reach or choose an alternative.'}
                     </p>
-                    {isEvidenceIncomplete ? (
-                      <div className="mt-3 inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-amber-800 text-xs">
-                        Evidence incomplete
-                      </div>
-                    ) : null}
                   </div>
                 </div>
               </div>
 
               {isToxic && hasToxicDetailContent ? (
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white/92 shadow-sm backdrop-blur">
+                <section className="botanical-card overflow-hidden rounded-[1.7rem]">
                   {plant.symptoms ? (
-                    <div className="p-5 border-slate-100 border-b">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Stethoscope className="w-4 h-4 text-rose-500" />
+                    <div className="border-b border-stone-100 p-5">
+                      <div className="mb-2 flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4 text-rose-500" />
                         <h2 className="font-semibold text-slate-900 text-sm">Symptoms</h2>
                       </div>
-                      <p className="text-slate-600 text-sm leading-relaxed">{plant.symptoms}</p>
+                      <p className="text-sm leading-relaxed text-slate-600">{plant.symptoms}</p>
                     </div>
                   ) : null}
                   {plant.toxic_parts ? (
                     <div className="p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FlaskConical className="w-4 h-4 text-rose-500" />
+                      <div className="mb-2 flex items-center gap-2">
+                        <FlaskConical className="h-4 w-4 text-rose-500" />
                         <h2 className="font-semibold text-slate-900 text-sm">Toxic Parts</h2>
                       </div>
-                      <p className="text-slate-600 text-sm leading-relaxed">{plant.toxic_parts}</p>
+                      <p className="text-sm leading-relaxed text-slate-600">{plant.toxic_parts}</p>
                     </div>
                   ) : null}
                 </section>
               ) : null}
 
-              <section className="rounded-2xl border border-slate-200 bg-white/92 p-5 shadow-sm backdrop-blur">
-                <h2 className="font-semibold text-slate-900 text-lg tracking-tight">Evidence</h2>
+              <section className="botanical-card rounded-[1.7rem] p-5">
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900">Evidence</h2>
+                <p className="mt-1 text-sm text-slate-600">Reference links used to support the current safety label.</p>
                 {plant.citations.length > 0 ? (
-                  <ul className="space-y-3 mt-3">
+                  <ul className="mt-4 space-y-3">
                     {plant.citations.map((citation) => (
                       <li
                         key={`${citation.source_name}-${citation.source_url}`}
-                        className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 rounded-[1rem] border border-stone-200 bg-white/80 p-3 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <span className="font-medium text-slate-800 text-sm">{citation.source_name}</span>
+                        <span className="text-sm font-medium text-slate-800">{citation.source_name}</span>
                         <a
                           href={citation.source_url}
                           target="_blank"
                           rel="noreferrer noopener"
-                          className="font-medium text-emerald-700 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 rounded-sm text-sm underline underline-offset-2"
+                          className="rounded-sm text-sm font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
                           Open source
                         </a>
@@ -436,24 +483,24 @@ export function DetailView({
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-2 text-slate-600 text-sm leading-relaxed">
-                    We do not currently have a required source citation for this plant, so this record is considered
-                    incomplete.
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    We do not currently have a required source citation for this plant, so this record is considered incomplete.
                   </p>
                 )}
               </section>
 
-              <section className="rounded-2xl border border-amber-200 bg-amber-50/85 p-4">
-                <p className="text-amber-900 text-sm leading-relaxed">
-                  This information is for educational purposes only and is not a substitute for professional veterinary
-                  care. If your cat may have ingested a toxic plant, contact your veterinarian or an emergency animal
-                  poison service immediately.
+              <section className="rounded-[1.6rem] border border-amber-200 bg-amber-50/85 p-4">
+                <p className="text-sm leading-relaxed text-amber-900">
+                  This information is for educational purposes only and is not a substitute for professional veterinary care. If your cat may have ingested a toxic plant, contact your veterinarian or an emergency animal poison service immediately.
                 </p>
               </section>
 
               {isToxic && alternatives.length > 0 ? (
                 <section>
-                  <h2 className="mb-3 font-semibold text-slate-900 text-lg tracking-tight">Safe Alternatives</h2>
+                  <div className="mb-3">
+                    <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Safer swap</p>
+                    <h2 className="font-display mt-1 text-2xl font-semibold tracking-tight text-slate-900">Safe alternatives</h2>
+                  </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {alternatives.map((alt) => {
                       const altDisplayStatus = getDisplaySafetyStatus(alt);
@@ -462,7 +509,7 @@ export function DetailView({
                           key={alt.id}
                           type="button"
                           onClick={() => onSelectPlant(alt.id)}
-                          className="group cursor-pointer rounded-2xl border border-slate-200 bg-white/90 p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                          className="group botanical-card-strong cursor-pointer rounded-[1.5rem] p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
                           <PlantImage
                             src={alt.primary_image_url}
@@ -471,12 +518,12 @@ export function DetailView({
                             width={320}
                             height={240}
                             loading="lazy"
-                            className="mb-3 rounded-xl w-full aspect-[4/3]"
-                            imageClassName="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                            className="mb-3 aspect-[4/3] w-full rounded-[1rem]"
+                            imageClassName="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
                             placeholderTestId={`alternative-placeholder-${alt.id}`}
                           />
-                          <div className="font-medium text-slate-900 text-sm">{alt.common_name}</div>
-                          <div className="text-slate-500 text-xs italic truncate">{alt.scientific_name}</div>
+                          <div className="text-sm font-medium text-slate-900">{alt.common_name}</div>
+                          <div className="truncate text-xs italic text-slate-500">{alt.scientific_name}</div>
                           <SafetyBadge status={altDisplayStatus} className="mt-2" compact />
                         </button>
                       );
@@ -486,6 +533,16 @@ export function DetailView({
               ) : null}
             </section>
           </div>
+
+          {/* Scroll to top button */}
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Scroll to top"
+            className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white/95 text-slate-600 shadow-lg backdrop-blur transition-all duration-300 hover:bg-emerald-50 hover:text-emerald-800 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${showScrollTop ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
+          >
+            <ArrowUp className="h-5 w-5" />
+          </button>
         </main>
       </div>
     </div>
