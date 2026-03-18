@@ -1,5 +1,6 @@
-import { LoaderCircle } from 'lucide-react';
+import { SiteHeader } from '@/src/components/ui/site-header';
 import { SiteFooter } from '@/src/components/ui/site-footer';
+import { Skeleton, SkeletonDetailContent } from '@/src/components/ui/skeleton';
 
 export default function PlantDetailLoading() {
   return (
@@ -10,11 +11,34 @@ export default function PlantDetailLoading() {
       <div className="absolute -bottom-20 -left-14 h-64 w-64 rounded-full bg-amber-100/50 blur-3xl pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-10 flex min-h-screen flex-col">
-        <main className="flex flex-1 items-center justify-center px-4 sm:px-6">
-          <div className="botanical-card inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm text-slate-600">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-            Loading plant details...
-          </div>
+        <SiteHeader
+          pathname="/plants"
+          onGoHome={() => {}}
+          onGoDirectory={() => {}}
+          onGoBack={() => {}}
+          backLabel="Back"
+          activeNav="none"
+        />
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
+          {/* Skeleton header */}
+          <header className="mb-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end animate-fade-up motion-reduce:animate-none">
+            <div>
+              <Skeleton className="h-3 w-36 rounded-lg" />
+              <Skeleton className="mt-3 h-12 w-72 rounded-xl sm:h-14" />
+              <Skeleton className="mt-3 h-5 w-48 rounded-lg" />
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Skeleton className="h-7 w-28 rounded-full" />
+              </div>
+            </div>
+            <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4">
+              <Skeleton className="h-3 w-28 rounded-lg" />
+              <Skeleton className="mt-3 h-4 w-full rounded-lg" />
+              <Skeleton className="mt-1.5 h-4 w-3/4 rounded-lg" />
+            </div>
+          </header>
+
+          {/* Skeleton content */}
+          <SkeletonDetailContent />
         </main>
         <SiteFooter />
       </div>
