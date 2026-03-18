@@ -710,7 +710,7 @@ export function PlantsDirectoryView() {
                             </button>
                           ) : (
                             <a
-                              href="mailto:robertxluo@gmail.com?subject=Plant Request"
+                              href="mailto:robertxluo@gmail.com?subject=CatSafe Plants - Plant Request"
                               className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 transition-colors group"
                             >
                               Request a plant 
