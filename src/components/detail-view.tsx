@@ -9,6 +9,8 @@ import {
   ChevronRight,
   FlaskConical,
   HelpCircle,
+  ShoppingCart,
+  ExternalLink,
   ShieldAlert,
   ShieldCheck,
   Stethoscope,
@@ -284,6 +286,9 @@ export function DetailView({
     }
   }
 
+  const amazonSearchTerm = encodeURIComponent(`live ${plant.common_name} plant`);
+  const amazonAffiliateLink = `https://www.amazon.com/s?k=${amazonSearchTerm}&linkCode=ll2&tag=daemonisk-20&linkId=ebb772e877f6c2ba67f057735b747416&language=en_US&ref_=as_li_ss_tl`;
+
   return (
     <div className="home-editorial-shell botanical-page relative min-h-screen overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-stone-100/84 via-stone-100/76 to-stone-100" aria-hidden="true" />
@@ -424,6 +429,23 @@ export function DetailView({
                 </div>
               ) : null}
 
+              <div className="botanical-card-strong overflow-hidden rounded-[1.5rem] border border-stone-200">
+                <div className="bg-stone-50 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Shop</span>
+                  </div>
+                  <a
+                    href={amazonAffiliateLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9900] px-4 py-3.5 text-sm font-bold text-slate-900 shadow-sm transition-all hover:bg-[#F29100] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 hover:-translate-y-0.5"
+                  >
+                    <ShoppingCart className="-ml-1 h-4 w-4 text-slate-800" />
+                    Buy {plant.common_name} on Amazon
+                    <ExternalLink className="ml-auto h-4 w-4 text-slate-700 opacity-60" />
+                  </a>
+                </div>
+              </div>
              </aside>
 
             <section className="space-y-4 sm:space-y-5">
