@@ -232,6 +232,12 @@ export function DetailView({
 
   const displaySafetyStatus = getDisplaySafetyStatus(plant);
   const color = getStatusColor(displaySafetyStatus);
+  const alertColor = {
+    non_toxic: { bg: 'bg-emerald-50', text: 'text-emerald-900', border: 'border-emerald-200' },
+    mildly_toxic: { bg: 'bg-amber-50', text: 'text-amber-900', border: 'border-amber-200' },
+    highly_toxic: { bg: 'bg-rose-50', text: 'text-rose-900', border: 'border-rose-200' },
+    unknown: { bg: 'bg-slate-50', text: 'text-slate-900', border: 'border-slate-200' },
+  }[displaySafetyStatus];
   const isToxic = displaySafetyStatus === 'mildly_toxic' || displaySafetyStatus === 'highly_toxic';
   const isEvidenceIncomplete = hasIncompleteEvidence(plant);
   const hasToxicDetailContent = Boolean(plant.symptoms || plant.toxic_parts);
@@ -284,7 +290,7 @@ export function DetailView({
         />
 
         <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
-          <header className="mb-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <header className="mb-7">
             <div>
               <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Plant safety profile</p>
               <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
@@ -299,16 +305,16 @@ export function DetailView({
                   </span>
                 ) : null}
               </div>
-            </div>
-            <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Quick guidance</p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                {displaySafetyStatus === 'non_toxic'
-                  ? 'Considered non-toxic to cats, but supervision around new plants is still wise.'
-                  : displaySafetyStatus === 'unknown'
-                    ? 'Reliable toxicity evidence is incomplete or unavailable. Treat with caution.'
-                    : 'This plant is associated with cat toxicity. Keep it out of reach or choose a safer substitute.'}
-              </p>
+              {plant.aka_names.length > 0 ? (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Also known as</span>
+                  {plant.aka_names.map((name) => (
+                    <span key={name} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </header>
 
@@ -383,10 +389,10 @@ export function DetailView({
                       aria-label={`View thumbnail image ${index + 1}`}
                       aria-current={index === activeImageIndex ? 'true' : undefined}
                       onClick={() => setActiveImageIndex(index)}
-                      className={`group relative aspect-square cursor-pointer overflow-hidden rounded-[1rem] border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
+                      className={`group relative aspect-square cursor-pointer overflow-hidden rounded-[1rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 ${
                         index === activeImageIndex
-                          ? 'border-emerald-500 ring-2 ring-emerald-300/70'
-                          : 'border-stone-200 hover:border-emerald-300'
+                          ? 'ring-2 ring-emerald-500 ring-offset-2 opacity-100'
+                          : 'opacity-60 hover:opacity-100'
                       }`}
                     >
                       <Image
@@ -403,39 +409,24 @@ export function DetailView({
                 </div>
               ) : null}
 
-              {plant.aka_names.length > 0 ? (
-                <div className="botanical-card rounded-[1.5rem] p-4">
-                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Also known as</h2>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {plant.aka_names.map((name) => (
-                      <span key={name} className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-slate-600">
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </aside>
+             </aside>
 
             <section className="space-y-4 sm:space-y-5">
-              <div className={`botanical-card-strong rounded-[1.8rem] border p-5 ${color.border}`}>
+              <div className={`rounded-[1.8rem] border p-5 shadow-sm backdrop-blur-md ${alertColor.bg} ${alertColor.border}`}>
                 <div className="flex items-start gap-3">
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${color.bg} ${color.text}`}>
+                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white ${color.text} shadow-sm`}>
                     <StatusIcon status={displaySafetyStatus} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Risk summary</p>
-                    <div className="mt-2">
-                      <SafetyBadge status={displaySafetyStatus} />
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                    <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${alertColor.text} opacity-80`}>Toxicity Alert</p>
+                    <p className={`mt-2 text-sm leading-relaxed ${alertColor.text}`}>
                       {displaySafetyStatus === 'non_toxic'
-                        ? 'This plant is currently regarded as non-toxic to cats, but individual reactions can vary. Monitor your cat around any new plant.'
+                        ? 'Considered non-toxic to cats, but supervision around new plants is still wise. Individual reactions can vary.'
                         : displaySafetyStatus === 'unknown'
                           ? isEvidenceIncomplete
-                            ? 'Evidence is incomplete for this plant because required source citations are missing. Treat safety as unknown and use caution.'
+                            ? 'Reliable toxicity evidence is incomplete. Treat safety as unknown and use caution.'
                             : 'Toxicity data is not yet available for this plant. Exercise caution.'
-                          : 'This plant is reported to pose a risk to cats. Keep it out of reach or choose an alternative.'}
+                          : 'This plant is associated with cat toxicity. Keep it out of reach or choose a safer substitute.'}
                     </p>
                   </div>
                 </div>
@@ -443,24 +434,29 @@ export function DetailView({
 
               {isToxic && hasToxicDetailContent ? (
                 <section className="botanical-card overflow-hidden rounded-[1.7rem]">
-                  {plant.symptoms ? (
-                    <div className="border-b border-stone-100 p-5">
-                      <div className="mb-2 flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4 text-rose-500" />
-                        <h2 className="font-semibold text-slate-900 text-sm">Symptoms</h2>
-                      </div>
-                      <p className="text-sm leading-relaxed text-slate-600">{plant.symptoms}</p>
+                  <div className="p-5">
+                    <h2 className="font-display text-xl font-semibold tracking-tight text-slate-900 mb-4">Clinical Details</h2>
+                    <div className="flex flex-col">
+                      {plant.symptoms ? (
+                        <div className={`py-4 ${plant.toxic_parts ? 'border-b border-stone-200/60' : ''} first:pt-0`}>
+                          <div className="mb-2 flex items-center gap-2">
+                            <Stethoscope className="h-4 w-4 text-rose-500" />
+                            <h3 className="font-semibold text-slate-900 text-sm">Symptoms</h3>
+                          </div>
+                          <p className="text-sm leading-relaxed text-slate-600">{plant.symptoms}</p>
+                        </div>
+                      ) : null}
+                      {plant.toxic_parts ? (
+                        <div className="py-4 last:pb-0">
+                          <div className="mb-2 flex items-center gap-2">
+                            <FlaskConical className="h-4 w-4 text-rose-500" />
+                            <h3 className="font-semibold text-slate-900 text-sm">Toxic Parts</h3>
+                          </div>
+                          <p className="text-sm leading-relaxed text-slate-600">{plant.toxic_parts}</p>
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                  {plant.toxic_parts ? (
-                    <div className="p-5">
-                      <div className="mb-2 flex items-center gap-2">
-                        <FlaskConical className="h-4 w-4 text-rose-500" />
-                        <h2 className="font-semibold text-slate-900 text-sm">Toxic Parts</h2>
-                      </div>
-                      <p className="text-sm leading-relaxed text-slate-600">{plant.toxic_parts}</p>
-                    </div>
-                  ) : null}
+                  </div>
                 </section>
               ) : null}
 
@@ -493,9 +489,9 @@ export function DetailView({
                 )}
               </section>
 
-              <section className="rounded-[1.6rem] border border-amber-200 bg-amber-50/85 p-4">
-                <p className="text-sm leading-relaxed text-amber-900">
-                  This information is for educational purposes only and is not a substitute for professional veterinary care. If your cat may have ingested a toxic plant, contact your veterinarian or an emergency animal poison service immediately.
+              <section className="rounded-xl bg-stone-50 p-4">
+                <p className="text-xs leading-relaxed text-slate-500">
+                  <strong className="font-medium text-slate-700">Disclaimer:</strong> This information is for educational purposes only and is not a substitute for professional veterinary care. If your cat may have ingested a toxic plant, contact your veterinarian or an emergency animal poison service immediately.
                 </p>
               </section>
 
