@@ -185,3 +185,21 @@ body {
   background: rgba(141, 174, 148, 0.35);
   color: var(--catsafe-tone-ink);
 }
+
+@layer base {
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
+  
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input[type="button"]:disabled,
+  input[type="submit"]:disabled,
+  input[type="reset"]:disabled {
+    cursor: not-allowed;
+  }
+}
