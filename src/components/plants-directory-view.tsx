@@ -443,7 +443,7 @@ export function PlantsDirectoryView() {
           {isLoading ? (
             <>
               {/* Skeleton search bar area */}
-              <section className="botanical-card-strong mb-4 rounded-[1.9rem] p-4 sm:p-5 animate-fade-up-soft">
+              <section className="botanical-card-strong mb-4 rounded-[1.9rem] px-4 py-3 sm:px-5 sm:py-3.5 animate-fade-up-soft">
                 <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,0.8fr)] lg:items-start">
                   <div className="max-w-3xl">
                     <Skeleton className="h-3 w-28 rounded-lg" />
@@ -520,7 +520,7 @@ export function PlantsDirectoryView() {
 
           {!isLoading && !error && plants.length > 0 ? (
             <>
-              <section className="botanical-card-strong mb-4 rounded-[1.9rem] p-4 sm:p-5">
+              <section className="botanical-card-strong mb-4 rounded-[1.9rem] px-4 py-3 sm:px-5 sm:py-3.5">
                 <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,0.8fr)] lg:items-start">
                   <div className="max-w-3xl">
                     <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Search plants</p>
@@ -685,31 +685,39 @@ export function PlantsDirectoryView() {
                     {showRemainderCard ? (
                       <article
                         data-testid="directory-remainder-card"
-                        className={`botanical-card hidden h-full flex-col justify-between rounded-[1.6rem] p-5 xl:flex ${
+                        className={`hidden h-full flex-col justify-center items-center text-center rounded-[1.6rem] p-8 bg-emerald-50/50 border-2 border-dashed border-emerald-200/60 shadow-inner xl:flex ${
                           gridRemainder === 1 ? 'xl:col-span-2' : ''
                         }`}
                       >
-                        <div>
-                          <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">
+                        <div className="flex flex-col items-center">
+                          <p className="editorial-kicker text-xs font-bold text-emerald-800 tracking-widest uppercase">
                             {hasActiveFilters ? 'Want broader results?' : 'Need a specific plant?'}
                           </p>
-                          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-600">
+                          <p className="mt-3 max-w-sm text-sm leading-relaxed text-emerald-900/80">
                             {hasActiveFilters
                               ? 'Clear the current search or filters to reopen the full catalog.'
-                              : 'Search by common name, scientific name, or alias to jump straight to a match.'}
+                              : "Can't find what you're looking for? Let us know what we should add next."}
                           </p>
                         </div>
-                        {hasActiveFilters ? (
-                          <div className="mt-4">
+                        <div className="mt-5">
+                          {hasActiveFilters ? (
                             <button
                               type="button"
                               onClick={clearRefinements}
-                              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full border border-emerald-200 bg-white px-5 py-2 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 shadow-sm"
                             >
-                              Clear all
+                              Clear all filters
                             </button>
-                          </div>
-                        ) : null}
+                          ) : (
+                            <a
+                              href="mailto:robertxluo@gmail.com?subject=Plant Request"
+                              className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 transition-colors group"
+                            >
+                              Request a plant 
+                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </a>
+                          )}
+                        </div>
                       </article>
                     ) : null}
                   </section>
