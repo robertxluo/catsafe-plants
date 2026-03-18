@@ -1,8 +1,9 @@
 "use client";
 
 import Image from 'next/image';
-import { ArrowLeft, Home, Search } from 'lucide-react';
+import { ArrowLeft, Home, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 interface SiteHeaderProps {
   pathname: string;
@@ -24,6 +25,8 @@ export function SiteHeader({
   backLabel = 'Back',
   activeNav,
 }: SiteHeaderProps) {
+  const [navigatingTo, setNavigatingTo] = useState<'home' | 'directory' | 'back' | 'none'>('none');
+
   const resolvedActiveNav =
     activeNav ?? (pathname === '/' ? 'home' : pathname === '/plants' ? 'directory' : 'none');
 
@@ -33,10 +36,17 @@ export function SiteHeader({
         {onGoBack ? (
           <button
             type="button"
-            onClick={onGoBack}
+            onClick={() => {
+              setNavigatingTo('back');
+              if (onGoBack) onGoBack();
+            }}
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-emerald-200/70 bg-white/90 px-3.5 py-2 text-slate-700 text-xs font-medium transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] sm:px-4.5 sm:text-sm"
           >
-            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+            {navigatingTo === 'back' ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+            )}
             <span className="truncate font-semibold tracking-tight">{backLabel}</span>
           </button>
         ) : (
@@ -65,7 +75,12 @@ export function SiteHeader({
         <nav aria-label="Primary" className="flex shrink-0 items-center gap-1 rounded-full p-1 bg-slate-100/80 border border-slate-200 shadow-inner">
           <button
             type="button"
-            onClick={onGoHome}
+            onClick={() => {
+              if (resolvedActiveNav !== 'home') {
+                setNavigatingTo('home');
+                onGoHome();
+              }
+            }}
             aria-current={resolvedActiveNav === 'home' ? 'page' : undefined}
             className={`${navButtonClass} ${
               resolvedActiveNav === 'home'
@@ -80,12 +95,21 @@ export function SiteHeader({
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Home
+            {navigatingTo === 'home' ? (
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            )}
+            <span className="hidden sm:inline">Home</span>
           </button>
           <button
             type="button"
-            onClick={onGoDirectory}
+            onClick={() => {
+              if (resolvedActiveNav !== 'directory') {
+                setNavigatingTo('directory');
+                onGoDirectory();
+              }
+            }}
             aria-label="Plant Directory"
             aria-current={resolvedActiveNav === 'directory' ? 'page' : undefined}
             className={`${navButtonClass} ${
@@ -101,9 +125,12 @@ export function SiteHeader({
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="sm:hidden">Directory</span>
-            <span className="hidden sm:inline">Plant Directory</span>
+            {navigatingTo === 'directory' ? (
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            )}
+            <span className="hidden sm:inline">Directory</span>
           </button>
         </nav>
       </div>

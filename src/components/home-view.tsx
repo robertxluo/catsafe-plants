@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
-import { Search, Leaf, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles, X } from 'lucide-react';
+import { Search, Leaf, LoaderCircle, AlertCircle, ArrowRight, Stethoscope, Sparkles, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import type { Plant } from '@/src/lib/plants';
@@ -31,6 +31,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
+  const [navigatingToDirectory, setNavigatingToDirectory] = useState(false);
   const [isPhoneViewport, setIsPhoneViewport] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
@@ -172,24 +174,15 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   }, []);
 
   useEffect(() => {
-    if (!isMobileSearchModeOpen) {
-      return;
-    }
-
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-    };
+    // We purposefully removed the document.body.style.overflow = 'hidden' logic here.
+    // Dynamic overflow manipulation on iOS with virtual keyboards causes
+    // erratic viewport scroll jumping. Keeping the body scrollable but overlaying
+    // the fixed container natively avoids the layout crash bug.
   }, [isMobileSearchModeOpen]);
 
   const handleSelectPlant = useCallback(
     (plant: Plant) => {
+      setNavigatingId(plant.id);
       onSelectPlant(plant.id);
       setQuery('');
       closeSearch();
@@ -299,16 +292,18 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
             </div>
           </div>
 
-          <section
-            ref={containerRef}
-            data-mobile-search-mode={isMobileSearchModeOpen ? 'open' : 'closed'}
-            className={`w-full max-w-2xl mt-4 sm:mt-8 animate-fade-up-soft motion-reduce:animate-none ${
-              isMobileSearchModeOpen
-                ? 'botanical-card-strong bg-stone-50/98 backdrop-blur-xl fixed inset-0 sm:inset-x-4 sm:bottom-4 sm:top-8 z-50 flex flex-col rounded-none sm:rounded-[2.5rem] px-4 pt-10 pb-4 sm:p-5 text-left shadow-2xl'
-                : 'text-left relative z-20 px-2 sm:px-0'
-            }`}
-            style={{ animationDelay: '80ms' }}
-          >
+          {/* Wrapper preserves the layout footprint to prevent jumping when search becomes fixed */}
+          <div className="w-full max-w-2xl mt-4 sm:mt-8 min-h-14 sm:min-h-16">
+            <section
+              ref={containerRef}
+              data-mobile-search-mode={isMobileSearchModeOpen ? 'open' : 'closed'}
+              className={`w-full h-full animate-fade-up-soft motion-reduce:animate-none ${
+                isMobileSearchModeOpen
+                  ? 'botanical-card-strong bg-stone-50/98 backdrop-blur-xl fixed inset-0 sm:inset-x-4 sm:bottom-4 sm:top-8 z-50 flex flex-col rounded-none sm:rounded-[2.5rem] px-4 pt-10 pb-4 sm:p-5 text-left shadow-2xl'
+                  : 'text-left relative z-20 px-2 sm:px-0'
+              }`}
+              style={{ animationDelay: '80ms' }}
+            >
             <div className={`relative ${isMobileSearchModeOpen ? 'flex min-h-0 flex-1 flex-col' : ''}`}>
               {isMobileSearchModeOpen ? (
                 <div className="flex justify-between items-center gap-3 shrink-0">
@@ -458,7 +453,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                           >
                             <button
                               type="button"
-                              className={`min-h-20 sm:min-h-24 w-full cursor-pointer px-4 sm:px-6 py-3 sm:py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset border-b border-stone-100 last:border-b-0 ${
+                              className={`relative min-h-20 sm:min-h-24 w-full cursor-pointer px-4 sm:px-6 py-3 sm:py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-inset border-b border-stone-100 last:border-b-0 ${
                                 isActiveOption ? 'bg-emerald-50/70' : 'hover:bg-stone-50/80'
                               }`}
                               onMouseEnter={() => setActiveIndex(index)}
@@ -487,6 +482,11 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                                   ) : null}
                                 </span>
                                 <SafetyBadge status={displaySafetyStatus} className="scale-[0.85] sm:scale-100 transform origin-right shrink-0" />
+                                {navigatingId === plant.id && (
+                                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                    <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 animate-spin" />
+                                  </div>
+                                )}
                               </span>
                             </button>
                           </li>
@@ -498,6 +498,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
               </div>
             </div>
           </section>
+        </div>
 
           {!error && plants.length > 0 ? (
             <section
@@ -514,11 +515,15 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => router.push('/plants')}
+                  onClick={() => {
+                    setNavigatingToDirectory(true);
+                    router.push('/plants');
+                  }}
                   className="inline-flex items-center gap-1 bg-white hover:bg-emerald-50 px-3 py-1.5 border border-stone-200 hover:border-emerald-200 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 font-medium text-slate-700 hover:text-emerald-800 text-xs sm:text-sm transition-colors duration-200 cursor-pointer"
                 >
+                  {navigatingToDirectory ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                   View directory
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {navigatingToDirectory ? null : <ArrowRight className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
@@ -531,10 +536,18 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                         <button
                           key={plant.id}
                           type="button"
-                          onClick={() => onSelectPlant(plant.id)}
-                          className="group flex flex-col bg-white/95 hover:bg-white shadow-sm hover:shadow-stone-200/60 hover:shadow-xl p-4 sm:p-5 border border-stone-200/80 hover:border-emerald-300/80 rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.98] transition-all lg:hover:-translate-y-1.5 hover:-translate-y-1 animate-fade-up-stagger motion-reduce:animate-none duration-300 cursor-pointer"
+                          onClick={() => {
+                            setNavigatingId(plant.id);
+                            onSelectPlant(plant.id);
+                          }}
+                          className="group relative flex flex-col bg-white/95 hover:bg-white shadow-sm hover:shadow-stone-200/60 hover:shadow-xl p-4 sm:p-5 border border-stone-200/80 hover:border-emerald-300/80 rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 text-left active:scale-[0.98] transition-all lg:hover:-translate-y-1.5 hover:-translate-y-1 animate-fade-up-stagger motion-reduce:animate-none duration-300 cursor-pointer overflow-hidden"
                           style={{ animationDelay: `${index * 80}ms` }}
                         >
+                          {navigatingId === plant.id && (
+                            <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-3xl">
+                              <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                            </div>
+                          )}
                           <PlantImage
                             src={plant.primary_image_url}
                             alt={`${plant.common_name} photo`}

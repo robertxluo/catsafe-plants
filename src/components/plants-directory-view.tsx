@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -94,6 +94,7 @@ export function PlantsDirectoryView() {
   const [isPhoneViewport, setIsPhoneViewport] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
 
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
@@ -639,11 +640,19 @@ export function PlantsDirectoryView() {
                         <button
                           key={plant.id}
                           type="button"
-                          onClick={() => router.push(buildPlantDetailHref(plant.id, currentDirectoryUrl))}
+                          onClick={() => {
+                            setNavigatingId(plant.id);
+                            router.push(buildPlantDetailHref(plant.id, currentDirectoryUrl));
+                          }}
                           aria-label={`Open details for ${plant.common_name}`}
-                          className="group botanical-card-strong flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] animate-fade-up-stagger motion-reduce:animate-none"
+                          className="group relative botanical-card-strong flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] animate-fade-up-stagger motion-reduce:animate-none"
                           style={{ animationDelay: `${index * 50}ms` }}
                         >
+                          {navigatingId === plant.id && (
+                            <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-[1.6rem]">
+                              <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                            </div>
+                          )}
                           <PlantImage
                             src={plant.primary_image_url}
                             alt={`${plant.common_name} photo`}
