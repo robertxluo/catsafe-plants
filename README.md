@@ -29,7 +29,6 @@ CatSafe Plants helps cat owners quickly verify whether common houseplants are sa
 - `npm run dev` -> start local dev server
 - `npm run build` -> create production build
 - `npm run start` -> run built app
-- `npm run test:run` -> run Vitest in CI mode
 - `npm run lint` -> run ESLint
 - `npm run audit:citations` -> verify citation completeness + URL health
 - `npm run smoke:deploy -- --base-url=<url>` -> browser smoke check for deploy URLs
@@ -64,11 +63,10 @@ Optional:
 ## Release Checklist
 Run this sequence before production publish:
 1. `npm run audit:citations`
-2. `npm run test:run`
-3. `npm run lint`
-4. `npm run build`
-5. `npm run smoke:deploy -- --base-url=<netlify-preview-url>`
-6. Open the Netlify deploy preview URL and spot-check:
+2. `npm run lint`
+3. `npm run build`
+4. `npm run smoke:deploy -- --base-url=<netlify-preview-url>`
+5. Open the Netlify deploy preview URL and spot-check:
    - Home search happy path + empty state
    - Detail evidence + alternatives
    - Directory filters + pagination

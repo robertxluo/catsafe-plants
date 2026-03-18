@@ -52,7 +52,7 @@
 - Lint: `npm run lint`
 - Citation release audit (network required): `npm run audit:citations`
 - Deploy smoke check (network required): `npm run smoke:deploy -- --base-url=<url>`
-- MVP top-50 seed SQL (run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
+- MVP seed SQL (historical `top50` filename; run in Supabase SQL editor): `scripts/sql/seed-mvp-top50-popular.sql`
 - Required Node runtime baseline: `24.x` (`package.json#engines`)
 
 ## Environment Variables
@@ -131,22 +131,21 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
   - Load full gallery on detail pages.
 - If safety evidence is missing, mark status/content as `unknown`; avoid strong claims.
 
-### Seed Workflow (Top-50 Popular Catalog)
+### Seed Workflow (Historical `Top-50` Filename, Expanded Catalog)
 - Canonical method doc: `docs/data/top50-popularity-method.md`
 - Canonical ranked seed summary: `docs/data/top50-seed-summary.json`
 - SQL seed file: `scripts/sql/seed-mvp-top50-popular.sql`
 - Seed behavior:
   - Full reset of `plants`, `citations`, and `alternatives` tables before insert.
-  - Rebuild with 50 popular indoor plants/potted flowers.
+  - Rebuild with 58 popular indoor plants, potted flowers, and bouquet flowers.
   - Add one ASPCA citation per plant.
   - Add 3-5 safe alternatives for each toxic plant.
 - Verification order after seed:
   1. `npm run audit:citations`
-  2. `npm run test:run`
-  3. `npm run lint`
-  4. `npm run build`
-  5. `npm run smoke:deploy -- --base-url=<netlify-preview-or-production-url>`
-  6. Manual browser spot-check on Netlify preview or production URL.
+  2. `npm run lint`
+  3. `npm run build`
+  4. `npm run smoke:deploy -- --base-url=<netlify-preview-or-production-url>`
+  5. Manual browser spot-check on Netlify preview or production URL.
 
 ### Safety/Trust Constraints
 - This product is safety-adjacent; avoid unverified medical certainty language.
