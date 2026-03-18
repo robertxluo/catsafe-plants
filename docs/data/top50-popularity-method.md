@@ -1,24 +1,33 @@
-# Top-50 Popularity Method (MVP Seed)
+# Top-50 Popularity Method (Historical Filename, Expanded Catalog)
 
 ## Objective
-Seed the launch catalog with a mixed safety profile of the most commonly sold and discussed indoor plants and potted indoor flowers in the U.S., while keeping every record citation-backed.
+Seed the launch catalog with a mixed safety profile of the most commonly sold and discussed indoor plants, potted indoor flowers, and common bouquet flowers in the U.S., while keeping every record citation-backed.
 
-## Source Inputs (sampled February 11, 2026)
+## Source Inputs (sampled February 11 and March 5, 2026)
 - Retail signal (weighted 70%):
   - Home Depot house plants category: https://www.homedepot.com/b/Outdoors-Garden-Center-Plants-Garden-Flowers-House-Plants/N-5yc1vZc8tc
   - The Sill best sellers: https://www.thesill.com/collections/best-sellers
   - Bloomscape best sellers: https://bloomscape.com/product-category/best-sellers/
+  - 1-800-Flowers mixed bouquets: https://www.1800flowers.com/mixedbouquets
+  - 1-800-Flowers mixed roses and blooms bouquet: https://www.1800flowers.com/mixed-roses-and-blooms-12550
+  - Costco floral landing page: https://www.costco.com/floral.html
+  - Costco hydrangea and rose bouquets: https://www.costco.com/opt/hydrangea-and-rose-bouquets
+  - Kroger flowers and plants hub: https://www.kroger.com/pr/flowers-plants
+  - Trader Joe's flower search: https://www.traderjoes.com/home/search?q=flowers
 - Editorial consensus (weighted 30%):
   - Better Homes & Gardens houseplants hub: https://www.bhg.com/gardening/houseplants/
   - Better Homes & Gardens care guides: https://www.bhg.com/gardening/houseplants/care/
   - The Spruce houseplants hub: https://www.thespruce.com/houseplants-4127760
+- Excluded during the bouquet refresh:
+  - Amazon and Walmart surfaced mostly ads, JS-heavy pages, or unstable search result URLs during the March 5, 2026 validation pass, so they were not treated as ranking inputs.
 
 ## Enrichment Rules
 - Aliases (aka_names) are sourced from ASPCA A-Z entries tied to the same scientific key; when exact scientific matches are sparse, genus-level ASPCA matches are used.
 - Small manual alias fallbacks are applied for unique plants with sparse ASPCA variants to keep directory search quality high.
-- Images follow this ASPCA-first quality chain:
+- Images follow an ASPCA-first, stable-public fallback quality chain:
   - prefer ASPCA original image path (`/sites/default/files/...`) when the same image also exists as `styles/medium_image_300x200`,
   - keep ASPCA listing thumbnail as a secondary `photo_urls` entry when needed,
+  - if an ASPCA social-card image does not expose a live listing thumbnail, pair it with a stable Wikimedia Commons image that clearly resembles the same flower,
   - if a record has a placeholder/missing image on its own ASPCA page, use same-scientific ASPCA alias pages first,
   - if still unresolved, use approved closest ASPCA-relative indoor substitute and document it below.
 - Toxic detail fields map from ASPCA record content:
@@ -30,14 +39,17 @@ Seed the launch catalog with a mixed safety profile of the most commonly sold an
 - `nerve-plant` -> reused ASPCA ornamental foliage imagery from `polka-dot-plant` + `prayer-plant` pages because the target page image is placeholder-only.
 - `baby-rubber-plant` -> replaced placeholder image with ASPCA alias-page image assets (`american-rubber-plant`, `blunt-leaf-peperomia`).
 - `emerald-ripple-peperomia` -> replaced placeholder image with ASPCA alias-page image assets (`metallic-peperomia`, `silver-heart`).
+- `rose`, `sunflower`, and `common-snapdragon` -> kept ASPCA primary images, but used stable Wikimedia Commons gallery images because the ASPCA social-card assets did not expose live `plant_listing_180x120` variants.
+- `rose` and `peony` -> used small manual alias fallbacks to keep search quality acceptable because the matching ASPCA entries did not expose additional common names.
 
 ## Current Completeness Snapshot
-- Records: 50
-- Records with non-empty aka_names: 50/50
-- Records with non-placeholder HTTPS primary image: 50/50
-- Records with `primary_image_url` using ASPCA original path (not `styles/medium_image_300x200`): 50/50
-- Records with 2+ HTTPS image URLs: 50/50
-- Records requiring closest ASPCA-relative fallback: 2/50 (`majesty-palm`, `nerve-plant`)
+- Records: 58
+- Records with non-empty aka_names: 58/58
+- Records with non-placeholder HTTPS primary image: 58/58
+- Records with `primary_image_url` using ASPCA original path (not `styles/medium_image_300x200`): 58/58
+- Records with 2+ HTTPS image URLs: 58/58
+- Records requiring closest ASPCA-relative fallback: 2/58 (`majesty-palm`, `nerve-plant`)
+- Records using stable public gallery fallbacks outside ASPCA thumbnails: 3/58 (`rose`, `sunflower`, `common-snapdragon`)
 
 ## Final Ranked Seed List
 The canonical machine-readable list is stored in docs/data/top50-seed-summary.json.
@@ -92,3 +104,11 @@ The canonical machine-readable list is stored in docs/data/top50-seed-summary.js
 48. Polka Dot Plant (non toxic)
 49. Nerve Plant (non toxic)
 50. Asparagus Fern (mildly toxic)
+51. Rose (non toxic)
+52. Carnation (mildly toxic)
+53. Peruvian Lily (non toxic)
+54. Sunflower (non toxic)
+55. Hydrangea (mildly toxic)
+56. Common Snapdragon (non toxic)
+57. Peony (mildly toxic)
+58. Baby's Breath (non toxic)

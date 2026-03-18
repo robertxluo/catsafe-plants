@@ -1,4 +1,4 @@
--- Seed: MVP popular indoor plants + potted flowers (50 records)
+-- Seed: MVP popular indoor plants + potted flowers (historical top50 filename, now 58 records)
 -- Enriched fields: aka_names, real image URLs, and toxic details from ASPCA pages.
 -- Safety: This reset intentionally replaces existing mock data.
 
@@ -70,7 +70,15 @@ VALUES
   ('friendship-plant', 'Friendship Plant', 'Pilea involucrata', ARRAY['Panamiga']::text[], ARRAY['green', 'pink']::text[], 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Pilea_involucrata_%28Sims%29_Urban_Moon_Valley.jpg/960px-Pilea_involucrata_%28Sims%29_Urban_Moon_Valley.jpg', ARRAY['https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Pilea_involucrata_%28Sims%29_Urban_Moon_Valley.jpg/960px-Pilea_involucrata_%28Sims%29_Urban_Moon_Valley.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pilea_involucrata%2C_Jard%C3%ADn_Bot%C3%A1nico%2C_M%C3%BAnich%2C_Alemania_2012-04-21%2C_DD_02.jpg/960px-Pilea_involucrata%2C_Jard%C3%ADn_Bot%C3%A1nico%2C_M%C3%BAnich%2C_Alemania_2012-04-21%2C_DD_02.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Pilea_involucrata_5zz.jpg/960px-Pilea_involucrata_5zz.jpg']::text[], 'non_toxic', NULL, NULL),
   ('polka-dot-plant', 'Polka Dot Plant', 'Hypoestes phyllostachya', ARRAY['Baby’s Tears', 'Freckle Face', 'Pink Splash']::text[], ARRAY['pink', 'white', 'red']::text[], 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Starr_080117-1693_Hypoestes_phyllostachya.jpg/960px-Starr_080117-1693_Hypoestes_phyllostachya.jpg', ARRAY['https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Starr_080117-1693_Hypoestes_phyllostachya.jpg/960px-Starr_080117-1693_Hypoestes_phyllostachya.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Hypoestes_phyllostachya_0205.jpg/960px-Hypoestes_phyllostachya_0205.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Hypoestes_phyllostachya_0200.jpg/960px-Hypoestes_phyllostachya_0200.jpg']::text[], 'non_toxic', NULL, NULL),
   ('nerve-plant', 'Nerve Plant', 'Fittonia verschaffeltii', ARRAY['Fittonia', 'Mosaic Plant']::text[], ARRAY['pink', 'white']::text[], 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Colpfl25.jpg/960px-Colpfl25.jpg', ARRAY['https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Colpfl25.jpg/960px-Colpfl25.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Fittonia_verschaffeltii%2C_Jard%C3%ADn_Bot%C3%A1nico_de_M%C3%BAnich%2C_Alemania%2C_2013-01-27%2C_DD_01.JPG/960px-Fittonia_verschaffeltii%2C_Jard%C3%ADn_Bot%C3%A1nico_de_M%C3%BAnich%2C_Alemania%2C_2013-01-27%2C_DD_01.JPG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Fittonia_albivenis_61868979.jpg/960px-Fittonia_albivenis_61868979.jpg']::text[], 'non_toxic', NULL, NULL),
-  ('asparagus-fern', 'Asparagus Fern', 'Asparagus densiflorus cv sprengeri', ARRAY['Lace Fern', 'Plumosa Fern', 'Racemose asparagus', 'Shatavari', 'Sprengeri Fern']::text[], ARRAY['green']::text[], 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Asparagus_densiflorus_08.jpg', ARRAY['https://upload.wikimedia.org/wikipedia/commons/0/0d/Asparagus_densiflorus_08.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Asparagus_densiflorus_2.JPG/960px-Asparagus_densiflorus_2.JPG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Asparagus_fern_%2860431%29.jpg/960px-Asparagus_fern_%2860431%29.jpg']::text[], 'mildly_toxic', 'Allergic dermatitis with repeated dermal exposure. Berry ingestion could result in gastric upset (vomiting, abdominal pain, or diarrhea).', NULL);
+  ('asparagus-fern', 'Asparagus Fern', 'Asparagus densiflorus cv sprengeri', ARRAY['Lace Fern', 'Plumosa Fern', 'Racemose asparagus', 'Shatavari', 'Sprengeri Fern']::text[], ARRAY['green']::text[], 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Asparagus_densiflorus_08.jpg', ARRAY['https://upload.wikimedia.org/wikipedia/commons/0/0d/Asparagus_densiflorus_08.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Asparagus_densiflorus_2.JPG/960px-Asparagus_densiflorus_2.JPG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Asparagus_fern_%2860431%29.jpg/960px-Asparagus_fern_%2860431%29.jpg']::text[], 'mildly_toxic', 'Allergic dermatitis with repeated dermal exposure. Berry ingestion could result in gastric upset (vomiting, abdominal pain, or diarrhea).', NULL),
+  ('rose', 'Rose', 'Rosa Species', ARRAY['Garden Rose', 'Florist Rose']::text[], ARRAY['white', 'yellow', 'orange', 'red', 'pink']::text[], 'https://www.aspca.org/sites/default/files/rose_facebook.jpg', ARRAY['https://www.aspca.org/sites/default/files/rose_facebook.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Red_rose_with_black_background.jpg/960px-Red_rose_with_black_background.jpg']::text[], 'non_toxic', NULL, NULL),
+  ('carnation', 'Carnation', 'Dianthus caryophyllus', ARRAY['Pinks', 'Wild Carnation', 'Sweet William']::text[], ARRAY['white', 'yellow', 'orange', 'red', 'pink', 'purple']::text[], 'https://www.aspca.org/sites/default/files/field/image/plants/carnation-r.jpg', ARRAY['https://www.aspca.org/sites/default/files/field/image/plants/carnation-r.jpg', 'https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/carnation-r.jpg']::text[], 'mildly_toxic', 'Mild gastrointestinal signs, mild dermatitis', 'Unknown irritant'),
+  ('peruvian-lily', 'Peruvian Lily', 'Alstroemeria', ARRAY['Lily of the Incas', 'Princess Lily', 'Alstromeria']::text[], ARRAY['white', 'yellow', 'orange', 'red', 'pink', 'purple']::text[], 'https://www.aspca.org/sites/default/files/field/image/plants/peruvian_lily.jpg', ARRAY['https://www.aspca.org/sites/default/files/field/image/plants/peruvian_lily.jpg', 'https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/peruvian_lily.jpg']::text[], 'non_toxic', NULL, NULL),
+  ('sunflower', 'Sunflower', 'Helianthus angustifolius', ARRAY['Swamp Sunflower']::text[], ARRAY['yellow', 'orange']::text[], 'https://www.aspca.org/sites/default/files/sunflower_facebook.jpg', ARRAY['https://www.aspca.org/sites/default/files/sunflower_facebook.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Sunflower_macro_wide.jpg/960px-Sunflower_macro_wide.jpg']::text[], 'non_toxic', NULL, NULL),
+  ('hydrangea', 'Hydrangea', 'Hydrangea arborescens', ARRAY['Hortensia', 'Hills of Snow', 'Seven Bark']::text[], ARRAY['white', 'pink', 'blue', 'purple']::text[], 'https://www.aspca.org/sites/default/files/field/image/plants/hydrangea-2-r.jpg', ARRAY['https://www.aspca.org/sites/default/files/field/image/plants/hydrangea-2-r.jpg', 'https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/hydrangea-2-r.jpg']::text[], 'mildly_toxic', 'Vomiting, depression, diarrhea. Cyanide intoxication is rare - usually produces more of a gastrointestinal disturbance.', 'Cyanogenic glycoside'),
+  ('common-snapdragon', 'Common Snapdragon', 'Antirrhinum majus', ARRAY['Garden Snapdragon']::text[], ARRAY['white', 'yellow', 'orange', 'red', 'pink', 'purple']::text[], 'https://www.aspca.org/sites/default/files/common-snapdragon_facebook.jpg', ARRAY['https://www.aspca.org/sites/default/files/common-snapdragon_facebook.jpg', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Pink_Snapdragon_Flower-Antirrhinum_majus_01.jpg/960px-Pink_Snapdragon_Flower-Antirrhinum_majus_01.jpg']::text[], 'non_toxic', NULL, NULL),
+  ('peony', 'Peony', 'Paeonis officinalis', ARRAY['Garden Peony', 'Common Garden Peony']::text[], ARRAY['white', 'pink', 'red']::text[], 'https://www.aspca.org/sites/default/files/field/image/plants/peony-r.jpg', ARRAY['https://www.aspca.org/sites/default/files/field/image/plants/peony-r.jpg', 'https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/peony-r.jpg']::text[], 'mildly_toxic', 'Vomiting, diarrhea, depression', 'Paeonol'),
+  ('babys-breath', 'Baby''s Breath', 'Gypsophila elegans', ARRAY['Maidens Breath']::text[], ARRAY['white']::text[], 'https://www.aspca.org/sites/default/files/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg', ARRAY['https://www.aspca.org/sites/default/files/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg', 'https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg']::text[], 'non_toxic', NULL, NULL);
 
 INSERT INTO citations (
   plant_id,
@@ -127,7 +135,15 @@ VALUES
   ('friendship-plant', 'ASPCA Animal Poison Control - Friendship Plant', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/friendship-plant'),
   ('polka-dot-plant', 'ASPCA Animal Poison Control - Polka Dot Plant', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/polka-dot-plant'),
   ('nerve-plant', 'ASPCA Animal Poison Control - Nerve Plant', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/nerve-plant'),
-  ('asparagus-fern', 'ASPCA Animal Poison Control - Asparagus Fern', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/asparagus-fern');
+  ('asparagus-fern', 'ASPCA Animal Poison Control - Asparagus Fern', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/asparagus-fern'),
+  ('rose', 'ASPCA Animal Poison Control - Rose', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/rose'),
+  ('carnation', 'ASPCA Animal Poison Control - Carnation', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/carnation'),
+  ('peruvian-lily', 'ASPCA Animal Poison Control - Peruvian Lily', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/peruvian-lily'),
+  ('sunflower', 'ASPCA Animal Poison Control - Sunflower', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/sunflower'),
+  ('hydrangea', 'ASPCA Animal Poison Control - Hydrangea', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/hydrangea'),
+  ('common-snapdragon', 'ASPCA Animal Poison Control - Common Snapdragon', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/common-snapdragon'),
+  ('peony', 'ASPCA Animal Poison Control - Peony', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/peony'),
+  ('babys-breath', 'ASPCA Animal Poison Control - Baby''s Breath', 'https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/babys-breath');
 
 INSERT INTO alternatives (
   toxic_plant_id,
@@ -268,6 +284,21 @@ VALUES
   ('asparagus-fern', 'parlor-palm'),
   ('asparagus-fern', 'calathea'),
   ('asparagus-fern', 'phalaenopsis-orchid'),
-  ('asparagus-fern', 'money-tree');
+  ('asparagus-fern', 'money-tree'),
+  ('carnation', 'rose'),
+  ('carnation', 'peruvian-lily'),
+  ('carnation', 'sunflower'),
+  ('carnation', 'common-snapdragon'),
+  ('carnation', 'babys-breath'),
+  ('hydrangea', 'rose'),
+  ('hydrangea', 'peruvian-lily'),
+  ('hydrangea', 'sunflower'),
+  ('hydrangea', 'common-snapdragon'),
+  ('hydrangea', 'babys-breath'),
+  ('peony', 'rose'),
+  ('peony', 'peruvian-lily'),
+  ('peony', 'sunflower'),
+  ('peony', 'common-snapdragon'),
+  ('peony', 'babys-breath');
 
 COMMIT;

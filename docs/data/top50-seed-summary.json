@@ -990,5 +990,157 @@
     ],
     "photo_count": 2,
     "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/asparagus-fern"
+  },
+  {
+    "rank": 51,
+    "id": "rose",
+    "common_name": "Rose",
+    "scientific_name": "Rosa Species",
+    "safety_status": "non_toxic",
+    "aka_names": [
+      "Garden Rose",
+      "Florist Rose"
+    ],
+    "aka_count": 2,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/rose_facebook.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/rose_facebook.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Red_rose_with_black_background.jpg/960px-Red_rose_with_black_background.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/rose"
+  },
+  {
+    "rank": 52,
+    "id": "carnation",
+    "common_name": "Carnation",
+    "scientific_name": "Dianthus caryophyllus",
+    "safety_status": "mildly_toxic",
+    "aka_names": [
+      "Pinks",
+      "Wild Carnation",
+      "Sweet William"
+    ],
+    "aka_count": 3,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/field/image/plants/carnation-r.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/field/image/plants/carnation-r.jpg",
+      "https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/carnation-r.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/carnation"
+  },
+  {
+    "rank": 53,
+    "id": "peruvian-lily",
+    "common_name": "Peruvian Lily",
+    "scientific_name": "Alstroemeria",
+    "safety_status": "non_toxic",
+    "aka_names": [
+      "Lily of the Incas",
+      "Princess Lily",
+      "Alstromeria"
+    ],
+    "aka_count": 3,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/field/image/plants/peruvian_lily.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/field/image/plants/peruvian_lily.jpg",
+      "https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/peruvian_lily.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/peruvian-lily"
+  },
+  {
+    "rank": 54,
+    "id": "sunflower",
+    "common_name": "Sunflower",
+    "scientific_name": "Helianthus angustifolius",
+    "safety_status": "non_toxic",
+    "aka_names": [
+      "Swamp Sunflower"
+    ],
+    "aka_count": 1,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/sunflower_facebook.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/sunflower_facebook.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Sunflower_macro_wide.jpg/960px-Sunflower_macro_wide.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/sunflower"
+  },
+  {
+    "rank": 55,
+    "id": "hydrangea",
+    "common_name": "Hydrangea",
+    "scientific_name": "Hydrangea arborescens",
+    "safety_status": "mildly_toxic",
+    "aka_names": [
+      "Hortensia",
+      "Hills of Snow",
+      "Seven Bark"
+    ],
+    "aka_count": 3,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/field/image/plants/hydrangea-2-r.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/field/image/plants/hydrangea-2-r.jpg",
+      "https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/hydrangea-2-r.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/hydrangea"
+  },
+  {
+    "rank": 56,
+    "id": "common-snapdragon",
+    "common_name": "Common Snapdragon",
+    "scientific_name": "Antirrhinum majus",
+    "safety_status": "non_toxic",
+    "aka_names": [
+      "Garden Snapdragon"
+    ],
+    "aka_count": 1,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/common-snapdragon_facebook.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/common-snapdragon_facebook.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Pink_Snapdragon_Flower-Antirrhinum_majus_01.jpg/960px-Pink_Snapdragon_Flower-Antirrhinum_majus_01.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/common-snapdragon"
+  },
+  {
+    "rank": 57,
+    "id": "peony",
+    "common_name": "Peony",
+    "scientific_name": "Paeonis officinalis",
+    "safety_status": "mildly_toxic",
+    "aka_names": [
+      "Garden Peony",
+      "Common Garden Peony"
+    ],
+    "aka_count": 2,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/field/image/plants/peony-r.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/field/image/plants/peony-r.jpg",
+      "https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/peony-r.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/peony"
+  },
+  {
+    "rank": 58,
+    "id": "babys-breath",
+    "common_name": "Baby's Breath",
+    "scientific_name": "Gypsophila elegans",
+    "safety_status": "non_toxic",
+    "aka_names": [
+      "Maidens Breath"
+    ],
+    "aka_count": 1,
+    "primary_image_url": "https://www.aspca.org/sites/default/files/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg",
+    "photo_urls": [
+      "https://www.aspca.org/sites/default/files/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg",
+      "https://www.aspca.org/sites/default/files/styles/plant_listing_180x120/public/field/image/plants/gypsophila_elegans_babys_breath-300x200.jpg"
+    ],
+    "photo_count": 2,
+    "source_url": "https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants/babys-breath"
   }
 ]

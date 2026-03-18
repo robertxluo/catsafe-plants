@@ -14,6 +14,10 @@ import { PlantImage } from '@/src/components/ui/plant-image';
 const PAGE_SIZE = 20;
 type SafetyFilter = 'all' | 'safe_only' | 'toxic_only';
 const FLOWER_COLOR_OPTIONS: FlowerColor[] = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'green'];
+const DIRECTORY_PLANT_NAME_COLLATOR = new Intl.Collator(undefined, {
+  sensitivity: 'base',
+  numeric: true,
+});
 const PILL_BASE_CLASS =
   'inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 active:scale-[0.97] sm:px-3.5 sm:text-sm';
 const PILL_INACTIVE_CLASS = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50';
@@ -59,6 +63,20 @@ function parsePageParam(value: string | null): number {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 1) return 1;
   return parsed;
+}
+
+function comparePlantsForDirectory(a: Plant, b: Plant): number {
+  const commonNameCompare = DIRECTORY_PLANT_NAME_COLLATOR.compare(a.common_name, b.common_name);
+  if (commonNameCompare !== 0) {
+    return commonNameCompare;
+  }
+
+  const scientificNameCompare = DIRECTORY_PLANT_NAME_COLLATOR.compare(a.scientific_name, b.scientific_name);
+  if (scientificNameCompare !== 0) {
+    return scientificNameCompare;
+  }
+
+  return DIRECTORY_PLANT_NAME_COLLATOR.compare(a.id, b.id);
 }
 
 export function PlantsDirectoryView() {
@@ -183,13 +201,18 @@ export function PlantsDirectoryView() {
     });
   }, [flowerColorFilter, normalizedCommittedQuery, plants, safetyFilter]);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredPlants.length / PAGE_SIZE)), [filteredPlants.length]);
+  const sortedFilteredPlants = useMemo(
+    () => [...filteredPlants].sort(comparePlantsForDirectory),
+    [filteredPlants]
+  );
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(sortedFilteredPlants.length / PAGE_SIZE)), [sortedFilteredPlants.length]);
   const currentPage = useMemo(() => Math.min(requestedPage, totalPages), [requestedPage, totalPages]);
 
   const visiblePlants = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredPlants.slice(start, start + PAGE_SIZE);
-  }, [currentPage, filteredPlants]);
+    return sortedFilteredPlants.slice(start, start + PAGE_SIZE);
+  }, [currentPage, sortedFilteredPlants]);
   const hasActiveFilters = safetyFilter !== 'all' || flowerColorFilter !== 'all' || committedQuery.length > 0;
   const activeRefinements = useMemo(() => {
     const refinements: Array<{ label: string; tone: string; capitalize?: boolean }> = [];
