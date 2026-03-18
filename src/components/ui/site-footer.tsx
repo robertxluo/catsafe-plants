@@ -2,13 +2,13 @@ import Image from 'next/image';
 
 export function SiteFooter() {
   return (
-    <footer className="mx-auto w-full max-w-6xl px-4 pb-2 pt-10 sm:px-6">
-      <div className="botanical-card rounded-[1.6rem] px-5 py-4 text-center animate-fade-up-soft motion-reduce:animate-none">
-        <p className="text-slate-600 text-xs leading-relaxed sm:text-[13px]">
+    <footer className="mx-auto w-full max-w-6xl px-4 pb-12 pt-16 sm:px-6 sm:pt-20 animate-fade-up-soft motion-reduce:animate-none">
+      <div className="border-t border-stone-200 pt-8 text-center">
+        <p className="text-slate-600 text-[13px] sm:text-[14px] leading-relaxed">
           Safety guidance is informational and should not replace professional veterinary advice.
         </p>
-        <p className="mt-2 inline-flex items-center gap-1.5 text-slate-500 text-xs sm:text-[13px]">
-          <Image src="/icon.svg" alt="" width={14} height={14} className="h-3.5 w-3.5" aria-hidden="true" />
+        <p className="mt-2.5 inline-flex items-center gap-1.5 text-slate-500 text-[13px] sm:text-[14px]">
+          <Image src="/icon.svg" alt="" width={14} height={14} className="h-3.5 w-3.5 opacity-60 grayscale" aria-hidden="true" />
           For cat owners, by a cat lover.
         </p>
       </div>
