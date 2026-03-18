@@ -310,8 +310,8 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   Is this plant safe for your cat?
                 </h1>
                 <p className="mt-4 max-w-2xl text-slate-700 text-base sm:text-xl text-pretty leading-relaxed">
-                  Search any houseplant and get a clear answer: safe, toxic, or caution advised — plus safer
-                  alternatives for cat homes.
+                  Search any houseplant and get a clear answer: safe, toxic, or caution advised, with cat-safe
+                  alternatives.
                 </p>
 
                 <div className="gap-2 grid sm:grid-cols-2 mt-6 max-w-3xl">
@@ -344,18 +344,18 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                 <div className="gap-2.5 sm:gap-3 grid sm:grid-cols-3 mt-7">
                   <article className="bg-emerald-50/70 p-3 sm:p-3.5 border border-emerald-200/80 rounded-[1.5rem]">
                     <p className="font-semibold text-[11px] text-emerald-700 editorial-kicker">Trust</p>
-                    <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Every entry cited</p>
+                    <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">Every plant is cited</p>
                     <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-                      Sourced from ASPCA, veterinary databases, and published references.
+                      Backed by ASPCA guidance, veterinary databases, and published references.
                     </p>
                   </article>
                   <article className="bg-amber-50/70 p-3 sm:p-3.5 border border-amber-200/80 rounded-[1.5rem]">
                     <p className="font-semibold text-[11px] text-amber-700 editorial-kicker">Safety</p>
                     <p className="mt-1 font-medium text-slate-800 sm:text-[15px] text-sm">
-                      If we&apos;re unsure, you&apos;ll know
+                      If we&apos;re unsure, we&apos;ll say so
                     </p>
                     <p className="mt-1 text-slate-600 sm:text-[13px] text-xs leading-relaxed">
-                      Uncertain plants are clearly marked — no false &quot;safe&quot; labels.
+                      Uncertain plants are clearly marked, with no false &quot;safe&quot; labels.
                     </p>
                   </article>
                   <article className="bg-sky-50/70 p-3 sm:p-3.5 border border-sky-200/80 rounded-[1.5rem]">
