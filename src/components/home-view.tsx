@@ -160,16 +160,20 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
 
   useEffect(() => {
     if (isMobileSearchModeOpen) {
-      // Small timeout allows the virtual keyboard to begin appearing and the browser
-      // to do its initial scroll, which we then cleanly override by scrolling to the top.
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 50);
+      const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      resetScroll();
+      
+      // Aggressively counteract iOS Safari's native auto-scroll behavior when virtual keyboard opens
+      const t1 = setTimeout(resetScroll, 50);
+      const t2 = setTimeout(resetScroll, 150);
+      const t3 = setTimeout(resetScroll, 300);
+      
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
     }
-    // We purposefully removed the document.body.style.overflow = 'hidden' logic here.
-    // Dynamic overflow manipulation on iOS with virtual keyboards causes
-    // erratic viewport scroll jumping. Keeping the body scrollable but overlaying
-    // the fixed container natively avoids the layout crash bug.
   }, [isMobileSearchModeOpen]);
 
   const handleSelectPlant = useCallback(
@@ -351,7 +355,7 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                   onFocus={() => {
                     if (isPhoneViewport) {
                       setIsOpen(true);
-                      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                      setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }), 10);
                     } else if (query.trim().length > 0) {
                       setIsOpen(true);
                     }
