@@ -159,6 +159,13 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
   }, []);
 
   useEffect(() => {
+    if (isMobileSearchModeOpen) {
+      // Small timeout allows the virtual keyboard to begin appearing and the browser
+      // to do its initial scroll, which we then cleanly override by scrolling to the top.
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
+    }
     // We purposefully removed the document.body.style.overflow = 'hidden' logic here.
     // Dynamic overflow manipulation on iOS with virtual keyboards causes
     // erratic viewport scroll jumping. Keeping the body scrollable but overlaying
@@ -342,7 +349,10 @@ export function HomeView({ onSelectPlant }: HomeViewProps) {
                     setActiveIndex(-1);
                   }}
                   onFocus={() => {
-                    if (isPhoneViewport || query.trim().length > 0) {
+                    if (isPhoneViewport) {
+                      setIsOpen(true);
+                      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                    } else if (query.trim().length > 0) {
                       setIsOpen(true);
                     }
                   }}
