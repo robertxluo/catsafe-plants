@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Search, SlidersHorizontal, Loader2, X } from 'lucide-react';
 import type { FlowerColor, Plant } from '@/src/lib/plants';
 import { getDisplaySafetyStatus, hasIncompleteEvidence } from '@/src/lib/plants';
 import { loadPlants } from '@/src/lib/load-plants';
@@ -95,6 +95,11 @@ export function PlantsDirectoryView() {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
+  const [isSearchSticky, setIsSearchSticky] = useState(false);
+
+  const searchSectionRef = useRef<HTMLElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const stickyInputRef = useRef<HTMLInputElement>(null);
 
   const requestedPage = parsePageParam(searchParams.get('page'));
   const searchParamsString = searchParams.toString();
@@ -141,6 +146,33 @@ export function PlantsDirectoryView() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Sticky search bar: observe when the main search section scrolls out of view
+  useEffect(() => {
+    const node = searchSectionRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSearchSticky(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: '-56px 0px 0px 0px' }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isLoading, error, plants.length]);
+
+  // Auto-scroll to results area when mobile user types a search query
+  useEffect(() => {
+    if (!isPhoneViewport || activeSearchQuery.length === 0) return;
+
+    const target = resultsRef.current;
+    if (!target) return;
+
+    const y = target.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }, [activeSearchQuery, isPhoneViewport]);
 
   const pushWithUpdatedParams = useCallback(
     (updateParams: (params: URLSearchParams) => void) => {
@@ -412,18 +444,18 @@ export function PlantsDirectoryView() {
         />
 
         <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-7 sm:px-6 sm:pb-10 sm:pt-9">
-          <header className="mb-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <header className="mb-4 grid gap-4 sm:mb-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
-              <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Curated for cat safety</p>
-              <h1 className="font-display mt-2 text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl">
+              <p className="editorial-kicker hidden text-[11px] font-semibold text-emerald-700 sm:block">Curated for cat safety</p>
+              <h1 className="font-display text-2xl font-semibold leading-tight tracking-tight text-slate-950 sm:mt-2 sm:text-5xl">
                 Plant directory
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base">
+              <p className="mt-1 hidden max-w-2xl text-sm leading-relaxed text-slate-700 sm:mt-2 sm:block sm:text-base">
                 Browse the catalog, filter by risk and flower color, and move from search to confident decisions without guesswork.
               </p>
             </div>
             {!isLoading && !error && plants.length > 0 ? (
-              <div className="botanical-card w-full max-w-sm rounded-[1.6rem] p-4 lg:ml-auto">
+              <div className="botanical-card hidden w-full max-w-sm rounded-[1.6rem] p-4 sm:block lg:ml-auto">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Catalog snapshot</p>
                 <div className="mt-2 grid grid-cols-3 gap-3">
                   <div>
@@ -523,17 +555,17 @@ export function PlantsDirectoryView() {
 
           {!isLoading && !error && plants.length > 0 ? (
             <>
-              <section className="botanical-card-strong mb-4 rounded-[1.9rem] px-4 py-3 sm:px-5 sm:py-3.5">
+              <section ref={searchSectionRef} className="botanical-card-strong mb-4 rounded-[1.9rem] px-4 py-3 sm:px-5 sm:py-3.5">
                 <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,0.8fr)] lg:items-start">
                   <div className="max-w-3xl">
-                    <p className="editorial-kicker text-[11px] font-semibold text-emerald-700">Search plants</p>
-                    <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                    <p className="editorial-kicker hidden text-[11px] font-semibold text-emerald-700 sm:block">Search plants</p>
+                    <h2 className="font-display hidden text-2xl font-semibold tracking-tight text-slate-950 sm:mt-2 sm:block sm:text-3xl">
                       Find a match fast
                     </h2>
-                    <p id="directory-search-hint" className="mt-2 text-xs text-slate-600 sm:text-sm">
+                    <p id="directory-search-hint" className="hidden text-xs text-slate-600 sm:mt-2 sm:block sm:text-sm">
                       Search by common name, scientific name, or alias, then refine only when you need a narrower result set.
                     </p>
-                    <div className="relative mt-4">
+                    <div className="relative sm:mt-4">
                       <Search
                         className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                         aria-hidden="true"
@@ -550,7 +582,7 @@ export function PlantsDirectoryView() {
                             setIsMobileFiltersOpen(false);
                           }
                         }}
-                        placeholder="Search by plant name, scientific name, or alias..."
+                        placeholder="Search plants..."
                         enterKeyHint="search"
                         autoCapitalize="none"
                         autoCorrect="off"
@@ -560,7 +592,8 @@ export function PlantsDirectoryView() {
                     </div>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-stone-200/90 bg-white/70 p-4">
+                  {/* Current view card — desktop only */}
+                  <div className="hidden rounded-[1.5rem] border border-stone-200/90 bg-white/70 p-4 sm:block">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Current view</p>
                     <p className="mt-2 text-sm leading-relaxed text-slate-700">
                       {hasActiveFilters
@@ -570,35 +603,53 @@ export function PlantsDirectoryView() {
                   </div>
                 </div>
 
-                <div className="mt-4 border-t border-stone-200/80 pt-4">
+                <div className="mt-3 border-t border-stone-200/80 pt-3 sm:mt-4 sm:pt-4">
                   {isPhoneViewport ? (
                     <>
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">Refine results</p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {activeRefinementCount > 0 ? `${activeRefinementCount} active filters` : 'Open filters only when you need them.'}
-                          </p>
-                        </div>
+                      <div className="flex items-center justify-between gap-2">
+                        {hasActiveFilters ? (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {activeRefinements.map((refinement) => (
+                              <span
+                                key={refinement.label}
+                                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${refinement.tone} ${refinement.capitalize ? 'capitalize' : ''}`}
+                              >
+                                {refinement.label}
+                              </span>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={clearRefinements}
+                              className="inline-flex items-center rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:bg-stone-50"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-500">No filters active</p>
+                        )}
                         <button
                           type="button"
                           aria-expanded={isMobileFiltersOpen}
                           aria-controls="directory-mobile-filters"
                           onClick={() => setIsMobileFiltersOpen((current) => !current)}
-                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                          className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-slate-700 transition-colors duration-200 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                         >
                           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                          {isMobileFiltersOpen ? 'Hide filters' : 'Refine results'}
+                          {activeRefinementCount > 0 && (
+                            <span className="absolute -right-1 -top-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white">
+                              {activeRefinementCount}
+                            </span>
+                          )}
+                          <span className="sr-only">{isMobileFiltersOpen ? 'Hide filters' : 'Show filters'}</span>
                         </button>
                       </div>
 
                       {isMobileFiltersOpen ? (
-                        <div id="directory-mobile-filters" className="mt-4">
+                        <div id="directory-mobile-filters" className="mt-3 animate-fade-up-soft">
                           {filterControls}
                         </div>
                       ) : null}
-
-                      {refinementSummary}
                     </>
                   ) : (
                     <>
@@ -609,7 +660,7 @@ export function PlantsDirectoryView() {
                 </div>
               </section>
 
-              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div ref={resultsRef} className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-700">{resultsStatusLabel}</p>
                   <p className="text-xs text-slate-500">Tap a card for evidence, symptoms, and safe alternatives.</p>
@@ -766,6 +817,48 @@ export function PlantsDirectoryView() {
           ) : null}
         </main>
         <SiteFooter />
+
+        {/* Sticky mobile search bar */}
+        {isPhoneViewport && (
+          <div
+            className={`fixed left-0 right-0 top-0 z-40 border-b border-stone-200/80 bg-(--catsafe-tone-bg)/95 px-4 py-2.5 shadow-md backdrop-blur-lg transition-all duration-300 ${
+              isSearchSticky ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-full opacity-0'
+            }`}
+          >
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+              <input
+                ref={stickyInputRef}
+                type="search"
+                aria-label="Search plant directory"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Search plants..."
+                enterKeyHint="search"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="min-h-11 w-full rounded-full border border-stone-200 bg-white pl-10 pr-10 text-[15px] text-slate-800 shadow-sm transition-colors placeholder:text-slate-400 focus:border-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+              />
+              {searchInput.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('');
+                    stickyInputRef.current?.focus();
+                  }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-slate-400 transition-colors hover:text-slate-600"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Scroll to top button */}
         <button
