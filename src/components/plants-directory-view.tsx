@@ -81,13 +81,18 @@ function comparePlantsForDirectory(a: Plant, b: Plant): number {
   return DIRECTORY_PLANT_NAME_COLLATOR.compare(a.id, b.id);
 }
 
-export function PlantsDirectoryView() {
+interface PlantsDirectoryViewProps {
+  initialPlants?: Plant[] | null;
+}
+
+export function PlantsDirectoryView({ initialPlants }: PlantsDirectoryViewProps) {
+  const hasServerData = Array.isArray(initialPlants) && initialPlants.length > 0;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [plants, setPlants] = useState<Plant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [plants, setPlants] = useState<Plant[]>(hasServerData ? initialPlants : []);
+  const [isLoading, setIsLoading] = useState(!hasServerData);
   const [error, setError] = useState<string | null>(null);
   const [safetyFilter, setSafetyFilter] = useState<SafetyFilter>('all');
   const [flowerColorFilter, setFlowerColorFilter] = useState<'all' | FlowerColor>('all');
@@ -125,8 +130,10 @@ export function PlantsDirectoryView() {
   }, []);
 
   useEffect(() => {
+    // Skip client-side fetch if server already provided the data
+    if (hasServerData) return;
     void fetchPlants();
-  }, [fetchPlants]);
+  }, [fetchPlants, hasServerData]);
 
   useEffect(() => {
     function handleResize() {

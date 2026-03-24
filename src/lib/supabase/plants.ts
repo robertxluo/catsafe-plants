@@ -22,7 +22,7 @@ const VALID_FLOWER_COLORS: ReadonlySet<FlowerColor> = new Set([
   'green',
 ]);
 
-type GenericRow = Record<string, unknown>;
+export type GenericRow = Record<string, unknown>;
 
 function readOptionalString(value: unknown): string | null {
   if (typeof value !== 'string') {
@@ -92,13 +92,13 @@ function normalizeFlowerColors(value: unknown): FlowerColor[] {
   return readStringArray(value).filter((color): color is FlowerColor => VALID_FLOWER_COLORS.has(color as FlowerColor));
 }
 
-function ensurePublicSupabaseConfig() {
+export function ensurePublicSupabaseConfig() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     throw new Error(SUPABASE_CONFIG_ERROR);
   }
 }
 
-function mapCitationsByPlant(rows: GenericRow[]) {
+export function mapCitationsByPlant(rows: GenericRow[]) {
   const map = new Map<string, Plant['citations']>();
 
   for (const row of rows) {
@@ -118,7 +118,7 @@ function mapCitationsByPlant(rows: GenericRow[]) {
   return map;
 }
 
-function mapAlternativesByPlant(rows: GenericRow[]) {
+export function mapAlternativesByPlant(rows: GenericRow[]) {
   const map = new Map<string, string[]>();
 
   for (const row of rows) {
@@ -139,7 +139,7 @@ function mapAlternativesByPlant(rows: GenericRow[]) {
   return map;
 }
 
-function mapPlantRow(
+export function mapPlantRow(
   row: GenericRow,
   citationsByPlant: Map<string, Plant['citations']>,
   alternativesByPlant: Map<string, string[]>
