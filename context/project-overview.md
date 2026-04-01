@@ -42,7 +42,7 @@
 - **Backend:** Node.js runtime via Next.js route handlers/server components/serverless model.
 - **Database:** PostgreSQL (via Supabase).
 - **Auth (approved approach):** Supabase Auth + email allowlist (for future admin scope).
-- **Image hosting (approved):** Cloudinary.
+- **Image hosting (approved):** Cloudflare R2.
 
 ## Repo Commands
 - Install dependencies: `npm install`
@@ -63,11 +63,6 @@ Current required variables (already used by code):
 Optional variable (release check tuning):
 - `CITATION_AUDIT_TIMEOUT_MS` (timeout per citation URL check; defaults to `10000`)
 
-Planned/additional variables (when image ingestion and/or admin tooling is implemented):
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `SUPABASE_SERVICE_ROLE_KEY` (server-only; never exposed to client)
 
 ### Netlify Context Variable Strategy (Required)
 - **Production context**
@@ -84,7 +79,7 @@ Planned/additional variables (when image ingestion and/or admin tooling is imple
 - **Supabase**
   - PostgreSQL database host.
   - Auth provider for future admin allowlist.
-- **Cloudinary**
+- **Cloudflare R2**
   - Hosted plant image storage/delivery.
 - **Netlify**
   - Primary deployment platform for SSR/Hybrid Next.js runtime.

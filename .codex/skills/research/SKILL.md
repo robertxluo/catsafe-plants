@@ -22,7 +22,7 @@ Execute research task: $ARGUMENTS
    - **Sources**: What files/tools to use
 5. Execute the research using appropriate tools:
    - Read files (Prisma schema, constants, components)
-   - Query database via Neon MCP if needed
+   - Query database via Supabase MCP if needed
    - Search codebase for patterns
 6. Write findings to the specified output location
 7. Summarize what was discovered

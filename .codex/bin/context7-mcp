@@ -3,21 +3,28 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
-local_env_file="$repo_root/.codex/.env.local"
+repo_env_file="$repo_root/.env.local"
+codex_env_file="$repo_root/.codex/.env.local"
 
-if [[ -f "$local_env_file" ]]; then
-  # Load only the local Codex secrets file for this repo.
-  set -a
-  # shellcheck disable=SC1090
-  source "$local_env_file"
-  set +a
-fi
+load_env_file() {
+  local file="$1"
+
+  if [[ -f "$file" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$file"
+    set +a
+  fi
+}
+
+load_env_file "$repo_env_file"
+load_env_file "$codex_env_file"
 
 if [[ -z "${CONTEXT7_API_KEY:-}" ]]; then
   cat >&2 <<'EOF'
 Missing CONTEXT7_API_KEY.
 
-Set CONTEXT7_API_KEY in your shell, or add it to .codex/.env.local for this repo.
+Set CONTEXT7_API_KEY in your shell, or add it to .env.local or .codex/.env.local for this repo.
 EOF
   exit 1
 fi

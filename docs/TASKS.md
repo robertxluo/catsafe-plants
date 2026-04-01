@@ -355,7 +355,7 @@
 - Keep graceful placeholders when image URL is missing/invalid.
 
 **Out of scope**
-- Cloudinary migration.
+- R2 migration.
 - Image optimization strategy redesign.
 
 **Verification steps**

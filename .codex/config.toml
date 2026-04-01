@@ -23,9 +23,6 @@ config_file = "agents/ui-reviewer.toml"
 description = "Scans a requested folder for duplicate code that should be extracted into shared utilities, components, hooks, wrappers, or helpers."
 config_file = "agents/refactor-scanner.toml"
 
-[mcp_servers.neon]
-url = "https://mcp.neon.tech/mcp"
-
 [mcp_servers.context7]
 command = "bash"
 args = ["./.codex/bin/context7-mcp"]
