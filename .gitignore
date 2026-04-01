@@ -66,5 +66,4 @@ node_modules/
 /.playwright-cli/
 /artifacts/
 /output/playwright/
-
-/.codex/
+.codex/.env.local
